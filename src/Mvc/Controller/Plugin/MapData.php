@@ -165,6 +165,18 @@ class MapData extends AbstractPlugin
         return $result->exchangeArray([]);
     }
 
+    public function pdf($filepath, array $mapping, $simpleExtract = false)
+    {
+        $mapping = $this->normalizeMapping($mapping);
+        if (empty($mapping)) {
+            return [];
+        }
+
+        $extractDataFromPdf = $this->plugins()->get('extractDataFromPdf');
+        $input = $extractDataFromPdf($filepath);
+        return $this->array($input, $mapping, $simpleExtract);
+    }
+
     protected function simpleExtract(ArrayObject $result, $value, $target, $source)
     {
         $result[] = [

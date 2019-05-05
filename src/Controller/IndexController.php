@@ -114,11 +114,16 @@ class IndexController extends AbstractActionController
             $errors = '';
 
             if (isset($this->filesMapsArray[$media_type])) {
-                $file['item_id'] = $this->filesMapsArray[$media_type]['item_id'];
+                $filesMapsArray = $this->filesMapsArray[$media_type];
+                $file['item_id'] = $filesMapsArray['item_id'];
+                unset($filesMapsArray['media_type']);
+                unset($filesMapsArray['item_id']);
 
                 switch ($media_type) {
                     case 'application/pdf':
-                        $errors = 'PDF extension, which is not loaded.';
+                        $data = $this->extractDataFromPdf($file['tmp_name']);
+                        $this->parsed_data = $this->flatArray($data);
+                        $data = $this->mapData()->array($data, $filesMapsArray, true);
                         break;
 
                     default:
@@ -128,15 +133,8 @@ class IndexController extends AbstractActionController
                             ->setOptionMD5DataSource(true)
                             ->setEncoding('UTF-8')
                             ->analyze($file['tmp_name']);
-
-                        $filesMapsArray = $this->filesMapsArray[$media_type];
-                        unset($filesMapsArray['media_type']);
-                        unset($filesMapsArray['item_id']);
-
-                        // Only getId3 is managed (array).
-                        $data = $this->mapData()->array($file_source, $filesMapsArray, true);
-
                         $this->parsed_data = $this->flatArray($file_source, $this->ignoredKeys);
+                        $data = $this->mapData()->array($file_source, $filesMapsArray, true);
                         break;
                 }
             }
@@ -388,12 +386,19 @@ class IndexController extends AbstractActionController
             if ($isXpath) {
                 $data = $this->mapData()->xml($full_file_path, $filesMapsArray);
             } else {
-                $data = $this->mapData()->array($file_source, $filesMapsArray);
+                switch ($media_type) {
+                    case 'application/pdf':
+                        $data = $this->mapData()->pdf($full_file_path, $filesMapsArray);
+                        break;
+                    default:
+                        $data = $this->mapData()->array($file_source, $filesMapsArray);
+                        break;
+                }
             }
 
             if (count($data) <= 0) {
                 if ($query) {
-                    $warning = $this->translate('No metadata to import.'); // @translate
+                    $warning = $this->translate('No metadata to import. You may see log for more info.'); // @translate
                 } else {
                     $notice = $this->translate('No metadata: mapping is empty.'); // @translate
                 }

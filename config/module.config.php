@@ -9,7 +9,8 @@ return [
     ],
     'form_elements' => [
         'factories' => [
-            'BulkImportFiles\Form\SettingsForm' => Service\Form\SettingsFormFactory::class,
+            Form\ConfigForm::class => \Omeka\Form\Factory\InvokableFactory::class,
+            Form\SettingsForm::class => \Omeka\Form\Factory\InvokableFactory::class,
         ],
     ],
     'controllers' => [
@@ -22,6 +23,7 @@ return [
             'extractStringFromFile' => Mvc\Controller\Plugin\ExtractStringFromFile::class,
         ],
         'factories' => [
+            'extractDataFromPdf' => Service\ControllerPlugin\ExtractDataFromPdfFactory::class,
             'mapData' => Service\ControllerPlugin\MapDataFactory::class,
         ],
     ],
@@ -101,6 +103,7 @@ return [
     ],
     'bulkimportfiles' => [
         'config' => [
+            'bulkimportfiles_pdftk' => '',
             'bulkimportfiles_mappings' => [
                 'image/jpeg' => 'data/mapping/map_jpeg.csv',
                 'pdf' => 'data/mapping/map_pdf.csv',

@@ -9,8 +9,11 @@ audio and video, or pdf properties, etc.).
 Installation
 ------------
 
-The module uses an external library, [`getid3`], so use the release zip to
-install it, or use and init the source.
+This module is dependant from the module [Bulk Import], that should be
+installed first.
+
+The module uses external libraries, [`getid3`] and [`php-pdftk`], so use the
+release zip to install it, or use and init the source.
 
 See general end user documentation for [installing a module].
 
@@ -36,6 +39,12 @@ The next times:
 ```
 
 Then install it like any other Omeka module.
+
+* Install pdftk
+
+The command line tool `pdftk` is required to extract data from pdf without raw
+xmp data. It should be installed on the server and the path should be set in the
+config of the module.
 
 
 Usage
@@ -100,6 +109,8 @@ Once the item templates are ready, you can upload files via the third sub-menu
 This workflow is experimental and will probably change in the future to avoid
 the creation of specific items.
 
+This module will be merged with module [Bulk Import].
+
 
 Warning
 -------
@@ -118,6 +129,8 @@ See online issues on the [module issues] page on GitHub.
 
 License
 -------
+
+* Module
 
 This module is published under the [CeCILL v2.1] licence, compatible with
 [GNU/GPL] and approved by [FSF] and [OSI].
@@ -145,6 +158,10 @@ conditions as regards security.
 The fact that you are presently reading this means that you have had knowledge
 of the CeCILL license and that you accept its terms.
 
+* Dependencies
+
+See licences of dependencies.
+
 
 Copyright
 ---------
@@ -154,7 +171,12 @@ Copyright
 
 [Bulk Import Files]: https://github.com/Daniel-KM/Omeka-S-module-BulkImportFiles
 [Omeka S]: https://omeka.org/s
+[Bulk Import]: https://github.com/Daniel-KM/Omeka-S-module-BulkImport
+[`getid3`]: https://getid3.org
+[`php-pdftk`]: https://github.com/mikehaertl/php-pdftk
+[`pdftk`]: https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit
 [`BulkImportFiles.zip`]: https://github.com/Daniel-KM/Omeka-S-module-BulkImportFiles/releases
+[Bulk Import]: https://github.com/Daniel-KM/Omeka-S-module-BulkImport
 [installing a module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
 [module issues]: https://github.com/Daniel-KM/Omeka-S-module-BulkImportFiles/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html

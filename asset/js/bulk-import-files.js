@@ -382,7 +382,8 @@ $(document).ready(function () {
 
         if ((file_position_upload >= total_files_for_upload) || (typeof data_for_recognize['filenames'][file_position_upload] == 'undefined')) {
             clearTimeout(create_action);
-            $('.response').append('Import done');
+            $('.response').append('<p>Import launched.</p>');
+            $('.response').append('<p>Note that the possible Omeka errors during import are reported in the logs.</p>');
             $('.response').find('.total_info').remove();
         } else {
             if (make_action == true) {
