@@ -12,11 +12,6 @@ use Omeka\Media\Ingester\Manager;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 
-//use BulkImportFile\Form\MappingForm;
-//use BulkImportFile\Source\SourceInterface;
-//use BulkImportFile\Job\Import;
-//use Omeka\Settings\UserSettings;
-
 class IndexController extends AbstractActionController
 {
     /**
@@ -79,8 +74,8 @@ class IndexController extends AbstractActionController
 
 
     /**
-     * Set filesMaps as object(stdClass) for all Items with BulkImportFile Resource
-     * (ex: public 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate ')
+     * Set filesMaps as object (stdClass) for all Items with BulkImportFile Resource
+     * (ex: public 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
      *
      * Set filesMapsArray as array with key "Item title" it's type of files
      * (ex: 'image/jpeg' => 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
@@ -139,12 +134,10 @@ class IndexController extends AbstractActionController
 
     public function mapimportAction()
     {
-        $view = new ViewModel;
-
         $form = $this->getForm(ImportForm::class);
 
-        $view->form = $form;
-
+        $view = new ViewModel;
+        $view->setVariable('form', $form);
         return $view;
     }
 
@@ -152,13 +145,11 @@ class IndexController extends AbstractActionController
     {
         $this->getFilesMaps();
 
-
         $request = $this->getRequest();
-
 
         $files = $request->getFiles()->toArray();
 
-        $files_data_for_view = array();
+        $files_data_for_view = [];
 
         foreach ($files['files'] as $file) {
             $file_type = $file['type'];
@@ -171,9 +162,7 @@ class IndexController extends AbstractActionController
 
                 switch ($file_type) {
                     case 'application/pdf':
-
                         $errors = 'PDF extension, which is not loaded.';
-
                         break;
 
                     default:
@@ -185,19 +174,16 @@ class IndexController extends AbstractActionController
                             ->setEncoding('UTF-8')
                             ->analyze($file['tmp_name']);
 
-
                         /**
                          * $filesMapsArray like 'dcterms:created' => string 'jpg/exif/IFD0/DateTime'
                          */
 
-                        $mime_type = 'not define';
-
+                        $mime_type = 'undefined';
                         if (isset($file_source['mime_type'])) {
                             $mime_type = $file_source['mime_type'];
                         }
 
-                        $filesMapsArray = array();
-
+                        $filesMapsArray = [];
                         if (isset($this->filesMapsArray[$mime_type])) {
                             $filesMapsArray = $this->filesMapsArray[$mime_type];
                         }
@@ -206,23 +192,22 @@ class IndexController extends AbstractActionController
                             $filesMaps = explode('/', $val);
 
                             $file_fields_source = $file_source;
-
                             foreach ($filesMaps as $fval) {
                                 if (isset($file_fields_source[$fval])) {
                                     $file_fields_source = $file_fields_source[$fval];
                                 }
                             }
 
-
                             if (!is_array($file_fields_source)) {
                                 $recognized_data[$key] = [
                                     'field' => $val,
-                                    'value' => $file_fields_source
+                                    'value' => $file_fields_source,
                                 ];
                             }
                         }
 
                         $this->array_keys_recursive($file_source);
+                        break;
                 }
             }
 
@@ -230,32 +215,22 @@ class IndexController extends AbstractActionController
                 'file' => $file,
                 'exif_data' => $this->parsed_data,
                 'recognized_data' => $recognized_data,
-                'errors' => $errors
+                'errors' => $errors,
             ];
         }
 
-        $this->layout()->setTemplate('common/blockfileslist');
-
-        $this->layout()->setVariable('files_data_for_view', $files_data_for_view);
-
-        /**
-         * listTerms
-         * list omeka property
-         */
-        $this->layout()->setVariable('listTerms', $this->listTerms());
-
-        /**
-         * filesMaps array
-         * all saved file type with saved property
-         * key = item id
-         * values (ex.: public 'dcterms:title' => string 'image/jpeg')
-         *
-         */
-
-        $this->layout()->setVariable('filesMaps', $this->filesMaps);
+        $this->layout()
+            ->setTemplate('common/blockfileslist')
+            ->setVariable('files_data_for_view', $files_data_for_view)
+            // List omeka properties.
+            ->setVariable('listTerms', $this->listTerms())
+            // All saved file types with saved properties.
+            // key = item id; values = mapping
+            // (ex.: public 'dcterms:title' => string 'image/jpeg')
+            ->setVariable('filesMaps', $this->filesMaps);
     }
 
-    public function array_keys_recursive($data_array, $keys = null)
+    protected function array_keys_recursive($data_array, $keys = null)
     {
         foreach ($data_array as $key => $val) {
             if (is_array($val)) {
@@ -282,13 +257,10 @@ class IndexController extends AbstractActionController
     {
         $result = [];
         $vocabulary = $this->api()->search('vocabularies', ['vocabulary_id' => 1])->getContent();
-
         $properties = $vocabulary[0]->properties();
-
         foreach ($properties as $property) {
             $result[] = $property->term();
         }
-
         return $result;
     }
 
@@ -299,11 +271,10 @@ class IndexController extends AbstractActionController
             $file_field_property = $_REQUEST['file_field_property'];
             $listterms_select = $_REQUEST['listterms_select'];
 
-            $form = $this->getForm(ResourceForm::class);
-            $form->setAttribute('action', $this->url()->fromRoute(null, [], true));
-            $form->setAttribute('enctype', 'multipart/form-data');
-            $form->setAttribute('id', 'edit-item');
-
+            $form = $this->getForm(ResourceForm::class)
+                ->setAttribute('action', $this->url()->fromRoute(null, [], true))
+                ->setAttribute('enctype', 'multipart/form-data')
+                ->setAttribute('id', 'edit-item');
 
             $items = $this->api()->read('items', ['id' => $omeka_item_id])->getContent();
             $values = $items->valueRepresentation();
@@ -334,7 +305,6 @@ class IndexController extends AbstractActionController
                 'o:is_public' => '1'
             ];
 
-
             foreach ($listterms_select as $term_item_name) {
                 if (isset($term_item_name['property'])) {
                     foreach ($term_item_name['property'] as $val) {
@@ -362,15 +332,15 @@ class IndexController extends AbstractActionController
             if ($response) {
                 $request = $this->translate('Item property successfully updated'); // @translate
             } else {
-                $request = $this->translate("Can't update item property"); // @translate
+                $request = $this->translate('Can’t update item property'); // @translate
             }
         } else {
-            $request = $this->translate("Can't update item property"); // @translate
+            $request = $this->translate('Can’t update item property'); // @translate
         }
 
-        $this->layout()->setTemplate('bulk-import-file/index/save-option');
-
-        $this->layout()->setVariable('request', $request);
+        $this->layout()
+            ->setTemplate('bulk-import-file/index/save-option')
+            ->setVariable('request', $request);
     }
 
     public function checkFolderAction()
@@ -398,9 +368,9 @@ class IndexController extends AbstractActionController
                         ->setEncoding('UTF-8')
                         ->analyze($file_path . $file);
 
-                    $total_files++;
+                    ++$total_files;
 
-                    $mime_type = 'not define';
+                    $mime_type = 'undefined';
                     $file_isset_maps = 'no';
 
                     if (isset($file_source['mime_type'])) {
@@ -408,7 +378,7 @@ class IndexController extends AbstractActionController
 
                         if (isset($this->filesMapsArray[$mime_type])) {
                             $file_isset_maps = 'yes';
-                            $total_files_can_recognized++;
+                            ++$total_files_can_recognized;
                         }
                     }
 
@@ -416,54 +386,46 @@ class IndexController extends AbstractActionController
                         'filename' => $file_source['filename'],
                         'file_size' => $file_source['filesize'],
                         'file_type' => $mime_type,
-                        'file_isset_maps' => $file_isset_maps
+                        'file_isset_maps' => $file_isset_maps,
                     ];
                 }
 
                 if (count($files_data) == 0) {
-                    $error = $this->translate("Folder is empty"); // @translate;
+                    $error = $this->translate('Folder is empty'); // @translate;
                 }
             } else {
-                $error = $this->translate("Folder not exist"); // @translate;
+                $error = $this->translate('Folder not exist'); // @translate;
             }
         } else {
-            $error = $this->translate("Can't check empty folder"); // @translate;
+            $error = $this->translate('Can’t check empty folder'); // @translate;
         }
 
-        $this->layout()->setTemplate('bulk-import-file/index/check-folder');
-
-        $this->layout()->setVariable('files_data', $files_data);
-        $this->layout()->setVariable('total_files', $total_files);
-        $this->layout()->setVariable('total_files_can_recognized', $total_files_can_recognized);
-        $this->layout()->setVariable('error', $error);
+        $this->layout()
+            ->setTemplate('bulk-import-file/index/check-folder')
+            ->setVariable('files_data', $files_data)
+            ->setVariable('total_files', $total_files)
+            ->setVariable('total_files_can_recognized', $total_files_can_recognized)
+            ->setVariable('error', $error);
     }
 
     public function actionMakeImportAction()
     {
         $this->getFilesMaps();
 
+        $api = $this->api();
+
         $data_for_recognize_row_id = '';
         $error = '';
-
-        $recognized_data = array();
-
-        $this->layout()->setTemplate('bulk-import-file/index/action-make-import');
-
+        $recognized_data = [];
         $url = $this->getRequest()->getUri();
-
-        $url_path = $url->getScheme() . "://" . $url->getHost();
+        $url_path = $url->getScheme() . '://' . $url->getHost();
 
         if (isset($_REQUEST['data_for_recognize_single'])) {
             $full_file_path = $_REQUEST['directory'] . '/' . $_REQUEST['data_for_recognize_single'];
 
-
             $delete_file_action = $_REQUEST['delete-file'];
 
-            /**
-             *
-             * create new Media
-             *
-             */
+            // Create new media.
 
             $fileinfo = new \SplFileInfo($full_file_path);
             $tempPath = $fileinfo->getRealPath();
@@ -475,26 +437,22 @@ class IndexController extends AbstractActionController
             $tempFile->setSourceName($full_file_path);
 
             $media = new Media();
-
             $media->setStorageId($tempFile->getStorageId());
             $media->setExtension($tempFile->getExtension());
             $media->setMediaType($tempFile->getMediaType());
             $media->setSha256($tempFile->getSha256());
             $media->setSize($tempFile->getSize());
+
             $hasThumbnails = $tempFile->storeThumbnails();
             $media->setHasThumbnails($hasThumbnails);
-
             $media->setSource($full_file_path);
 
             $tempFile->storeOriginal();
             $media->setHasOriginal(true);
 
-            /**
-             * get metadata from $full_file_path
-             * create new Item
-             *
-             */
+            // Create new Item.
 
+            // Get metadata from $full_file_path
             $url = $url_path . '/files/original/' . $tempFile->getStorageId() . '.' . $tempFile->getExtension();
 
             $getId3 = new GetId3();
@@ -505,15 +463,12 @@ class IndexController extends AbstractActionController
                 ->setEncoding('UTF-8')
                 ->analyze($full_file_path);
 
-
-            $mime_type = 'not define';
-
+            $mime_type = 'undefined';
             if (isset($file_source['mime_type'])) {
                 $mime_type = $file_source['mime_type'];
             }
 
             $filesMapsArray = $this->filesMapsArray[$mime_type];
-
             foreach ($filesMapsArray as $key => $val) {
                 $filesMaps = explode('/', $val);
 
@@ -525,41 +480,36 @@ class IndexController extends AbstractActionController
                     }
                 }
 
-
                 if (!is_array($file_fields_source)) {
                     $recognized_data[$key] = [
                         'field' => $val,
-                        'value' => $file_fields_source
+                        'value' => $file_fields_source,
                     ];
                 }
             }
 
-
-            /**
-             * check for item title in 'dcterms:alternative'
-             * if not, set item title as file name
-             *
-             */
-
+            // Check for item title in "dcterms:alternative". If not, set item
+            // title as file name.
             if (isset($recognized_data['dcterms:alternative'])) {
                 $item_title = $recognized_data['dcterms:alternative']['value'];
             } else {
                 $item_title = $_REQUEST['data_for_recognize_single'];
             }
 
-
+            /** @var \Omeka\Form\ResourceForm $form */
             $form = $this->getForm(ResourceForm::class);
-            $form->setAttribute('action', $this->url()->fromRoute(null, [], true));
-            $form->setAttribute('enctype', 'multipart/form-data');
-            $form->setAttribute('id', 'add-item');
+            $form
+                ->setAttribute('action', $this->url()->fromRoute(null, [], true))
+                ->setAttribute('enctype', 'multipart/form-data')
+                ->setAttribute('id', 'add-item');
 
             $property_id = 1;
             $data = [
                 'o:resource_template' => [
-                    'o:id' => 1
+                    'o:id' => 1,
                 ],
                 'o:resource_class' => [
-                    'o:id' => ''
+                    'o:id' => '',
                 ],
                 'dcterms:title' => [
                     '0' => [
@@ -567,11 +517,11 @@ class IndexController extends AbstractActionController
                         'type' => 'literal',
                         '@language' => '',
                         '@value' => $item_title,
-                        'is_public' => '1'
-                    ]
+                        'is_public' => '1',
+                    ],
                 ],
                 'o:thumbnail' => [
-                    'o:id' => ''
+                    'o:id' => '',
                 ],
                 'o:media' => [
                     '0' => [
@@ -580,61 +530,58 @@ class IndexController extends AbstractActionController
                             '0' => [
                                 '@value' => 'test2_media',
                                 'property_id' => '1',
-                                'type' => 'literal'
-                            ]
+                                'type' => 'literal',
+                            ],
                         ],
-
                         'ingest_url' => $url,
                         'o:ingester' => 'url',
-                    ]
-
+                    ],
                 ],
-                'o:is_public' => '1'
+                'o:is_public' => '1',
             ];
 
             if (count($recognized_data) > 0) {
                 foreach ($recognized_data as $key => $val) {
-                    $property_id++;
+                    ++$property_id;
                     if ($key != 'dcterms:alternative') {
                         $term = explode(':', $key);
 
-                        $term_item = $this->api()->search('properties', ['vocabulary_id' => 1, 'local_name' => $term[1]])->getContent();
+                        $term_item = $api
+                            ->search('properties', ['vocabulary_id' => 1, 'local_name' => $term[1]])->getContent();
 
                         $data[$key] = [
                             '0' => [
                                 'property_id' => $term_item[0]->id(),
                                 'type' => 'literal',
                                 '@language' => '',
-                                '@value' => (string)$val['value'],
+                                '@value' => (string) $val['value'],
                                 'is_public' => '1'
                             ]
                         ];
                     }
                 }
             } else {
-                $error = $this->translate("Field can't map"); // @translate;
+                $error = $this->translate('Field can’t map'); // @translate;
             }
 
             $form->setData($data);
 
             $new_item = $this->api($form)->create('items', $data);
-
             if ($new_item) {
                 $data_for_recognize_row_id = $_REQUEST['data_for_recognize_row_id'];
-
                 echo $data_for_recognize_row_id;
             }
 
             // $new_item_id = $new_item->getContent()->id();
 
-            if ('yes' === $delete_file_action) {
+            if ($delete_file_action ===  'yes') {
                 $tempFile->delete();
             }
         }
 
-
-        $this->layout()->setVariable('data_for_recognize_row_id', $data_for_recognize_row_id);
-
-        $this->layout()->setVariable('error', $error);
+        $this->layout()
+            ->setTemplate('bulk-import-file/index/action-make-import')
+            ->setVariable('data_for_recognize_row_id', $data_for_recognize_row_id)
+            ->setVariable('error', $error);
     }
 }

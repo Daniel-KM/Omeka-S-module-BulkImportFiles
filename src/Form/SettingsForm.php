@@ -2,7 +2,6 @@
 
 namespace BulkImportFile\Form;
 
-
 use Zend\Form\Form;
 
 class SettingsForm extends Form

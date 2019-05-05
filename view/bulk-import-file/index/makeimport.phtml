@@ -1,33 +1,33 @@
 <?php
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ */
+
 $escapeHtml = $this->plugin('escapeHtml');
 $this->headLink()->appendStylesheet($this->assetUrl('css/bulkimportfile.css', 'BulkImportFile'));
 $this->headScript()->appendFile($this->assetUrl('js/bulkimportfile.js', 'BulkImportFile'));
 ?>
 
-<?php echo $this->pageTitle($this->translate('Make Bulk Import Files'), 1, $this->translate('BulkImportFile Module')); ?>
-
+<?php echo $this->pageTitle($this->translate('Make Bulk Import Files'), 1, $this->translate('Bulk import files')); ?>
 
 <form method="post" class="make_import_form">
     <div class="field required">
         <div class="field-meta">
-            <label for="directory">Bulk Import Files directory</label> <a href="#" class="expand" aria-label="Expand"
-                                                                 title="Expand"></a>
+            <label for="directory">Bulk Import Files directory</label> <a href="#" class="expand" aria-label="Expand" title="Expand"></a>
             <div class="collapsible">
                 <div class="field-description">Enter the absolute path to the directory where files to be bulkimportfile
-                    will be added. The directory can be anywhere on your server. You root path is: <?php echo $_SERVER["DOCUMENT_ROOT"];?>
+                    will be added. The directory can be anywhere on your server. You root path is: <?php echo $_SERVER["DOCUMENT_ROOT"]; ?>
                 </div>
             </div>
         </div>
         <div class="inputs">
-            <input type="text" name="directory" required="required" id="directory"
-                   value="/var/www/test.com/public_html/files/data">
+            <input type="text" name="directory" required="required" id="directory" value="/var/www/test.com/public_html/files/data">
         </div>
         <button type="submit" name="add-item-submit" class="check_button">Check</button>
     </div>
     <div class="field">
         <div class="field-meta">
-            <label for="delete-file">Delete bulkimportfile file?</label> <a href="#" class="expand"
-                                                                        aria-label=" Expand"></a>
+            <label for="delete-file">Delete original file from the folder?</label> <a href="#" class="expand" aria-label=" Expand"></a>
             <div class="collapsible">
                 <div class="field-description">Do you want to delete a file from the bulkimportfile directory after it has
                     been imported? If so, the directory must be server-writable.
@@ -35,14 +35,13 @@ $this->headScript()->appendFile($this->assetUrl('js/bulkimportfile.js', 'BulkImp
             </div>
         </div>
         <div class="inputs">
-            <input type="hidden" name="delete_file" value="no"><input type="checkbox" name="delete_file"
-                                                                      id="delete-file" value="no"></div>
+            <input type="hidden" name="delete_file" value="no"><input type="checkbox" name="delete_file" id="delete-file" value="no">
+        </div>
     </div>
-
 </form>
 
 <div class="response"></div>
 
 <div class="modal-loader">
-    <div class="modal-loader-info"><?php echo $this->translate('Please wait, analysis in progress ...'); ?></div>
+    <div class="modal-loader-info"><?php echo $this->translate('Please wait, analysis in progress…'); ?></div>
 </div>

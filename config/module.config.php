@@ -1,5 +1,4 @@
 <?php
-
 namespace BulkImportFile;
 
 return [
@@ -27,7 +26,7 @@ return [
             'admin' => [
                 'child_routes' => [
                     'bulkimportfile' => [
-                        'type' => 'Literal',
+                        'type' => \Zend\Router\Http\Literal::class,
                         'options' => [
                             'route' => '/bulkimportfile',
                             'defaults' => [
@@ -39,7 +38,7 @@ return [
                         'may_terminate' => true,
                         'child_routes' => [
                             'mapimport' => [
-                                'type' => 'Literal',
+                                'type' => \Zend\Router\Http\Literal::class,
                                 'options' => [
                                     'route' => '/mapimport',
                                     'defaults' => [
@@ -50,7 +49,7 @@ return [
                                 ],
                             ],
                             'getFiles' => [
-                                'type' => 'Literal',
+                                'type' => \Zend\Router\Http\Literal::class,
                                 'options' => [
                                     'route' => '/getfiles',
                                     'defaults' => [
@@ -61,7 +60,7 @@ return [
                                 ],
                             ],
                             'saveOption' => [
-                                'type' => 'Literal',
+                                'type' => \Zend\Router\Http\Literal::class,
                                 'options' => [
                                     'route' => '/saveoption',
                                     'defaults' => [
@@ -72,7 +71,7 @@ return [
                                 ],
                             ],
                             'makeimport' => [
-                                'type' => 'Literal',
+                                'type' => \Zend\Router\Http\Literal::class,
                                 'options' => [
                                     'route' => '/makeimport',
                                     'defaults' => [
@@ -83,7 +82,7 @@ return [
                                 ],
                             ],
                             'checkfolder' => [
-                                'type' => 'Literal',
+                                'type' => \Zend\Router\Http\Literal::class,
                                 'options' => [
                                     'route' => '/checkfolder',
                                     'defaults' => [
@@ -94,7 +93,7 @@ return [
                                 ],
                             ],
                             'actionmakeimport' => [
-                                'type' => 'Literal',
+                                'type' => \Zend\Router\Http\Literal::class,
                                 'options' => [
                                     'route' => '/actionmakeimport',
                                     'defaults' => [
@@ -113,22 +112,22 @@ return [
     'navigation' => [
         'AdminModule' => [
             [
-                'label' => 'Bulk Import Files',
+                'label' => 'Bulk import files', // @translate
                 'route' => 'admin/bulkimportfile',
                 'resource' => 'BulkImportFile\Controller\Index',
                 'pages' => [
                     [
-                        'label' => 'View maps settings', // @translate
+                        'label' => 'View mappings', // @translate
                         'route' => 'admin/bulkimportfile',
                         'resource' => 'BulkImportFile\Controller\Index',
                     ],
                     [
-                        'label' => 'Create file Maps', // @translate
+                        'label' => 'Create mappings', // @translate
                         'route' => 'admin/bulkimportfile/mapimport',
                         'resource' => 'BulkImportFile\Controller\Index',
                     ],
                     [
-                        'label' => 'Make Import', // @translate
+                        'label' => 'Process import', // @translate
                         'route' => 'admin/bulkimportfile/makeimport',
                         'resource' => 'BulkImportFile\Controller\Index',
                     ]

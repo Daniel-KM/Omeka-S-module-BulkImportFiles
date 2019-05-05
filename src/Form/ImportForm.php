@@ -11,7 +11,6 @@ class ImportForm extends Form
 
     public function init()
     {
-
     }
 
     /**
@@ -29,5 +28,4 @@ class ImportForm extends Form
     {
         return $this->urlHelper;
     }
-
 }

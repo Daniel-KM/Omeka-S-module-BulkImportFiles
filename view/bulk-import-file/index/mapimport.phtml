@@ -1,4 +1,8 @@
 <?php
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ */
+
 $form->prepare();
 
 $escapeHtml = $this->plugin('escapeHtml');
@@ -7,7 +11,7 @@ $this->headScript()->appendFile($this->assetUrl('js/bulkimportfile.js', 'BulkImp
 
 ?>
 
-<?php echo $this->pageTitle($this->translate('Create/configure Import Map'), 1, $this->translate('BulkImportFile Module')); ?>
+<?php echo $this->pageTitle($this->translate('Create/configure Import Map'), 1, $this->translate('Bulk import files')); ?>
 
 <?php echo $this->form()->openTag($form); ?>
 <fieldset id='page-actions'>
@@ -29,7 +33,7 @@ $this->headScript()->appendFile($this->assetUrl('js/bulkimportfile.js', 'BulkImp
 <div class="files-map-block">
 
     <div class="property"><h4><?php echo $this->translate('Select folder:'); ?>
-            <?php echo $this->translate('(you can select folder with you files, with any type and configure its)'); ?></h4>
+            <?php echo $this->translate('(you can select folder with you files, with any type and configure it.)'); ?></h4>
 
         <input type="file" id="multiFiles" name="files[]" multiple="multiple" webkitdirectory mozdirectory msdirectory
                odirectory directory/>
