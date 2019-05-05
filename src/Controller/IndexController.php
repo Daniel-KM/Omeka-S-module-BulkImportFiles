@@ -87,29 +87,30 @@ class IndexController extends AbstractActionController
             $resourceTemplate = $this->api()
                 ->read('resource_templates', ['label' => 'BulkImportFile Resource'])
                 ->getContent();
+        } catch (\Exception $e) {
+            $this->messenger()->addError('The resource template "BulkImportFile Resource" has been removed or renamed.'); // @translate
+            return;
+        }
 
-            $items = $this->api()->search('items')->getContent();
+        $items = $this->api()->search('items')->getContent();
 
-            $this->filesMaps = array();
-            foreach ($items as $item) {
-                if ($item->resourceTemplate()
-                    && $item->resourceTemplate()->id() == $resourceTemplate->id()
-                ) {
-                    $options['viewName'] = 'common/item-resource-values';
+        $this->filesMaps = [];
+        foreach ($items as $item) {
+            if ($item->resourceTemplate()
+                && $item->resourceTemplate()->id() == $resourceTemplate->id()
+            ) {
+                $options['viewName'] = 'common/item-resource-values';
 
-                    $this->filesMaps[$item->id()] = json_decode($item->displayValues($options));
+                $this->filesMaps[$item->id()] = json_decode($item->displayValues($options));
 
-                    $current_maps = (Array)json_decode($item->displayValues($options));
+                $current_maps = (Array)json_decode($item->displayValues($options));
 
-                    $current_maps['item_id'] = $item->id();
+                $current_maps['item_id'] = $item->id();
 
-                    if (isset($current_maps['dcterms:title'])) {
-                        $this->filesMapsArray[$current_maps['dcterms:title']] = $current_maps;
-                    }
+                if (isset($current_maps['dcterms:title'])) {
+                    $this->filesMapsArray[$current_maps['dcterms:title']] = $current_maps;
                 }
             }
-        } catch (\Exception $e) {
-            var_dump($e);
         }
     }
 
