@@ -258,7 +258,7 @@ class IndexController extends AbstractActionController
 
         if (!empty($params['folder'])) {
             if (file_exists($params['folder']) && is_dir($params['folder'])) {
-                $files = array_diff(scandir($params['folder']), ['.', '..']);
+                $files = $this->listFilesInDir($params['folder']);
                 $file_path = $params['folder'] . '/';
                 foreach ($files as $file) {
                     $getId3 = new GetId3();
@@ -537,5 +537,24 @@ class IndexController extends AbstractActionController
             $current_maps['media_type'] = $mediaType;
             $this->filesMaps[$item->id()] = $current_maps;
         }
+    }
+
+    /**
+     * List files in a directory, not recursively, and without subdirs, and sort
+     * them alphabetically (case insenitive and natural order).
+     *
+     * @param string $dir
+     * @return array
+     */
+    protected function listFilesInDir($dir)
+    {
+        if (empty($dir) || !file_exists($dir) || !is_dir($dir) || !is_readable($dir)) {
+            return [];
+        }
+        $result = array_values(array_filter(scandir($dir), function($file) use ($dir) {
+            return is_file($dir . DIRECTORY_SEPARATOR . $file);
+        }));
+        natcasesort($result);
+        return $result;
     }
 }
