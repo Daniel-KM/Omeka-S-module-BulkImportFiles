@@ -311,9 +311,6 @@ class IndexController extends AbstractActionController
     {
         $this->prepareFilesMaps();
 
-        $data_for_recognize_row_id = '';
-        $error = '';
-
         $config = $this->services->get('Config');
         $baseUri = $config['file_store']['local']['base_uri'];
         if (!$baseUri) {
@@ -324,6 +321,11 @@ class IndexController extends AbstractActionController
         }
 
         $params = $this->params()->fromPost();
+        $data_for_recognize_row_id = $params['data_for_recognize_row_id'];
+        $notice = null;
+        $warning = null;
+        $error = null;
+
         if (isset($params['data_for_recognize_single'])) {
             $full_file_path = $params['directory'] . '/' . $params['data_for_recognize_single'];
             $delete_file_action = $params['delete-file'];
@@ -388,7 +390,11 @@ class IndexController extends AbstractActionController
             }
 
             if (count($data) <= 0) {
-                $error = $this->translate('Field can’t map'); // @translate;
+                if ($query) {
+                    $warning = $this->translate('No metadata to import.'); // @translate
+                } else {
+                    $notice = $this->translate('No metadata: mapping is empty.'); // @translate
+                }
             }
 
             // Append default metadata if needed.
@@ -421,15 +427,9 @@ class IndexController extends AbstractActionController
                 ->setAttribute('action', $this->url()->fromRoute(null, [], true))
                 ->setAttribute('enctype', 'multipart/form-data')
                 ->setAttribute('id', 'add-item');
-
             $form->setData($data);
-            $new_item = $this->api($form)->create('items', $data);
-
-            if ($new_item) {
-                $data_for_recognize_row_id = $params['data_for_recognize_row_id'];
-            }
-
-            if ($delete_file_action ===  'yes') {
+            $hasNewItem = $this->api($form)->create('items', $data);
+            if ($hasNewItem && $delete_file_action ===  'yes') {
                 $tempFile->delete();
             }
         }
@@ -437,7 +437,9 @@ class IndexController extends AbstractActionController
         $this->layout()
             ->setTemplate('bulk-import-files/index/process-import')
             ->setVariable('data_for_recognize_row_id', $data_for_recognize_row_id)
-            ->setVariable('error', $error);
+            ->setVariable('notice', empty($notice) ? null : $notice)
+            ->setVariable('warning', empty($warning) ? null : $warning)
+            ->setVariable('error', empty($error) ? null : $error);
     }
 
     /**

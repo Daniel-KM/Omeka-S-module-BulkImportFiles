@@ -182,7 +182,16 @@ div.messages .response.error {
 }
 
 .response .isset_no {
-    background-color: #c0c0c0;
+    background-color: #f4b4b4;
+}
+.isset_yes.success {
+    background-color: #cdffcd;
+}
+.isset_yes.warning {
+    background-color: #fff6e6;
+}
+.isset_yes.error {
+    background-color: #f4b4b4;
 }
 
 .modal-loader {
@@ -244,12 +253,4 @@ div.messages .response.error {
 
 #table-selected-files .separator.set_active span span {
     color: #000;
-}
-
-.isset_yes.make_success {
-    background-color: #cdffcd;
-}
-
-.isset_yes.make_error {
-    background-color: #A91919;
 }

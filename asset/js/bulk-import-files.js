@@ -372,17 +372,12 @@ $(document).ready(function () {
     total_files_for_upload = 0;
 
     function make_single_file_upload(file_position_upload) {
-
         // console.log(make_action);
-        //
         // console.log(total_files_for_upload);
-        //
         // console.log(data_for_recognize['filenames'][file_position_upload]);
 
         url = basePath + '/admin/bulk-import-files/process-import';
-
         directory = $('.make_import_form #directory').val();
-
         $('.directory').val(directory);
 
         if ((file_position_upload >= total_files_for_upload) || (typeof data_for_recognize['filenames'][file_position_upload] == 'undefined')) {
@@ -390,14 +385,14 @@ $(document).ready(function () {
             $('.response').append('Import done');
             $('.response').find('.total_info').remove();
         } else {
-
             if (make_action == true) {
-
+                var rowId = data_for_recognize['row_id'][file_position_upload];
+                var row = $('.response .isset_yes.row_id_' + rowId);
                 data_for_recognize_single = {
                     'data_for_recognize_single' : data_for_recognize['filenames'][file_position_upload],
                     'directory': directory,
                     'delete-file': $('#delete-file').val(),
-                    'data_for_recognize_row_id' : data_for_recognize['row_id'][file_position_upload]
+                    'data_for_recognize_row_id' : rowId,
                 };
 
                 $.ajax({
@@ -409,42 +404,34 @@ $(document).ready(function () {
                         clearTimeout(create_action);
                     },
                     success: function (response) {
-
-                        // console.log(response.length);
-
-                        /**
-                         *
-                         * if error , field not recognize
-                         *
-                         */
-                        // if (response.length > 1)
-                        // {
-                        //     $('.response .isset_yes.row_id_'+row).addClass('make_error');
-                        //     $('.response .isset_yes.row_id_'+row).find('.status').html('NO');
-                        //
-                        // } else {
-                        //     $('.response .isset_yes.row_id_'+row).addClass('make_success');
-                        //     $('.response .isset_yes.row_id_'+row).find('.status').html('OK');
-                        // }
-
-                        row = parseInt(response);
-
-                        $('.response .isset_yes.row_id_'+row).addClass('make_success');
-                        $('.response .isset_yes.row_id_'+row).find('.status').html('OK');
-
-
+                        if (response.length > 1) {
+                            var resp = $.parseJSON(response);
+                            row.addClass(resp.severity);
+                            if (resp.severity === 'notice') {
+                                row.find('.status').html('Notice');
+                            } else if (resp.severity === 'warning') {
+                                row.find('.status').html('Warning');
+                            } else {
+                                row.find('.status').html('Error');
+                            }
+                            if (resp.message) {
+                                row.after('<tr class="message row_id_' + rowId + '"><td class="' + resp.severity + '" colspan="6"></td></tr>');
+                                row.next().find('td').html(resp.message);
+                            }
+                        } else {
+                            row.addClass('success');
+                            row.find('.status').html('OK');
+                        }
                     },
                     error: function (response) {
                         $('.response').html(response);
                     },
                     complete: function (response) {
                         make_action = true;
-                        file_position_upload++;
+                        ++file_position_upload;
                         create_action = setTimeout(make_single_file_upload(file_position_upload), 1000);
                     }
                 });
-
-
             } else {
                 clearTimeout(create_action);
             }
