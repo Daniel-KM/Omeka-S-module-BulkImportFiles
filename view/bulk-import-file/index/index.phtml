@@ -16,7 +16,7 @@ $this->headLink()->appendStylesheet($this->assetUrl('css/bulkimportfile.css', 'B
 
 <?php if (count($this->values) == 0) : ?>
     <div><?php echo $this->translate('No available maps for import'); ?>
-    <a href="/admin/bulkimportfile/mapimport">Create...</a>
+    <a href="<?= $this->basePath() ?>/admin/bulkimportfile/mapimport">Create...</a>
     </div>
 
 <?php else : ?>

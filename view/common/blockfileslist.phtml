@@ -5,8 +5,10 @@
 
 $escapeHtml = $this->plugin('escapeHtml');
 $this->headLink()->appendStylesheet($this->assetUrl('css/bulkimportfile.css', 'BulkImportFile'));
-$this->headScript()->appendFile($this->assetUrl('js/bulkimportfile.js', 'BulkImportFile'));
-
+$script = 'var basePath = ' . json_encode($this->basePath(), 320);
+$this->headScript()
+    ->appendScript($script)
+    ->appendFile($this->assetUrl('js/bulkimportfile.js', 'BulkImportFile'));
 ?>
 <div class="messages">
     <div class="response"></div>
@@ -42,7 +44,7 @@ $this->headScript()->appendFile($this->assetUrl('js/bulkimportfile.js', 'BulkImp
                     <?php
                     $item_id = '';
                     if (isset($files_data['file']['item_id'])) {
-                        $item_id = '/admin/item/' . $files_data['file']['item_id'] . '/edit';
+                        $item_id = $this->basePath() . '/admin/item/' . $files_data['file']['item_id'] . '/edit';
                         ?>
                         <a target="_blank" class="underline_link" title="Click for edit"
                            href="<?php echo $item_id; ?>"> <?php echo $files_data['file']['type']; ?></a>
@@ -50,8 +52,8 @@ $this->headScript()->appendFile($this->assetUrl('js/bulkimportfile.js', 'BulkImp
                                class="omeka_item_id">
                     <?php } else { ?>
                         <?php echo $files_data['file']['type']; ?>
-                        <span class="errors">(Type is not define)</span>
-                        <a href="/admin/item/add" target="_blank" class="add_item_button">Add</a>
+                        <span class="errors">(Type is not defined)</span>
+                        <a href="<?= $this->basePath() ?>/admin/item/add" target="_blank" class="add_item_button">Add</a>
                     <?php } ?>
 
 

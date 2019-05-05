@@ -5,7 +5,10 @@
 
 $escapeHtml = $this->plugin('escapeHtml');
 $this->headLink()->appendStylesheet($this->assetUrl('css/bulkimportfile.css', 'BulkImportFile'));
-$this->headScript()->appendFile($this->assetUrl('js/bulkimportfile.js', 'BulkImportFile'));
+$script = 'var basePath = ' . json_encode($this->basePath(), 320);
+$this->headScript()
+    ->appendScript($script)
+    ->appendFile($this->assetUrl('js/bulkimportfile.js', 'BulkImportFile'));
 ?>
 
 <?php echo $this->pageTitle($this->translate('Make Bulk Import Files'), 1, $this->translate('Bulk import files')); ?>

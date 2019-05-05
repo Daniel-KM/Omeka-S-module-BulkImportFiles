@@ -39,7 +39,7 @@ $(document).ready(function () {
 
         //var formData = new FormData($(this).parents('form')[0]);
 
-        url = '/admin/bulkimportfile/getfiles';
+        url = basePath + '/admin/bulkimportfile/getfiles';
 
         var form_data = new FormData();
         var ins = document.getElementById('multiFiles').files.length;
@@ -88,7 +88,7 @@ $(document).ready(function () {
 
         // console.log(formData);
 
-        // url = '/admin/bulkimportfile/getfiles';
+        // url = basePath + '/admin/bulkimportfile/getfiles';
         //
         // $.ajax({
         //     url: url,
@@ -142,7 +142,7 @@ $(document).ready(function () {
 
 
     $('#upload').on('click', function () {
-        url = '/admin/bulkimportfile/getfiles';
+        url = basePath + '/admin/bulkimportfile/getfiles';
 
         var form_data = new FormData();
         var ins = document.getElementById('multiFiles').files.length;
@@ -319,7 +319,7 @@ $(document).ready(function () {
             return false;
         }
 
-        url = '/admin/bulkimportfile/saveoption';
+        url = basePath + '/admin/bulkimportfile/saveoption';
 
 
         var form_data = {
@@ -351,7 +351,7 @@ $(document).ready(function () {
 
         directory = {'folder' : $('.make_import_form #directory').val()};
 
-        url = '/admin/bulkimportfile/checkfolder';
+        url = basePath + '/admin/bulkimportfile/checkfolder';
 
         $.ajax({
             url: url,
@@ -396,7 +396,7 @@ $(document).ready(function () {
         //
         // console.log(data_for_recognize['filenames'][file_position_upload]);
 
-        url = '/admin/bulkimportfile/actionmakeimport';
+        url = basePath + '/admin/bulkimportfile/actionmakeimport';
 
         directory = $('.make_import_form #directory').val();
 
