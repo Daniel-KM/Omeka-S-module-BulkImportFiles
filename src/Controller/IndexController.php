@@ -8,8 +8,8 @@ use GetId3\GetId3Core as GetId3;
 use Omeka\Entity\Media;
 use Omeka\File\TempFileFactory;
 use Omeka\Form\ResourceForm;
-use Omeka\Media\Ingester\Manager;
 use Zend\Mvc\Controller\AbstractActionController;
+use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Model\ViewModel;
 
 class IndexController extends AbstractActionController
@@ -19,6 +19,9 @@ class IndexController extends AbstractActionController
      */
     protected $filesMaps;
 
+    /**
+     * @var array
+     */
     protected $filesMapsArray;
 
     protected $parsed_data;
@@ -44,88 +47,29 @@ class IndexController extends AbstractActionController
     ];
 
     protected $tempFileFactory;
+
+    /**
+     * @var ServiceLocatorInterface
+     */
     protected $services;
 
     /**
-     * @var array
+     * @param ServiceLocatorInterface $serviceLocator
      */
-    // protected $config;
-
-    /**
-     * @var Manager
-     */
-    // protected $mediaIngesterManager;
-
-    /**
-     * @var UserSettings
-     */
-    // protected $userSettings;
-
-    /**
-     * @param array $config
-     * @param Manager $mediaIngesterManager
-     * @param UserSettings $userSettings
-     */
-
-    public function __construct($config, $mediaIngesterManager, $serviceLocator)
+    public function __construct(ServiceLocatorInterface $serviceLocator)
     {
         $this->services = $serviceLocator;
     }
 
-
-    /**
-     * Set filesMaps as object (stdClass) for all Items with BulkImportFile Resource
-     * (ex: public 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
-     *
-     * Set filesMapsArray as array with key "Item title" it's type of files
-     * (ex: 'image/jpeg' => 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
-     *
-     */
-    public function getFilesMaps()
-    {
-        try {
-            $resourceTemplate = $this->api()
-                ->read('resource_templates', ['label' => 'BulkImportFile Resource'])
-                ->getContent();
-        } catch (\Exception $e) {
-            $this->messenger()->addError('The resource template "BulkImportFile Resource" has been removed or renamed.'); // @translate
-            return;
-        }
-
-        $items = $this->api()->search('items')->getContent();
-
-        $this->filesMaps = [];
-        foreach ($items as $item) {
-            if ($item->resourceTemplate()
-                && $item->resourceTemplate()->id() == $resourceTemplate->id()
-            ) {
-                $options['viewName'] = 'common/item-resource-values';
-
-                $this->filesMaps[$item->id()] = json_decode($item->displayValues($options));
-
-                $current_maps = (Array)json_decode($item->displayValues($options));
-
-                $current_maps['item_id'] = $item->id();
-
-                if (isset($current_maps['dcterms:title'])) {
-                    $this->filesMapsArray[$current_maps['dcterms:title']] = $current_maps;
-                }
-            }
-        }
-    }
-
     public function indexAction()
     {
-        $this->getFilesMaps();
-
-        $view = new ViewModel;
-
-        $view->setVariable('values', $this->filesMaps);
+        $this->prepareFilesMaps();
 
         $form = $this->getForm(SettingsForm::class);
 
-        $view->form = $form;
-
+        $view = new ViewModel;
+        $view->setVariable('values', $this->filesMaps);
+        $view->setVariable('form', $form);
         return $view;
     }
 
@@ -144,7 +88,7 @@ class IndexController extends AbstractActionController
 
     public function getFilesAction()
     {
-        $this->getFilesMaps();
+        $this->prepareFilesMaps();
 
         $request = $this->getRequest();
 
@@ -346,8 +290,7 @@ class IndexController extends AbstractActionController
 
     public function checkFolderAction()
     {
-        $this->getFilesMaps();
-
+        $this->prepareFilesMaps();
         $error = '';
         $files_data = [];
 
@@ -411,7 +354,7 @@ class IndexController extends AbstractActionController
 
     public function actionMakeImportAction()
     {
-        $this->getFilesMaps();
+        $this->prepareFilesMaps();
 
         $api = $this->api();
 
@@ -584,5 +527,43 @@ class IndexController extends AbstractActionController
             ->setTemplate('bulk-import-file/index/action-make-import')
             ->setVariable('data_for_recognize_row_id', $data_for_recognize_row_id)
             ->setVariable('error', $error);
+    }
+
+    /**
+     * Set filesMaps as object (stdClass) for all Items with BulkImportFile Resource
+     * (ex: public 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
+     *
+     * Set filesMapsArray as array with key "Item title" it's type of files
+     * (ex: 'image/jpeg' => 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
+     */
+    protected function prepareFilesMaps()
+    {
+        $this->filesMaps = [];
+
+        try {
+            $resourceTemplate = $this->api()
+                ->read('resource_templates', ['label' => 'BulkImportFile Resource'])
+                ->getContent();
+        } catch (\Exception $e) {
+            $this->messenger()->addError('The required resource template "BulkImportFile Resource" has been removed or renamed.'); // @translate
+            return;
+        }
+
+        $items = $this->api()
+            ->search('items', ['resource_template_id' => $resourceTemplate->id()])
+            ->getContent();
+
+        $options = [];
+        $options['viewName'] = 'common/item-resource-values';
+
+        foreach ($items as $item) {
+            $this->filesMaps[$item->id()] = json_decode($item->displayValues($options));
+
+            $current_maps = (array) json_decode($item->displayValues($options));
+            $current_maps['item_id'] = $item->id();
+            if (isset($current_maps['dcterms:title'])) {
+                $this->filesMapsArray[$current_maps['dcterms:title']] = $current_maps;
+            }
+        }
     }
 }
