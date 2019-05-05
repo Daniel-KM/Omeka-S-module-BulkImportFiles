@@ -37,13 +37,6 @@ The next times:
 
 Then install it like any other Omeka module.
 
-* Important
-
-This project requires to run in project root:
-
-```sh
-    composer require "phansys/getid3: ^2.1@dev"
-```
 
 Usage
 -----

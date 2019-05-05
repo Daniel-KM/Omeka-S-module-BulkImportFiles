@@ -3,18 +3,19 @@
 namespace BulkImportFile;
 
 use BulkImportFile\Form\ConfigFormSettings;
+use Omeka\Api\Manager as ApiManager;
+use Omeka\Entity\ResourceTemplate;
 use Omeka\Form\ResourceTemplateForm;
 use Omeka\Module\AbstractModule;
 use Omeka\Settings\SettingsInterface;
 use Zend\EventManager\Event;
 use Zend\EventManager\SharedEventManagerInterface;
 use Zend\Form\Fieldset;
+use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\Controller\AbstractController;
 use Zend\Mvc\MvcEvent;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Renderer\PhpRenderer;
-use Omeka\Entity\ResourceTemplate;
-use Omeka\Api\Manager as ApiManager;
 
 class Module extends AbstractModule
 {
@@ -26,6 +27,11 @@ class Module extends AbstractModule
 
     protected $listenersByEventViewShowAfter = [];
     protected $resourceTemplate;
+
+    public function init(ModuleManager $moduleManager)
+    {
+        require_once __DIR__ . '/vendor/autoload.php';
+    }
 
     public function getConfig()
     {
