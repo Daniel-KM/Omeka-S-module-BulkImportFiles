@@ -1,0 +1,46 @@
+<?php if ($this->error != '') : ?>
+    <div class="error"><?php echo $this->error; ?></div>
+<?php else : ?>
+
+    <?php if (count($this->files_data) > 0) : ?>
+        <div class="total_info">
+            <span class="total_info_row"><h4><?php echo $this->translate('Total files:'); ?> </h4><?php echo $this->total_files; ?></span>
+            <span class="total_info_row"><h4><?php echo $this->translate('Files can be recognize and add:'); ?></h4> <?php echo $this->total_files_can_recognized; ?></span>
+
+            <button type=""
+                    class="js-recognize_files"><?php echo $this->translate('Make recognize and add'); ?></button>
+
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 5%">Id</th>
+                <th style="width: 25%">File name</th>
+                <th style="width: 15%">File size</th>
+                <th style="width: 15%">File type</th>
+                <th style="width: 15%">Isset maps for file type</th>
+                <th style="width: 5%">Status</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <?php $i = 1; ?>
+
+            <?php foreach ($this->files_data as $val) : ?>
+                <tr class="isset_<?php echo $val['file_isset_maps']; ?> row_id_<?php echo $i; ?>">
+                    <td><?php echo $i; ?></td>
+                    <td class="filename" attr-row-id="<?php echo $i; ?>"><?php echo $val['filename']; ?></td>
+                    <td><?php echo $val['file_size']; ?></td>
+                    <td><?php echo $val['file_type']; ?></td>
+                    <td><?php echo $val['file_isset_maps']; ?></td>
+                    <td class="status">
+                    </td>
+                    <?php $i++; ?>
+                </tr>
+
+
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+<?php endif; ?>

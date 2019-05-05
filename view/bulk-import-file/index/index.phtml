@@ -1,0 +1,86 @@
+<?php
+
+$form->prepare();
+$escapeHtml = $this->plugin('escapeHtml');
+$this->headLink()->appendStylesheet($this->assetUrl('css/bulkimportfile.css', 'BulkImportFile'));
+?>
+
+<?php echo $this->pageTitle($this->translate('View Module Maps Settings'), 1, $this->translate('BulkImportFile Module')); ?>
+
+<?php echo $this->form()->openTag($form); ?>
+    <fieldset id='page-actions' style="display: none">
+        <button type="submit"><?php echo $this->translate('Save'); ?></button>
+    </fieldset>
+<?php echo $this->formCollection($form, false); ?>
+
+
+<?php if (count($this->values) == 0) : ?>
+    <div><?php echo $this->translate('No available maps for import'); ?>
+    <a href="/admin/bulkimportfile/mapimport">Create...</a>
+    </div>
+
+<?php else : ?>
+    <div class="show">
+        <div><h3><?php echo $this->translate('Available maps for import'); ?></h3></div>
+
+
+        <?php $title_row = ''; ?>
+
+        <?php foreach ($this->values as $item) : ?>
+            <?php $property_row = ''; ?>
+
+            <table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack" id="table-selected-files">
+                <thead>
+                <tr>
+
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($item as $key => $item_s) : ?>
+
+                    <?php if ($key == 'dcterms:title') {
+                        $title_row = '<tr>';
+                        $title_row .= '<td class="file_type_property_td">';
+                        $title_row .= '<div class="file_type_property"><h4>File type: </h4>';
+                        $title_row .= $item_s;
+                        $title_row .= '</div>';
+                        $title_row .= '</td>';
+                        $title_row .= '</tr>';
+                    } else {
+                        $property_row .= '<tr>';
+                        $property_row .= '<td>';
+                        $property_row .= $key;
+                        $property_row .= '</td><td>';
+                        $property_row .= $item_s;
+                        $property_row .= '</td>';
+                        $property_row .= '</tr>';
+
+                    } ?>
+
+
+                <?php endforeach; ?>
+                <?php echo $title_row; ?>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Omeka property</th>
+                        <th>Map file data field(path)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php echo $property_row; ?>
+                    </tbody>
+                </table>
+
+                </tbody>
+            </table>
+
+        <?php endforeach; ?>
+
+
+    </div>
+
+<?php endif; ?>
+
+
+<?php echo $this->form()->closeTag($form); ?>

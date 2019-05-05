@@ -1,0 +1,12 @@
+<?php
+
+$item_property = [];
+
+foreach ($values as $term => $propertyData) {
+    foreach ($propertyData['values'] as $value) {
+        $item_property[$propertyData['property']->term()] = $value->asHtml();
+    }
+}
+
+echo json_encode($item_property);
+?>
