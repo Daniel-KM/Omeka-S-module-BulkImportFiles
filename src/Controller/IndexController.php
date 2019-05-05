@@ -361,8 +361,15 @@ class IndexController extends AbstractActionController
         $data_for_recognize_row_id = '';
         $error = '';
         $recognized_data = [];
-        $url = $this->getRequest()->getUri();
-        $url_path = $url->getScheme() . '://' . $url->getHost();
+
+        $config = $this->services->get('Config');
+        $baseUri = $config['file_store']['local']['base_uri'];
+        if (!$baseUri) {
+            $helpers = $this->services->get('ViewHelperManager');
+            $serverUrlHelper = $helpers->get('ServerUrl');
+            $basePathHelper = $helpers->get('BasePath');
+            $baseUri = $serverUrlHelper($basePathHelper('files'));
+        }
 
         if (isset($_REQUEST['data_for_recognize_single'])) {
             $full_file_path = $_REQUEST['directory'] . '/' . $_REQUEST['data_for_recognize_single'];
@@ -397,7 +404,7 @@ class IndexController extends AbstractActionController
             // Create new Item.
 
             // Get metadata from $full_file_path
-            $url = $url_path . '/files/original/' . $tempFile->getStorageId() . '.' . $tempFile->getExtension();
+            $url = $baseUri . '/original/' . $tempFile->getStorageId() . '.' . $tempFile->getExtension();
 
             $getId3 = new GetId3();
 
