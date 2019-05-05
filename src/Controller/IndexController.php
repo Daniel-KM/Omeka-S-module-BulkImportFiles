@@ -177,7 +177,7 @@ class IndexController extends AbstractActionController
         }
 
         $this->layout()
-            ->setTemplate('common/blockfileslist')
+            ->setTemplate('common/block-files-list')
             ->setVariable('files_data_for_view', $files_data_for_view)
             // List omeka properties.
             ->setVariable('listTerms', $this->listTerms())
@@ -650,7 +650,11 @@ class IndexController extends AbstractActionController
             $current_maps = json_decode($item->displayValues($options), true);
             if (isset($current_maps['dcterms:title'][0])) {
                 $mediaType = $current_maps['dcterms:title'][0];
-                unset($current_maps['dcterms:title'][0]);
+                if (count($current_maps['dcterms:title']) <= 1) {
+                    unset($current_maps['dcterms:title']);
+                } else {
+                    unset($current_maps['dcterms:title'][0]);
+                }
                 $current_maps['item_id'] = $item->id();
                 $this->filesMapsArray[$mediaType] = $current_maps;
             } else {

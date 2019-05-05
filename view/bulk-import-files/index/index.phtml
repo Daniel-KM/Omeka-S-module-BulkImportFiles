@@ -1,90 +1,85 @@
 <?php
 /**
  * @var \Zend\View\Renderer\PhpRenderer $this
+ * @var \BulkImportFiles\Form\SettingsForm $form
+ * @var array $filesMaps
  */
 
-$form->prepare();
-$escapeHtml = $this->plugin('escapeHtml');
+$translate = $this->plugin('translate');
 $this->headLink()->appendStylesheet($this->assetUrl('css/bulk-import-files.css', 'BulkImportFiles'));
+
+$form->prepare();
 ?>
 
-<?php echo $this->pageTitle($this->translate('View Module Maps Settings'), 1, $this->translate('Bulk import files')); ?>
+<?php echo $this->pageTitle($translate('View mappings'), 1, $translate('Bulk import files')); ?>
 
 <?php echo $this->form()->openTag($form); ?>
     <fieldset id='page-actions' style="display: none">
-        <button type="submit"><?php echo $this->translate('Save'); ?></button>
+        <button type="submit"><?php echo $translate('Save'); ?></button>
     </fieldset>
 <?php echo $this->formCollection($form, false); ?>
 
-
 <?php if (count($filesMaps) == 0) : ?>
-    <div><?php echo $this->translate('No available maps for import'); ?>
-    <a href="<?= $this->basePath() ?>/admin/bulk-import-files/map-import">Create...</a>
-    </div>
+
+    <div><?= $translate('No available maps for import'); ?></div>
+    <div><?= $this->hyperlink($translate('Create'), $this->url('admin/bulkimportfiles/mapimport')) ?></div>
 
 <?php else : ?>
+
     <div class="show">
-        <div><h3><?php echo $this->translate('Available maps for import'); ?></h3></div>
-
-
-        <?php $title_row = ''; ?>
-
+        <h3><?= $translate('Available maps for import'); ?></h3>
         <?php foreach ($filesMaps as $item) : ?>
-            <?php $property_row = ''; ?>
-
-            <table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack" id="table-selected-files">
-                <thead>
+        <table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack" id="table-selected-files">
+            <thead>
+                <tr></tr>
+            </thead>
+            <tbody>
+                <?php
+                $mediaType = $item['media_type'];
+                unset($item['media_type']);
+                unset($item['item_id']);
+                ?>
                 <tr>
-
+                    <td class="file_type_property_td">
+                        <div class="file_type_property">
+                            <h4><?= $translate('Media type') ?></h4>
+                            <?= $mediaType ?>
+                        </div>
+                    </td>
                 </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($item as $key => $item_s): ?>
-
-                    <?php if ($key == 'media_type'):
-                        $title_row = '<tr>';
-                        $title_row .= '<td class="file_type_property_td">';
-                        $title_row .= '<div class="file_type_property">';
-                        $title_row .= '<h4>' . $this->translate('Media type') . '</h4>';
-                        $title_row .= $item_s;
-                        $title_row .= '</div>';
-                        $title_row .= '</td>';
-                        $title_row .= '</tr>';
-                    elseif (is_array($item_s)):
-                        $property_row .= '<tr>';
-                        $property_row .= '<td>';
-                        $property_row .= $key;
-                        $property_row .= '</td><td><table><tr>';
-                        foreach ($item_s as $v):
-                            $property_row .= '<td>' . $v . '</td>' . "\n";
-                        endforeach;
-                        $property_row .= '</tr></table></td>';
-                        $property_row .= '</tr>' . "\n";
-                    endif; ?>
-
-                <?php endforeach; ?>
-                <?php echo $title_row; ?>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Omeka property</th>
-                        <th>Map file data field(path)</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <?php echo $property_row; ?>
-                    </tbody>
-                </table>
-
-                </tbody>
-            </table>
-
+                <tr>
+                    <td>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th><?= $translate('Property') ?></th>
+                                    <th><?= $translate('Map file data field (xpath or object notation)') ?></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($item as $metadata => $queries): ?>
+                                <tr>
+                                    <td><?= $metadata ?></td>
+                                    <td>
+                                        <table>
+                                            <tr>
+                                                <?php foreach ($queries as $query): ?>
+                                                <td><?= $query ?></td>
+                                                <?php endforeach; ?>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
         <?php endforeach; ?>
-
-
     </div>
 
 <?php endif; ?>
-
 
 <?php echo $this->form()->closeTag($form); ?>

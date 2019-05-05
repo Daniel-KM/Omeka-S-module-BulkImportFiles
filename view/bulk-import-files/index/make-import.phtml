@@ -3,6 +3,7 @@
  * @var \Zend\View\Renderer\PhpRenderer $this
  */
 
+$translate = $this->plugin('translate');
 $escapeHtml = $this->plugin('escapeHtml');
 $this->headLink()->appendStylesheet($this->assetUrl('css/bulk-import-files.css', 'BulkImportFiles'));
 $script = 'var basePath = ' . json_encode($this->basePath(), 320);
@@ -11,34 +12,37 @@ $this->headScript()
     ->appendFile($this->assetUrl('js/bulk-import-files.js', 'BulkImportFiles'));
 ?>
 
-<?php echo $this->pageTitle($this->translate('Make Bulk Import Files'), 1, $this->translate('Bulk import files')); ?>
+<?php echo $this->pageTitle($translate('Make bulk import files'), 1, $translate('Bulk import files')); ?>
 
 <form method="post" class="make_import_form">
     <div class="field required">
         <div class="field-meta">
-            <label for="directory">Bulk Import Files directory</label> <a href="#" class="expand" aria-label="Expand" title="Expand"></a>
+            <label for="directory"><?= $translate('Source directory') ?></label>
+            <a href="#" class="expand" aria-label="<?= $translate('Expand') ?>"></a>
             <div class="collapsible">
-                <div class="field-description">Enter the absolute path to the directory where files to be imported
-                    will be added. The directory can be anywhere on your server. You root path is: <?php echo $_SERVER["DOCUMENT_ROOT"]; ?>
+                <div class="field-description"><?= $translate('Enter the absolute path to the directory where files to be imported will be added.') ?>
+                    <?= sprintf($translate('The directory can be anywhere on your server. Your root path is: %s'), $_SERVER['DOCUMENT_ROOT']) ?>
                 </div>
             </div>
         </div>
         <div class="inputs">
             <input type="text" name="directory" required="required" id="directory" value="<?= OMEKA_PATH ?>/files/import">
         </div>
-        <button type="submit" name="add-item-submit" class="check_button">Check</button>
+        <button type="submit" name="add-item-submit" class="check_button"><?= $translate('Check') ?></button>
     </div>
     <div class="field">
         <div class="field-meta">
-            <label for="delete-file">Delete original file from the folder?</label> <a href="#" class="expand" aria-label=" Expand"></a>
+            <label for="delete-file"><?= $translate('Delete original file from the folder?') ?></label>
+            <a href="#" class="expand" aria-label="<?= $translate('Expand') ?>"></a>
             <div class="collapsible">
-                <div class="field-description">Do you want to delete a file from the source directory after it has
-                    been imported? If so, the directory must be server-writable.
+                <div class="field-description">
+                    <?= $translate('Do you want to delete a file from the source directory after it has been imported? If so, the directory must be server-writable.') ?>
                 </div>
             </div>
         </div>
         <div class="inputs">
-            <input type="hidden" name="delete_file" value="no"><input type="checkbox" name="delete_file" id="delete-file" value="no">
+            <input type="hidden" name="delete_file" value="no">
+            <input type="checkbox" name="delete_file" id="delete-file" value="no">
         </div>
     </div>
 </form>
@@ -46,5 +50,5 @@ $this->headScript()
 <div class="response"></div>
 
 <div class="modal-loader">
-    <div class="modal-loader-info"><?php echo $this->translate('Please wait, analysis in progress…'); ?></div>
+    <div class="modal-loader-info"><?= $translate('Please wait, analysis in progress…') ?></div>
 </div>

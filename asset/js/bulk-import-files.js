@@ -179,10 +179,10 @@ $(document).ready(function () {
             var row_td = $(this).parent().parent().parent();
             row_td.find('.omeka_list_property').append(listterms);
 
-            count = parseInt(row_td.parent().attr('attr-property-count'));
+            count = parseInt(row_td.parent().data('property-count'));
 
             count++;
-            row_td.parent().attr('attr-property-count', count);
+            row_td.parent().data('property-count', count);
 
             add_button_action();
 
@@ -199,9 +199,9 @@ $(document).ready(function () {
 
                 listterms_with_action_row = $(this).parent().parent().parent();
 
-                count = parseInt(listterms_with_action_row.parent().parent().attr('attr-property-count'));
+                count = parseInt(listterms_with_action_row.parent().parent().data('property-count'));
                 --count;
-                listterms_with_action_row.parent().parent().attr('attr-property-count', count);
+                listterms_with_action_row.parent().parent().data('property-count', count);
 
                 if (count == 0) {
                     listterms_with_action_row.parent().parent().removeClass('listterms_with_action_row').find('.js-save-button').html('');
@@ -461,7 +461,7 @@ $(document).ready(function () {
 
             $('.response .isset_yes').each(function () {
                 filenames.push($(this).find('.filename').html());
-                row_id.push($(this).find('.filename').attr('attr-row-id'));
+                row_id.push($(this).find('.filename').data('row-id'));
             });
 
             data_for_recognize = {
