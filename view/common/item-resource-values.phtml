@@ -1,13 +1,14 @@
 <?php
 /**
  * @var \Zend\View\Renderer\PhpRenderer $this
+ * @todo Remove this partial.
  */
 
 $item_property = [];
 
 foreach ($values as $term => $propertyData) {
     foreach ($propertyData['values'] as $value) {
-        $item_property[$propertyData['property']->term()] = $value->asHtml();
+        $item_property[$propertyData['property']->term()] = trim($value->value());
     }
 }
 

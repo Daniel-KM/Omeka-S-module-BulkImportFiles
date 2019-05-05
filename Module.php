@@ -11,6 +11,8 @@ class Module extends AbstractModule
 {
     const NAMESPACE = __NAMESPACE__;
 
+    protected $dependency = 'BulkImport';
+
     public function init(ModuleManager $moduleManager)
     {
         require_once __DIR__ . '/vendor/autoload.php';

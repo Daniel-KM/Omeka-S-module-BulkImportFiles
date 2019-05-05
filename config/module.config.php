@@ -21,6 +21,9 @@ return [
         'invokables' => [
             'extractStringFromFile' => Mvc\Controller\Plugin\ExtractStringFromFile::class,
         ],
+        'factories' => [
+            'mapData' => Service\ControllerPlugin\MapDataFactory::class,
+        ],
     ],
     'router' => [
         'routes' => [
