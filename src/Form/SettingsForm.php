@@ -21,10 +21,6 @@ class SettingsForm extends Form
                 'class' => 'bulkimportfile_maps_settings',
             ]
         ]);
-
-
-
-
     }
 
     /**
@@ -42,6 +38,5 @@ class SettingsForm extends Form
     public function getModules()
     {
         return $this->modules;
-
     }
 }

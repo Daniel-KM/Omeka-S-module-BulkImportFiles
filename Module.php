@@ -91,10 +91,15 @@ class Module extends AbstractModule
         $defaultSettings = $config[strtolower(__NAMESPACE__)][$settingsType];
 
         foreach ($defaultSettings as $name => $value) {
-
-            if (is_array($value)) $value = json_encode($value);
-            if (is_array($setValue)) $setValue = json_encode($setValue);
-            if (is_object($setValue)) $setValue = json_encode($setValue);
+            if (is_array($value)) {
+                $value = json_encode($value);
+            }
+            if (is_array($setValue)) {
+                $setValue = json_encode($setValue);
+            }
+            if (is_object($setValue)) {
+                $setValue = json_encode($setValue);
+            }
 
             switch ($process) {
                 case 'install':
@@ -183,7 +188,7 @@ class Module extends AbstractModule
         return true;
     }
 
-     /**
+    /**
      * Prepare data for a form or a fieldset.
      *
      * To be overridden by module for specific keys.

@@ -97,9 +97,7 @@ class IndexController extends AbstractActionController
 
             $this->filesMaps = array();
             foreach ($items as $item) {
-
                 if ($item->resourceTemplate()->id() == $resourceTemplate->id()) {
-
                     $options['viewName'] = 'common/item-resource-values';
 
                     $this->filesMaps[$item->id()] = json_decode($item->displayValues($options));
@@ -108,12 +106,11 @@ class IndexController extends AbstractActionController
 
                     $current_maps['item_id'] = $item->id();
 
-                    if (isset($current_maps['dcterms:title']))
+                    if (isset($current_maps['dcterms:title'])) {
                         $this->filesMapsArray[$current_maps['dcterms:title']] = $current_maps;
+                    }
                 }
             }
-
-
         } catch (\Exception $e) {
             var_dump($e);
         }
@@ -121,7 +118,6 @@ class IndexController extends AbstractActionController
 
     public function indexAction()
     {
-
         $this->getFilesMaps();
 
         $view = new ViewModel;
@@ -148,7 +144,6 @@ class IndexController extends AbstractActionController
         $view->form = $form;
 
         return $view;
-
     }
 
     public function getFilesAction()
@@ -164,14 +159,12 @@ class IndexController extends AbstractActionController
         $files_data_for_view = array();
 
         foreach ($files['files'] as $file) {
-
             $file_type = $file['type'];
             $recognized_data = '';
             $errors = '';
             $this->parsed_data = '';
 
             if (isset($this->filesMapsArray[$file_type])) {
-
                 $file['item_id'] = $this->filesMapsArray[$file_type]['item_id'];
 
                 switch ($file_type) {
@@ -203,24 +196,28 @@ class IndexController extends AbstractActionController
 
                         $filesMapsArray = array();
 
-                        if (isset($this->filesMapsArray[$mime_type])) $filesMapsArray = $this->filesMapsArray[$mime_type];
+                        if (isset($this->filesMapsArray[$mime_type])) {
+                            $filesMapsArray = $this->filesMapsArray[$mime_type];
+                        }
 
                         foreach ($filesMapsArray as $key => $val) {
-
                             $filesMaps = explode('/', $val);
 
                             $file_fields_source = $file_source;
 
                             foreach ($filesMaps as $fval) {
-                                if (isset($file_fields_source[$fval])) $file_fields_source = $file_fields_source[$fval];
+                                if (isset($file_fields_source[$fval])) {
+                                    $file_fields_source = $file_fields_source[$fval];
+                                }
                             }
 
 
-                            if (!is_array($file_fields_source))
+                            if (!is_array($file_fields_source)) {
                                 $recognized_data[$key] = [
                                     'field' => $val,
                                     'value' => $file_fields_source
                                 ];
+                            }
                         }
 
                         $this->array_keys_recursive($file_source);
@@ -259,17 +256,15 @@ class IndexController extends AbstractActionController
     public function array_keys_recursive($data_array, $keys = null)
     {
         foreach ($data_array as $key => $val) {
-
             if (is_array($val)) {
                 $this->array_keys_recursive($val, $keys . '/' . $key);
             } else {
-
-                if (!in_array($key, $this->ignoredKeys))
-
+                if (!in_array($key, $this->ignoredKeys)) {
                     $this->parsed_data[] = [
                         'key' => $keys . '/' . $key,
                         'value' => $val,
                     ];
+                }
             }
         }
     }
@@ -297,9 +292,7 @@ class IndexController extends AbstractActionController
 
     public function saveOptionAction()
     {
-
         if ((isset($_REQUEST['omeka_item_id'])) && $_REQUEST['omeka_item_id'] != '') {
-
             $omeka_item_id = $_REQUEST['omeka_item_id'];
             $file_field_property = $_REQUEST['file_field_property'];
             $listterms_select = $_REQUEST['listterms_select'];
@@ -341,8 +334,7 @@ class IndexController extends AbstractActionController
 
 
             foreach ($listterms_select as $term_item_name) {
-
-                if (isset($term_item_name['property']))
+                if (isset($term_item_name['property'])) {
                     foreach ($term_item_name['property'] as $val) {
                         $term = explode(':', $val);
 
@@ -357,8 +349,8 @@ class IndexController extends AbstractActionController
                                 'is_public' => '1'
                             ]
                         ];
-
                     }
+                }
             }
 
             $form->setData($data);
@@ -370,7 +362,6 @@ class IndexController extends AbstractActionController
             } else {
                 $request = $this->translate("Can't update item property"); // @translate
             }
-
         } else {
             $request = $this->translate("Can't update item property"); // @translate
         }
@@ -378,21 +369,17 @@ class IndexController extends AbstractActionController
         $this->layout()->setTemplate('bulk-import-file/index/save-option');
 
         $this->layout()->setVariable('request', $request);
-
     }
 
     public function checkFolderAction()
     {
-
         $this->getFilesMaps();
 
         $error = '';
         $files_data = [];
 
         if ((isset($_REQUEST['folder'])) && ($_REQUEST['folder'] != '')) {
-
             if (file_exists($_REQUEST['folder'])) {
-
                 $files = array_diff(scandir($_REQUEST['folder']), array('.', '..'));
 
                 $file_path = $_REQUEST['folder'] . '/';
@@ -401,7 +388,6 @@ class IndexController extends AbstractActionController
                 $total_files_can_recognized = 0;
 
                 foreach ($files as $file) {
-
                     $getId3 = new GetId3();
 
                     $file_source = $getId3
@@ -435,12 +421,9 @@ class IndexController extends AbstractActionController
                 if (count($files_data) == 0) {
                     $error = $this->translate("Folder is empty"); // @translate;
                 }
-
             } else {
                 $error = $this->translate("Folder not exist"); // @translate;
             }
-
-
         } else {
             $error = $this->translate("Can't check empty folder"); // @translate;
         }
@@ -451,7 +434,6 @@ class IndexController extends AbstractActionController
         $this->layout()->setVariable('total_files', $total_files);
         $this->layout()->setVariable('total_files_can_recognized', $total_files_can_recognized);
         $this->layout()->setVariable('error', $error);
-
     }
 
     public function actionMakeImportAction()
@@ -531,21 +513,23 @@ class IndexController extends AbstractActionController
             $filesMapsArray = $this->filesMapsArray[$mime_type];
 
             foreach ($filesMapsArray as $key => $val) {
-
                 $filesMaps = explode('/', $val);
 
                 $file_fields_source = $file_source;
 
                 foreach ($filesMaps as $fval) {
-                    if (isset($file_fields_source[$fval])) $file_fields_source = $file_fields_source[$fval];
+                    if (isset($file_fields_source[$fval])) {
+                        $file_fields_source = $file_fields_source[$fval];
+                    }
                 }
 
 
-                if (!is_array($file_fields_source))
+                if (!is_array($file_fields_source)) {
                     $recognized_data[$key] = [
                         'field' => $val,
                         'value' => $file_fields_source
                     ];
+                }
             }
 
 
@@ -610,7 +594,6 @@ class IndexController extends AbstractActionController
                 foreach ($recognized_data as $key => $val) {
                     $property_id++;
                     if ($key != 'dcterms:alternative') {
-
                         $term = explode(':', $key);
 
                         $term_item = $this->api()->search('properties', ['vocabulary_id' => 1, 'local_name' => $term[1]])->getContent();
@@ -651,10 +634,5 @@ class IndexController extends AbstractActionController
         $this->layout()->setVariable('data_for_recognize_row_id', $data_for_recognize_row_id);
 
         $this->layout()->setVariable('error', $error);
-
-
-
     }
-
-
 }

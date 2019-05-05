@@ -7,7 +7,6 @@ use Zend\Form\Form;
 
 class ImportForm extends Form
 {
-
     protected $urlHelper;
 
     public function init()
