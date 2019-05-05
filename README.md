@@ -55,15 +55,15 @@ the following xml paths (`xmp` is xml and provide all `iptc` and `exif` metadata
 
 ```
 Title [dcterms:title] = image/jpeg
-Alternative Title [dcterms:alternative] = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:Label
+Title [dcterms:title] = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:Label
 Date Created [dcterms:created] = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate
 Date Modified [dcterms:modified] = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:ModifyDate
 Format [dcterms:format] = /x:xmpmeta/rdf:RDF/rdf:Description/@tiff:Model
 Subject [dcterms:subject] = /x:xmpmeta/rdf:RDF/rdf:Description/dc:subject//rdf:li
 ```
 
-Note that the title is used as media type to import files, so the alternative
-title is used as main title.
+Note that the first title is used as media type to import files, and the second
+as title, if any.
 
 These items should be kept private, else they will be displayed in public.
 

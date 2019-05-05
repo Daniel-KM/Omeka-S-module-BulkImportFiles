@@ -100,6 +100,7 @@ $this->headScript()
                                                 $find_field = '';
                                                 ?>
 
+                                                <?php // TODO Finalize recognized data dynamically. ?>
                                                 <?php if ((isset($files_data['recognized_data'])) && ($files_data['recognized_data'] != '')) : ?>
                                                     <?php foreach ($files_data['recognized_data'] as $key => $recognized_data_val) { ?>
                                                         <?php if ($recognized_data_val['field'] == substr($val['key'], 1)) {

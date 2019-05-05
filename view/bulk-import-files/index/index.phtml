@@ -17,7 +17,7 @@ $this->headLink()->appendStylesheet($this->assetUrl('css/bulk-import-files.css',
 <?php echo $this->formCollection($form, false); ?>
 
 
-<?php if (count($this->values) == 0) : ?>
+<?php if (count($filesMaps) == 0) : ?>
     <div><?php echo $this->translate('No available maps for import'); ?>
     <a href="<?= $this->basePath() ?>/admin/bulk-import-files/map-import">Create...</a>
     </div>
@@ -29,7 +29,7 @@ $this->headLink()->appendStylesheet($this->assetUrl('css/bulk-import-files.css',
 
         <?php $title_row = ''; ?>
 
-        <?php foreach ($this->values as $item) : ?>
+        <?php foreach ($filesMaps as $item) : ?>
             <?php $property_row = ''; ?>
 
             <table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack" id="table-selected-files">
@@ -39,27 +39,28 @@ $this->headLink()->appendStylesheet($this->assetUrl('css/bulk-import-files.css',
                 </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($item as $key => $item_s) : ?>
+                <?php foreach ($item as $key => $item_s): ?>
 
-                    <?php if ($key == 'dcterms:title') {
+                    <?php if ($key == 'media_type'):
                         $title_row = '<tr>';
                         $title_row .= '<td class="file_type_property_td">';
-                        $title_row .= '<div class="file_type_property"><h4>File type: </h4>';
+                        $title_row .= '<div class="file_type_property">';
+                        $title_row .= '<h4>' . $this->translate('Media type') . '</h4>';
                         $title_row .= $item_s;
                         $title_row .= '</div>';
                         $title_row .= '</td>';
                         $title_row .= '</tr>';
-                    } else {
+                    elseif (is_array($item_s)):
                         $property_row .= '<tr>';
                         $property_row .= '<td>';
                         $property_row .= $key;
-                        $property_row .= '</td><td>';
-                        $property_row .= $item_s;
-                        $property_row .= '</td>';
-                        $property_row .= '</tr>';
-
-                    } ?>
-
+                        $property_row .= '</td><td><table><tr>';
+                        foreach ($item_s as $v):
+                            $property_row .= '<td>' . $v . '</td>' . "\n";
+                        endforeach;
+                        $property_row .= '</tr></table></td>';
+                        $property_row .= '</tr>' . "\n";
+                    endif; ?>
 
                 <?php endforeach; ?>
                 <?php echo $title_row; ?>

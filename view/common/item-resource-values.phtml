@@ -8,7 +8,7 @@ $item_property = [];
 
 foreach ($values as $term => $propertyData) {
     foreach ($propertyData['values'] as $value) {
-        $item_property[$propertyData['property']->term()] = trim($value->value());
+        $item_property[$propertyData['property']->term()][] = trim($value->value());
     }
 }
 
