@@ -54,16 +54,35 @@ For example, for the `JPG` format, the values are the one that are exposed via
 the following xml paths (`xmp` is xml and provide all `iptc` and `exif` metadata):
 
 ```
-Title [dcterms:title] = image/jpeg
-Title [dcterms:title] = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:Label
-Date Created [dcterms:created] = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate
-Date Modified [dcterms:modified] = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:ModifyDate
-Format [dcterms:format] = /x:xmpmeta/rdf:RDF/rdf:Description/@tiff:Model
-Subject [dcterms:subject] = /x:xmpmeta/rdf:RDF/rdf:Description/dc:subject//rdf:li
+dcterms:title = image/jpeg
+dcterms:title = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:Label
+dcterms:description = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:Caption
+dcterms:created = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate
+dcterms:modified = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:ModifyDate
+dcterms:format = /x:xmpmeta/rdf:RDF/rdf:Description/@tiff:Model
+dcterms:subject = /x:xmpmeta/rdf:RDF/rdf:Description/dc:subject//rdf:li
 ```
 
 Note that the first title is used as media type to import files, and the second
 as title, if any.
+
+If you prefer to use `exif` or `iptc`, here is the equivalent config:
+
+``
+dcterms:title = image/jpeg
+dcterms:title = iptc.IPTCApplication.Headline
+dcterms:description = iptc.IPTCApplication.Caption
+dcterms:created = jpg.exif.EXIF.DateTimeOriginal
+dcterms:modified = jpg.exif.EXIF.DateTimeDigitized
+dcterms:format = jpg.exif.FILE.MimeType
+dcterms:subject = iptc.IPTCApplication.Keywords/0
+dcterms:subject = iptc.IPTCApplication.Keywords/1
+dcterms:subject = iptc.IPTCApplication.Keywords/2
+dcterms:subject = iptc.IPTCApplication.Keywords/3
+dcterms:subject = iptc.IPTCApplication.Keywords/4
+```
+
+Note that metadata can be slighly different between standards.
 
 These items should be kept private, else they will be displayed in public.
 

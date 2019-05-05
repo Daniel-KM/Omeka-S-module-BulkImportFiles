@@ -18,6 +18,32 @@ class MapData extends AbstractPlugin
     protected $bulk;
 
     /**
+     * Temporary flat array.
+     *
+     * @var array
+     */
+    private $flatArray;
+
+    /**
+     * Keys to ignore for getid3.
+     *
+     * @var array
+     */
+    protected $getId3IgnoredKeys = [
+        'GETID3_VERSION',
+        'filesize',
+        'filename',
+        'filepath',
+        'filenamepath',
+        'avdataoffset',
+        'avdataend',
+        'fileformat',
+        'encoding',
+        'mime_type',
+        'md5_data'
+    ];
+
+    /**
      * @param Bulk $bulk
      */
     public function __construct(Bulk $bulk)
@@ -43,12 +69,14 @@ class MapData extends AbstractPlugin
      * [[object.to.data => [dcterms:title]]]
      * The format is normalized into [[path/object => dcterms:title]].
      *
-     * @param string $input
+     * @param string|array $input A string is managed via xpath, an array via
+     * object notation.
      * @param array $mapping The mapping adapted to the input.
+     * @param bool $simpleExtract Only extract metadata, don't map them.
      * @return array A resource array by property, suitable for api creation
      * or update.
      */
-    public function __invoke($input, array $mapping)
+    public function __invoke($input, array $mapping, $simpleExtract = false)
     {
         if (empty($input) || empty($mapping)) {
             return [];
@@ -72,14 +100,12 @@ class MapData extends AbstractPlugin
         $isTargetKey = strpos($key, ':') && strpos($key, '::') === false;
         if ($isTargetKey) {
             $mapping = $this->flipTargetToValues($mapping);
-            $keyValue = reset($mapping);
-            $key = key($keyValue);
         }
 
-        $isArray = strpos($key, '/') === false;
-        $result = $isArray
-            ? $this->arrayExtract($input, $mapping)
-            : $this->xpathExtract($input, $mapping);
+        // $isArray = strpos($key, '/') === false;
+        $result = is_array($input)
+            ? $this->arrayExtract($input, $mapping, $simpleExtract)
+            : $this->xpathExtract($input, $mapping, $simpleExtract);
         return $result->exchangeArray([]);
     }
 
@@ -88,13 +114,33 @@ class MapData extends AbstractPlugin
      *
      * @todo Move code from index controller to here.
      *
-     * @param array $data
+     * @param array $input
      * @param array $mapping
+     * @param bool $simpleExtract Only extract metadata, don't map them.
      * @return array
      */
-    protected function arrayExtract($data, array $mapping)
+    protected function arrayExtract(array $input, array $mapping, $simpleExtract = false)
     {
-        $result = [];
+        $result = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
+
+        foreach ($mapping as $map) {
+            $target = reset($map);
+            $query = key($map);
+
+            $queryMapping = explode('.', $query);
+            $input_fields = $input;
+            foreach ($queryMapping as $qm) {
+                if (isset($input_fields[$qm])) {
+                    $input_fields = $input_fields[$qm];
+                }
+            }
+
+            if (!is_array($input_fields)) {
+                $simpleExtract
+                    ? $this->simpleExtract($result, $input_fields, $target)
+                    : $this->appendValueToTarget($result, $input_fields, $target);
+            }
+        }
 
         return $result;
     }
@@ -104,9 +150,10 @@ class MapData extends AbstractPlugin
      *
      * @param string $xml
      * @param array $mapping
+     * @param bool $simpleExtract Only extract metadata, don't map them.
      * @return array
      */
-    protected function xpathExtract($xml, array $mapping)
+    protected function xpathExtract($xml, array $mapping, $simpleExtract = false)
     {
         $result = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
 
@@ -121,7 +168,7 @@ class MapData extends AbstractPlugin
         $doc->loadXML($xml);
         $xpath = new DOMXPath($doc);
 
-        // Register namespaces to allow prefixes.
+        // Register all namespaces to allow prefixes.
         $xpathN = new DOMXPath($doc);
         foreach ($xpathN->query('//namespace::*') as $node) {
             $xpath->registerNamespace($node->prefix, $node->nodeValue);
@@ -137,12 +184,21 @@ class MapData extends AbstractPlugin
 
             // The answer has many nodes.
             foreach ($nodeList as $node) {
-                $value = $node->nodeValue;
-                $this->appendValueToTarget($result, $value, $target);
+                $simpleExtract
+                    ? $this->simpleExtract($result, $node->nodeValue, $target)
+                    : $this->appendValueToTarget($result, $node->nodeValue, $target);
             }
         }
 
         return $result;
+    }
+
+    protected function simpleExtract(ArrayObject $result, $value, $target)
+    {
+        $result[] = [
+            'field' => $target,
+            'value' => $value,
+        ];
     }
 
     protected function appendValueToTarget(ArrayObject $result, $value, $target)
@@ -348,5 +404,56 @@ class MapData extends AbstractPlugin
             $result[] = [reset($value) => key($value)];
         }
         return $result;
+    }
+
+    /**
+     * Create a flat array from a recursive array.
+     *
+     * @example
+     * ```
+     * // The following recursive array:
+     * 'video' => [
+     *      'dataformat' => 'jpg',
+     *      'bits_per_sample' => 24;
+     * ]
+     * // is converted into:
+     * [
+     *     'video.dataformat' => 'jpg',
+     *     'video.bits_per_sample' => 24,
+     * ]
+     * ```
+     *
+     * @param array $data
+     * @param array $ignoredKeys
+     * @return array
+     */
+    protected function flatArray(array $data, array $ignoredKeys = [])
+    {
+        $this->flatArray = [];
+        $this->_flatArray($data, $ignoredKeys);
+        $result = $this->flatArray;
+        $this->flatArray = [];
+        return $result;
+    }
+
+    /**
+     * Recursive helper to flat an array with separator ".".
+     *
+     * @param array $data
+     * @param array $ignoredKeys
+     * @param string $keys
+     */
+    private function _flatArray(array $data, array $ignoredKeys = [], $keys = null)
+    {
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $this->_flatArray($value, $ignoredKeys, $keys . '.' . $key);
+            } elseif (!in_array($key, $ignoredKeys)) {
+                $this->flatArray[] = [
+                    'key' => trim($keys . '.' . $key, '.'),
+                    'value' => $value,
+                ];
+            }
+        }
     }
 }

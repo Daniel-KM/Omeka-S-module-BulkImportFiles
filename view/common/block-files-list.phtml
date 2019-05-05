@@ -86,9 +86,9 @@ $this->headScript()
                                             </tr>
                                         </thead>
                                         <tbody>
-                                        <?php if ((isset($files_data['exif_data'])) && ($files_data['exif_data'] != '')):
-                                            //var_dump($files_data['exif_data']);
-                                            foreach ($files_data['exif_data'] as $val):
+                                        <?php if (!empty($files_data['source_data'])):
+                                            //var_dump($files_data['source_data']);
+                                            foreach ($files_data['source_data'] as $val):
 
                                                 $additional_class = '';
                                                 $find_field = '';

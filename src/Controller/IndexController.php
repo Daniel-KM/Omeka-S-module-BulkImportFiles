@@ -28,6 +28,8 @@ class IndexController extends AbstractActionController
      */
     protected $filesMapsArray;
 
+    private $flatArray;
+
     protected $parsed_data;
 
     protected $filesData;
@@ -102,9 +104,9 @@ class IndexController extends AbstractActionController
 
         foreach ($files['files'] as $file) {
             $media_type = $file['type'];
-            $recognized_data = '';
+            $data = [];
+            $this->parsed_data = [];
             $errors = '';
-            $this->parsed_data = '';
 
             if (isset($this->filesMapsArray[$media_type])) {
                 $file['item_id'] = $this->filesMapsArray[$media_type]['item_id'];
@@ -116,7 +118,6 @@ class IndexController extends AbstractActionController
 
                     default:
                         $getId3 = new GetId3();
-
                         $file_source = $getId3
                             ->setOptionMD5Data(true)
                             ->setOptionMD5DataSource(true)
@@ -124,54 +125,47 @@ class IndexController extends AbstractActionController
                             ->analyze($file['tmp_name']);
 
                         $filesMapsArray = $this->filesMapsArray[$media_type];
+                        unset($filesMapsArray['media_type']);
+                        unset($filesMapsArray['item_id']);
 
-                        foreach ($filesMapsArray as $key => $val) {
-                            if (is_array($val)) {
-                                foreach ($val as $v) {
-                                    $filesMaps = explode('/', $v);
-
-                                    $file_fields_source = $file_source;
-                                    foreach ($filesMaps as $fval) {
-                                        if (isset($file_fields_source[$fval])) {
-                                            $file_fields_source = $file_fields_source[$fval];
-                                        }
-                                    }
-
-                                    if (!is_array($file_fields_source)) {
-                                        $recognized_data[$key][] = [
-                                            'field' => $v,
-                                            'value' => $file_fields_source,
-                                        ];
-                                    }
-                                }
-                            } else {
-                                $filesMaps = explode('/', $val);
-
-                                $file_fields_source = $file_source;
-                                foreach ($filesMaps as $fval) {
-                                    if (isset($file_fields_source[$fval])) {
-                                        $file_fields_source = $file_fields_source[$fval];
-                                    }
-                                }
-
-                                if (!is_array($file_fields_source)) {
-                                    $recognized_data[$key] = [
-                                        'field' => $val,
-                                        'value' => $file_fields_source,
-                                    ];
-                                }
-                            }
+                        $metadata = $this->extractStringFromFile($file['tmp_name'], '<x:xmpmeta', '</x:xmpmeta>');
+                        if ($metadata) {
+                            $data = $this->mapData($metadata, $filesMapsArray, true);
+                        } else {
+                            $data = $this->mapData($file_source, $filesMapsArray, true);
                         }
 
-                        $this->array_keys_recursive($file_source);
+                        $this->parsed_data = $this->flatArray($file_source, $this->ignoredKeys);
                         break;
                 }
             }
 
+            /**
+             * selected files for uploads
+             * $file array
+             *      'name' => string
+             *      'type' => string
+             *      'tmp_name' => string
+             *      'error' => int
+             *      'size' => int
+             *
+             * $source_data = $this->parsed_data
+             * all available meta data for current file with value
+             * example:
+             *      'key' => string '/video/dataformat'
+             *      'value' => string 'jpg'
+             *
+             * config saved by user for current file type
+             * $recognized_data
+             * example:
+             * 'dcterms:created' => array
+             *        'field' => string 'jpg/exif/IFD0/DateTime'
+             *        'value' => string '2014:03:12 15:03:25'
+             */
             $files_data_for_view[] = [
                 'file' => $file,
-                'exif_data' => $this->parsed_data,
-                'recognized_data' => $recognized_data,
+                'source_data' => $this->parsed_data,
+                'recognized_data' => $data,
                 'errors' => $errors,
             ];
         }
@@ -179,11 +173,7 @@ class IndexController extends AbstractActionController
         $this->layout()
             ->setTemplate('common/block-files-list')
             ->setVariable('files_data_for_view', $files_data_for_view)
-            // List omeka properties.
-            ->setVariable('listTerms', $this->listTerms())
-            // All saved file types with saved properties.
-            // key = item id; values = mapping
-            // (ex.: public 'dcterms:title' => string 'image/jpeg')
+            ->setVariable('listTerms', $this->bulk()->getPropertyTerms())
             ->setVariable('filesMaps', $this->filesMaps);
     }
 
@@ -283,7 +273,6 @@ class IndexController extends AbstractActionController
 
                 foreach ($files as $file) {
                     $getId3 = new GetId3();
-
                     $file_source = $getId3
                         ->setOptionMD5Data(true)
                         ->setOptionMD5DataSource(true)
@@ -297,7 +286,6 @@ class IndexController extends AbstractActionController
 
                     if (isset($file_source['mime_type'])) {
                         $media_type = $file_source['mime_type'];
-
                         if (isset($this->filesMapsArray[$media_type])) {
                             $file_isset_maps = 'yes';
                             ++$total_files_can_recognized;
@@ -348,10 +336,10 @@ class IndexController extends AbstractActionController
 
         if (isset($_REQUEST['data_for_recognize_single'])) {
             $full_file_path = $_REQUEST['directory'] . '/' . $_REQUEST['data_for_recognize_single'];
-
             $delete_file_action = $_REQUEST['delete-file'];
 
-            // Create new media.
+            // TODO Use api standard method, not direct creation.
+            // Create new media via temporary factory.
 
             $fileinfo = new \SplFileInfo($full_file_path);
             $tempPath = $fileinfo->getRealPath();
@@ -382,71 +370,59 @@ class IndexController extends AbstractActionController
             $url = $baseUri . '/original/' . $tempFile->getStorageId() . '.' . $tempFile->getExtension();
 
             $getId3 = new GetId3();
-
             $file_source = $getId3
                 ->setOptionMD5Data(true)
                 ->setOptionMD5DataSource(true)
                 ->setEncoding('UTF-8')
                 ->analyze($full_file_path);
 
-            $media_type = 'undefined';
-            if (isset($file_source['mime_type'])) {
-                $media_type = $file_source['mime_type'];
-            }
-
+            $media_type = isset($file_source['mime_type']) ? $file_source['mime_type'] : 'undefined';
             if (!isset($this->filesMapsArray[$media_type])) {
                 $this->layout()
                     ->setTemplate('bulk-import-files/index/process-import')
                     ->setVariable('data_for_recognize_row_id', $data_for_recognize_row_id)
-                    ->setVariable('error', $this->translate('Mime type not managed.'));
+                    ->setVariable('error', sprintf($this->translate('The media type "%s" is not managed or has no mapping.'), $media_type));
                 return;
             }
 
             $filesMapsArray = $this->filesMapsArray[$media_type];
             unset($filesMapsArray['media_type']);
+            unset($filesMapsArray['item_id']);
 
             $metadata = $this->extractStringFromFile($full_file_path, '<x:xmpmeta', '</x:xmpmeta>');
 
             if ($metadata) {
-                unset($filesMapsArray['item_id']);
                 $data = $this->mapData($metadata, $filesMapsArray);
-                $data += [
-                    'o:resource_template' => [
-                        'o:id' => '',
-                    ],
-                    'o:resource_class' => [
-                        'o:id' => '',
-                    ],
-                    'o:thumbnail' => [
-                        'o:id' => '',
-                    ],
-                    'o:media' => [
-                        '0' => [
-                            'o:is_public' => '1',
-                            'ingest_url' => $url,
-                            'o:ingester' => 'url',
-                        ],
-                    ],
-                    'o:is_public' => '1',
-                ];
-
-                if (!isset($data['dcterms:title'][0])) {
-                    $item_title = $_REQUEST['data_for_recognize_single'];
-                    $data['dcterms:title'] = [
-                        [
-                            'property_id' => 1,
-                            'type' => 'literal',
-                            '@language' => '',
-                            '@value' => $item_title,
-                            'is_public' => '1',
-                        ],
-                    ];
-                }
             } else {
-                // Try via getid3.
-                $result = $this->mapDataFromGetId3($getId3, $file_source, $url, $filesMapsArray);
-                $data = $result['data'];
-                $error = $result['error'];
+                $data = $this->mapData($file_source, $filesMapsArray);
+            }
+
+            if (count($data) <= 0) {
+                $error = $this->translate('Field can’t map'); // @translate;
+            }
+
+            // Append default metadata if needed.
+            $data += [
+                'o:resource_template' => ['o:id' => ''],
+                'o:resource_class' => ['o:id' => ''],
+                'o:thumbnail' => ['o:id' => ''],
+                'o:media' => [[
+                    'o:is_public' => '1',
+                    'ingest_url' => $url,
+                    'o:ingester' => 'url',
+                ]],
+                'o:is_public' => '1',
+            ];
+
+            if (!isset($data['dcterms:title'][0])) {
+                $item_title = $_REQUEST['data_for_recognize_single'];
+                $data['dcterms:title'] = [[
+                    'property_id' => 1,
+                    'type' => 'literal',
+                    '@language' => '',
+                    '@value' => $item_title,
+                    'is_public' => '1',
+                ]];
             }
 
             /** @var \Omeka\Form\ResourceForm $form */
@@ -461,10 +437,7 @@ class IndexController extends AbstractActionController
 
             if ($new_item) {
                 $data_for_recognize_row_id = $_REQUEST['data_for_recognize_row_id'];
-                // echo $data_for_recognize_row_id;
             }
-
-            // $new_item_id = $new_item->getContent()->id();
 
             if ($delete_file_action ===  'yes') {
                 $tempFile->delete();
@@ -477,146 +450,55 @@ class IndexController extends AbstractActionController
             ->setVariable('error', $error);
     }
 
-    protected function mapDataFromGetId3(GetID3 $getid3, $file_source, $url, array $filesMapsArray)
+    /**
+     * Create a flat array from a recursive array.
+     *
+     * @example
+     * ```
+     * // The following recursive array:
+     * 'video' => [
+     *      'dataformat' => 'jpg',
+     *      'bits_per_sample' => 24;
+     * ]
+     * // is converted into:
+     * [
+     *     'video.dataformat' => 'jpg',
+     *     'video.bits_per_sample' => 24,
+     * ]
+     * ```
+     *
+     * @param array $data
+     * @param array $ignoredKeys
+     * @return array
+     */
+    protected function flatArray(array $data, array $ignoredKeys = [])
     {
-        $api = $this->api();
-        $recognized_data = [];
-        $error = '';
-
-        foreach ($filesMapsArray as $key => $val) {
-            if (is_array($val)) {
-                foreach ($val as $v) {
-                    $filesMaps = explode('/', $v);
-
-                    $file_fields_source = $file_source;
-                    foreach ($filesMaps as $fval) {
-                        if (isset($file_fields_source[$fval])) {
-                            $file_fields_source = $file_fields_source[$fval];
-                        }
-                    }
-
-                    if (!is_array($file_fields_source)) {
-                        $recognized_data[$key][] = [
-                            'field' => $v,
-                            'value' => $file_fields_source,
-                        ];
-                    }
-                }
-            } else {
-                $filesMaps = explode('/', $val);
-
-                $file_fields_source = $file_source;
-                foreach ($filesMaps as $fval) {
-                    if (isset($file_fields_source[$fval])) {
-                        $file_fields_source = $file_fields_source[$fval];
-                    }
-                }
-
-                if (!is_array($file_fields_source)) {
-                    $recognized_data[$key] = [
-                        'field' => $val,
-                        'value' => $file_fields_source,
-                    ];
-                }
-            }
-        }
-
-        // Check for item title in "dcterms:title". If not, set item
-        // title as file name.
-        if (isset($recognized_data['dcterms:title'][0])) {
-            $item_title = $recognized_data['dcterms:title'][0]['value'];
-        } else {
-            $item_title = $_REQUEST['data_for_recognize_single'];
-        }
-
-        $data = [
-            'o:resource_template' => [
-                'o:id' => 1,
-            ],
-            'o:resource_class' => [
-                'o:id' => '',
-            ],
-            'dcterms:title' => [
-                [
-                    'property_id' => 1,
-                    'type' => 'literal',
-                    '@language' => '',
-                    '@value' => $item_title,
-                    'is_public' => '1',
-                ],
-            ],
-            'o:thumbnail' => [
-                'o:id' => '',
-            ],
-            'o:media' => [
-                '0' => [
-                    'o:is_public' => '1',
-                    'ingest_url' => $url,
-                    'o:ingester' => 'url',
-                ],
-            ],
-            'o:is_public' => '1',
-        ];
-
-        if (count($recognized_data) > 0) {
-            foreach ($recognized_data as $term => $val) {
-                if (!is_array($val)) {
-                    continue;
-                }
-                $property = $api->searchOne('properties', ['term' => $term])->getContent();
-                foreach ($val as $v) {
-                    $data[$key][] = [
-                        'property_id' => $property->id(),
-                        'type' => 'literal',
-                        '@language' => '',
-                        '@value' => (string) $v['value'],
-                        'is_public' => '1'
-                    ];
-                }
-            }
-        } else {
-            $error = $this->translate('Field can’t map'); // @translate;
-        }
-
-        return [
-            'data' => $data,
-            'error' => $error,
-        ];
-    }
-
-    protected function array_keys_recursive($data_array, $keys = null)
-    {
-        foreach ($data_array as $key => $val) {
-            if (is_array($val)) {
-                $this->array_keys_recursive($val, $keys . '/' . $key);
-            } else {
-                if (!in_array($key, $this->ignoredKeys)) {
-                    $this->parsed_data[] = [
-                        'key' => $keys . '/' . $key,
-                        'value' => $val,
-                    ];
-                }
-            }
-        }
+        $this->flatArray = [];
+        $this->_flatArray($data, $ignoredKeys);
+        $result = $this->flatArray;
+        $this->flatArray = [];
+        return $result;
     }
 
     /**
-     * Return the list of properties by names and labels from Dublin Core.
+     * Recursive helper to flat an array with separator ".".
      *
-     * @return array Associative array of term names and term labels as key
-     * (ex: "dcterms:title" and "Dublin Core : Title") in two subarrays ("names"
-     * "labels", and properties as value.
+     * @param array $data
+     * @param array $ignoredKeys
+     * @param string $keys
      */
-    protected function listTerms()
+    private function _flatArray(array $data, array $ignoredKeys = [], $keys = null)
     {
-        $result = [];
-        $vocabularies = $this->api()->search('vocabularies')->getContent();
-        foreach ($vocabularies as $vocabulary) {
-            foreach ($vocabulary->properties() as $property) {
-                $result[] = $property->term();
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $this->_flatArray($value, $ignoredKeys, $keys . '.' . $key);
+            } elseif (!in_array($key, $ignoredKeys)) {
+                $this->flatArray[] = [
+                    'key' => trim($keys . '.' . $key, '.'),
+                    'value' => $value,
+                ];
             }
         }
-        return $result;
     }
 
     /**
