@@ -77,7 +77,7 @@ as title, if any.
 
 If you prefer to use `exif` or `iptc`, here is the equivalent config:
 
-``
+```
 dcterms:title = image/jpeg
 dcterms:title = iptc.IPTCApplication.Headline
 dcterms:description = iptc.IPTCApplication.Caption
@@ -98,18 +98,25 @@ These items should be kept private, else they will be displayed in public.
 Once saved, all the specific items can be checked in the main menu `Bulk import files`
 on the main sidebar.
 
-This menu displays a second menu `Create mappings` to automatically create
-items from a config file, but it is still in development.
+*** Assistant to create or update a template
+
+An assistant is available to create or update a template via the second
+sub-menu. Simply choose a directory where the files you want to import are
+located, create your mapping and save it.
+
+The assistant works only with data extractable as an array (getid3 or pdf), not
+for xml data, that requires manual edition of xpaths.
 
 *** Upload
 
 Once the item templates are ready, you can upload files via the third sub-menu
-`Process import`. Just choose the folder, then check and add the files.
+`Process import`. Just choose the folder where are files to import, then check
+and add the files.
 
-This workflow is experimental and will probably change in the future to avoid
-the creation of specific items.
+This workflow is experimental and will change in the future to avoid the
+creation of specific items.
 
-This module will be merged with module [Bulk Import].
+This module will probably be merged with module [Bulk Import].
 
 
 Warning

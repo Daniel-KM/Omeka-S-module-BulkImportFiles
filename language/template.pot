@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-11 11:33+0100\n"
+"POT-Creation-Date: 2019-05-06 00:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,243 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: Module.php:132
-msgid "Configure modules settings for display."
+#: src/Controller/IndexController.php:233
+msgid "Item property successfully updated"
 msgstr ""
 
+#: src/Controller/IndexController.php:235
+msgid "Can’t update item property"
+msgstr ""
+
+#: src/Controller/IndexController.php:238
+msgid "Request empty."
+msgstr ""
+
+#: src/Controller/IndexController.php:291
+msgid "Folder is empty"
+msgstr ""
+
+#: src/Controller/IndexController.php:294
+msgid "Folder not exist"
+msgstr ""
+
+#: src/Controller/IndexController.php:297
+msgid "Can’t check empty folder"
+msgstr ""
+
+#: src/Controller/IndexController.php:374
+#, php-format
+msgid "The media type \"%s\" is not managed or has no mapping."
+msgstr ""
+
+#: src/Controller/IndexController.php:401
+msgid "No metadata to import. You may see log for more info."
+msgstr ""
+
+#: src/Controller/IndexController.php:403
+msgid "No metadata: mapping is empty."
+msgstr ""
+
+#: view/bulk-import-files/index/check-folder.phtml:19
+msgid "Total files"
+msgstr ""
+
+#: view/bulk-import-files/index/check-folder.phtml:20
+msgid "Importable files"
+msgstr ""
+
+#: view/bulk-import-files/index/check-folder.phtml:21
+msgid "Make recognize and add"
+msgstr ""
+
+#: view/bulk-import-files/index/check-folder.phtml:27
+#: view/common/block-files-list.phtml:37
+msgid "File name"
+msgstr ""
+
+#: view/bulk-import-files/index/check-folder.phtml:29
+#: view/bulk-import-files/index/index.phtml:45
+#: view/common/block-files-list.phtml:41
+msgid "Media type"
+msgstr ""
+
+#: view/bulk-import-files/index/check-folder.phtml:30
+msgid "Has mapping"
+msgstr ""
+
+#: view/bulk-import-files/index/index.phtml:14
+msgid "View mappings"
+msgstr ""
+
+#: view/bulk-import-files/index/index.phtml:14
+#: view/bulk-import-files/index/make-import.phtml:15
+#: view/bulk-import-files/index/map-import.phtml:18
+msgid "Bulk import files"
+msgstr ""
+
+#: view/bulk-import-files/index/index.phtml:24
+msgid "No available maps for import"
+msgstr ""
+
+#: view/bulk-import-files/index/index.phtml:25
+msgid "Create"
+msgstr ""
+
+#: view/bulk-import-files/index/index.phtml:30
+msgid "Available maps for import"
+msgstr ""
+
+#: view/bulk-import-files/index/index.phtml:56
+msgid "Map file data field (xpath or object notation)"
+msgstr ""
+
+#: view/bulk-import-files/index/make-import.phtml:15
+msgid "Make bulk import files"
+msgstr ""
+
+#: view/bulk-import-files/index/make-import.phtml:20
+msgid "Source directory"
+msgstr ""
+
+#: view/bulk-import-files/index/make-import.phtml:23
+msgid ""
+"Enter the absolute path to the directory where files to be imported will be "
+"added."
+msgstr ""
+
+#: view/bulk-import-files/index/make-import.phtml:24
+#, php-format
+msgid "The directory can be anywhere on your server. Your root path is: %s"
+msgstr ""
+
+#: view/bulk-import-files/index/make-import.phtml:31
+msgid "Check"
+msgstr ""
+
+#: view/bulk-import-files/index/make-import.phtml:35
+msgid "Delete original file from the folder?"
+msgstr ""
+
+#: view/bulk-import-files/index/make-import.phtml:39
+msgid ""
+"Do you want to delete a file from the source directory after it has been "
+"imported? If so, the directory must be server-writable."
+msgstr ""
+
+#: view/bulk-import-files/index/make-import.phtml:53
+msgid "Please wait, analysis in progress…"
+msgstr ""
+
+#: view/bulk-import-files/index/map-import.phtml:18
+msgid "Create/configure mappings"
+msgstr ""
+
+#: view/bulk-import-files/index/map-import.phtml:37
+#, php-format
+msgid "This helper works only with the formats managed by %sGetId3%s."
+msgstr ""
+
+#: view/bulk-import-files/index/map-import.phtml:38
+msgid ""
+"For xml metadata like xmp, that may be more complete and precise, you need "
+"to write the xpaths yourself."
+msgstr ""
+
+#: view/bulk-import-files/index/map-import.phtml:41
+#, php-format
+msgid ""
+"All fields should have the same format: either the object notation (%siptc."
+"IPTCApplication.Headline%s), either the xpaths (%s/x:xmpmeta/rdf:RDF/rdf:"
+"Description/@xmp:Label%s). They should not be mixed."
+msgstr ""
+
+#: view/bulk-import-files/index/map-import.phtml:44
+msgid ""
+"You may need to create an item template first, with the media type as title."
+msgstr ""
+
+#: view/bulk-import-files/index/map-import.phtml:46
+msgid "Select folder"
+msgstr ""
+
+#: view/bulk-import-files/index/map-import.phtml:47
+msgid ""
+"You can select folder with you files with any type (images, etc.) and "
+"configure it."
+msgstr ""
+
+#: view/common/block-files-list.phtml:21
+msgid "Selected files"
+msgstr ""
+
+#: view/common/block-files-list.phtml:43
+msgid "Click for edit"
+msgstr ""
+
+#: view/common/block-files-list.phtml:50
+msgid "[Type is not defined]"
+msgstr ""
+
+#: view/common/block-files-list.phtml:55 view/common/block-files-list.phtml:73
+#, php-format
+msgid "%d available fields"
+msgstr ""
+
+#: view/common/block-files-list.phtml:55 view/common/block-files-list.phtml:73
+msgid "No available fields"
+msgstr ""
+
+#: view/common/block-files-list.phtml:66 view/common/block-files-list.phtml:67
+msgid "Show all data"
+msgstr ""
+
+#: view/common/block-files-list.phtml:85 view/common/block-files-list.phtml:159
+msgid "Field"
+msgstr ""
+
+#: view/common/block-files-list.phtml:86 view/common/block-files-list.phtml:160
+msgid "Value"
+msgstr ""
+
+#: view/common/block-files-list.phtml:151
+msgid "Recognized fields"
+msgstr ""
+
+#: view/common/block-files-list.phtml:177
+msgid "No recognized fields"
+msgstr ""
+
+#: src/Form/ConfigForm.php:15
+msgid "PdfTk path"
+msgstr ""
+
+#: src/Form/ConfigForm.php:16
+msgid ""
+"Set the path if it is not automatically detected. PdfTk is the library used "
+"to extract metadata from pdf files."
+msgstr ""
+
+#: src/Controller/IndexController.php:519
+msgid ""
+"The required resource template \"Bulk import files\" has been removed or "
+"renamed."
+msgstr ""
+
+#: src/Mvc/Controller/Plugin/ExtractDataFromPdf.php:106
+#, php-format
+msgid "Command pdftk unavailable or failed: %s"
+msgstr ""
+
+#: src/Mvc/Controller/Plugin/MapData.php:259
+msgid ""
+"Index #{index}: Resource id for value \"{value}\" cannot be found: the entry "
+"is skipped."
+msgstr ""
+
+#: config/module.config.php:79
+msgid "Create mappings"
+msgstr ""
+
+#: config/module.config.php:85
+msgid "Make import"
+msgstr ""
