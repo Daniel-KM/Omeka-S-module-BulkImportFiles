@@ -97,7 +97,9 @@ class IndexController extends AbstractActionController
 
             $this->filesMaps = array();
             foreach ($items as $item) {
-                if ($item->resourceTemplate()->id() == $resourceTemplate->id()) {
+                if ($item->resourceTemplate()
+                    && $item->resourceTemplate()->id() == $resourceTemplate->id()
+                ) {
                     $options['viewName'] = 'common/item-resource-values';
 
                     $this->filesMaps[$item->id()] = json_decode($item->displayValues($options));
