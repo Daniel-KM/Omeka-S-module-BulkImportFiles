@@ -124,6 +124,7 @@ class IndexController extends AbstractActionController
                             ->analyze($file['tmp_name']);
 
                         $filesMapsArray = $this->filesMapsArray[$media_type];
+
                         foreach ($filesMapsArray as $key => $val) {
                             if (is_array($val)) {
                                 foreach ($val as $v) {
@@ -609,10 +610,11 @@ class IndexController extends AbstractActionController
     protected function listTerms()
     {
         $result = [];
-        $vocabulary = $this->api()->search('vocabularies', ['vocabulary_id' => 1])->getContent();
-        $properties = $vocabulary[0]->properties();
-        foreach ($properties as $property) {
-            $result[] = $property->term();
+        $vocabularies = $this->api()->search('vocabularies')->getContent();
+        foreach ($vocabularies as $vocabulary) {
+            foreach ($vocabulary->properties() as $property) {
+                $result[] = $property->term();
+            }
         }
         return $result;
     }
