@@ -1,6 +1,5 @@
 $(document).ready(function () {
 
-
     // available_maps = $.parseJSON($('.bulkimportfiles_maps_settings').val());
     //
     // console.log(available_maps);
@@ -19,14 +18,13 @@ $(document).ready(function () {
     //
     // $('.modulePreContent.module_BulkImportFiles').append(available_maps_html);
 
-
     $('#flup').change(function (event) {
 
         event.preventDefault();
 
         var files = event.target.files;
         var path = files[0].webkitRelativePath;
-        var Folder = path.split("/");
+        var Folder = path.split('/');
 
         // console.log(files);
         // console.log(path);
@@ -44,7 +42,7 @@ $(document).ready(function () {
         var form_data = new FormData();
         var ins = document.getElementById('multiFiles').files.length;
         for (var x = 0; x < ins; x++) {
-            form_data.append("files[]", document.getElementById('multiFiles').files[x]);
+            form_data.append('files[]', document.getElementById('multiFiles').files[x]);
         }
 
         // console.log(form_data);
@@ -69,7 +67,7 @@ $(document).ready(function () {
 
         // console.log(importform);
 
-        //var filedata = document.getElementsByName("file");
+        //var filedata = document.getElementsByName('file');
 
         // len = files.length;
         // var i = 0;
@@ -98,7 +96,7 @@ $(document).ready(function () {
         //         return myXhr;
         //     },
         //     success: function (data) {
-        //         //alert("Data Uploaded: "+data);
+        //         //alert('Data Uploaded: ' + data);
         //     },
         //     data: formData,
         //     cache: false,
@@ -130,9 +128,7 @@ $(document).ready(function () {
         //     console.log(err);
         // });
 
-
     })
-
 
     $('#multiFiles').change(function (event) {
         // console.log('change');
@@ -140,14 +136,13 @@ $(document).ready(function () {
         $('#upload').click();
     });
 
-
     $('#upload').on('click', function () {
         url = basePath + '/admin/bulk-import-files/get-files';
 
         var form_data = new FormData();
         var ins = document.getElementById('multiFiles').files.length;
         for (var x = 0; x < ins; x++) {
-            form_data.append("files[]", document.getElementById('multiFiles').files[x]);
+            form_data.append('files[]', document.getElementById('multiFiles').files[x]);
         }
         $.ajax({
             url: url,
@@ -181,7 +176,6 @@ $(document).ready(function () {
 
         $('.omeka_property .js-add-action').on('click', function () {
 
-
             var row_td = $(this).parent().parent().parent();
             row_td.find('.omeka_list_property').append(listterms);
 
@@ -206,9 +200,7 @@ $(document).ready(function () {
                 listterms_with_action_row = $(this).parent().parent().parent();
 
                 count = parseInt(listterms_with_action_row.parent().parent().attr('attr-property-count'));
-
-                count--;
-
+                --count;
                 listterms_with_action_row.parent().parent().attr('attr-property-count', count);
 
                 if (count == 0) {
@@ -217,7 +209,6 @@ $(document).ready(function () {
                 }
 
                 $(this).parent().parent().remove();
-
 
             });
 
@@ -259,7 +250,6 @@ $(document).ready(function () {
 
         });
 
-
         /**
          * Add existed fields
          */
@@ -286,7 +276,6 @@ $(document).ready(function () {
          * Check double omeka property fields
          */
 
-
         check_same_property = '';
 
         $('.response').removeClass('error');
@@ -301,7 +290,7 @@ $(document).ready(function () {
 
                 if (check_same_property == 0) {
                     $('.response').addClass('error');
-                    $('.response').html("Omeka property can't be same !");
+                    $('.response').html('Omeka property can’t be same!');
                     return false;
                 } else {
                     property_for_check.push(pr_val);
@@ -313,19 +302,17 @@ $(document).ready(function () {
             }
         });
 
-
         if (check_same_property == 0) {
-            $("html, body").animate({scrollTop: 0}, "slow");
+            $('html, body').animate({scrollTop: 0}, 'slow');
             return false;
         }
 
         url = basePath + '/admin/bulk-import-files/save-option';
 
-
         var form_data = {
-            "omeka_item_id": omeka_item_id,
-            "file_field_property": file_field_property,
-            "listterms_select": listterms_select_total
+            'omeka_item_id': omeka_item_id,
+            'file_field_property': file_field_property,
+            'listterms_select': listterms_select_total,
         }
 
         $.ajax({
@@ -335,13 +322,12 @@ $(document).ready(function () {
             success: function (response) {
                 $('.response').addClass('success');
                 $('.response').html(response);
-                $("html, body").animate({scrollTop: 0}, "slow");
+                $('html, body').animate({scrollTop: 0}, 'slow');
             },
             error: function (response) {
                 $('.response').html(response);
             }
         });
-
 
     }
 
@@ -378,17 +364,12 @@ $(document).ready(function () {
     });
 
     make_action = false;
-
     data_for_recognize  = {};
-
     create_action = '';
-
     file_position_upload = 0;
-
     total_files_for_upload = 0;
 
     function make_single_file_upload(file_position_upload) {
-
 
         // console.log(make_action);
         //
@@ -409,7 +390,6 @@ $(document).ready(function () {
         } else {
 
             if (make_action == true) {
-
 
                 data_for_recognize_single = {
                     'data_for_recognize_single' : data_for_recognize['filenames'][file_position_upload],
@@ -469,10 +449,6 @@ $(document).ready(function () {
 
         }
 
-
-
-
-
     }
 
     function action_for_recognize_files() {
@@ -480,7 +456,6 @@ $(document).ready(function () {
 
             filenames = [];
             row_id = [];
-
 
             $('.response').find('.total_info').remove();
 
@@ -498,11 +473,8 @@ $(document).ready(function () {
             // console.log(data_for_recognize);
 
             total_files_for_upload = data_for_recognize['filenames'].length;
-
             make_action = true;
-
             create_action = setTimeout(make_single_file_upload(file_position_upload), 1000);
-
 
         });
 
