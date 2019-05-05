@@ -4,8 +4,6 @@
  * @var \BulkImportFiles\Form\ImportForm $form
  */
 
-$form->prepare();
-
 $translate = $this->plugin('translate');
 $escapeHtml = $this->plugin('escapeHtml');
 $this->headLink()->appendStylesheet($this->assetUrl('css/bulk-import-files.css', 'BulkImportFiles'));
@@ -14,6 +12,7 @@ $this->headScript()
     ->appendScript($script)
     ->appendFile($this->assetUrl('js/bulk-import-files.js', 'BulkImportFiles'));
 
+$form->prepare();
 ?>
 
 <?php echo $this->pageTitle($translate('Create/configure mappings'), 1, $translate('Bulk import files')); ?>
@@ -34,8 +33,18 @@ $this->headScript()
 
 <div class="files-map-block">
     <div class="property">
-        <h4><?= $translate('Select folder'); ?></h4>
-        <div><?= $translate('You can select folder with you files, with any type and configure it.'); ?></div>
+        <p>
+            <?= sprintf($translate('This helper works only with the formats managed by %sGetId3%s.'), '<a href="https://getid3.org" target="_blank">', '</a>') ?>
+            <?= $translate('For xml metadata like xmp, that may be more complete and precise, you need to write the xpaths yourself.') ?>
+        </p>
+        <p>
+            <?= sprintf($translate('All fields should have the same format: either the object notation (%siptc.IPTCApplication.Headline%s), either the xpaths (%s/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:Label%s). They should not be mixed.'), '<code>', '</code>', '<code>', '</code>') ?>
+        </p>
+        <p>
+            <?= $translate('You may need to create an item template first, with the media type as title.') ?>
+        </p>
+        <h4><?= $translate('Select folder') ?></h4>
+        <div><?= $translate('You can select folder with you files with any type (images, etc.) and configure it.') ?></div>
         <input type="file" id="multiFiles" name="files[]" multiple="multiple" webkitdirectory mozdirectory msdirectory odirectory directory />
         <button id="upload"><?= $translate('Upload') ?></button>
     </div>

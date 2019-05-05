@@ -22,6 +22,11 @@ class IndexController extends AbstractActionController
     protected $filesMaps;
 
     /**
+     * @var string
+     */
+    protected $resourceTemplateLabel = 'Bulk import files';
+
+    /**
      * Mapping by media type like 'dcterms:created' => ['jpg/exif/IFD0/DateTime'].
      *
      * @var array
@@ -128,12 +133,8 @@ class IndexController extends AbstractActionController
                         unset($filesMapsArray['media_type']);
                         unset($filesMapsArray['item_id']);
 
-                        $metadata = $this->extractStringFromFile($file['tmp_name'], '<x:xmpmeta', '</x:xmpmeta>');
-                        if ($metadata) {
-                            $data = $this->mapData($metadata, $filesMapsArray, true);
-                        } else {
-                            $data = $this->mapData($file_source, $filesMapsArray, true);
-                        }
+                        // Only getId3 is managed (array).
+                        $data = $this->mapData($file_source, $filesMapsArray, true);
 
                         $this->parsed_data = $this->flatArray($file_source, $this->ignoredKeys);
                         break;
@@ -179,67 +180,55 @@ class IndexController extends AbstractActionController
 
     public function saveOptionsAction()
     {
-        if ((isset($_REQUEST['omeka_item_id'])) && $_REQUEST['omeka_item_id'] != '') {
-            $omeka_item_id = $_REQUEST['omeka_item_id'];
-            $file_field_property = $_REQUEST['file_field_property'];
-            $listterms_select = $_REQUEST['listterms_select'];
+        $params = $this->params()->fromPost();
 
-            $form = $this->getForm(ResourceForm::class)
-                ->setAttribute('action', $this->url()->fromRoute(null, [], true))
-                ->setAttribute('enctype', 'multipart/form-data')
-                ->setAttribute('id', 'edit-item');
+        if (!empty($params['omeka_item_id'])) {
+            $omeka_item_id = $params['omeka_item_id'];
+            $media_type = $params['media_type'];
+            // $file_field_property = $params['file_field_property'];
+            $listterms_select = $params['listterms_select'];
 
-            $items = $this->api()->read('items', ['id' => $omeka_item_id])->getContent();
-            $values = $items->valueRepresentation();
+            /** @var \Omeka\Api\Representation\ItemRepresentation $item */
+            $item = $this->api()->read('items', ['id' => $omeka_item_id])->getContent();
 
             $resourceTemplate = $this->api()
-                ->read('resource_templates', ['label' => 'Bulk import files'])
+                ->read('resource_templates', ['label' => $this->resourceTemplateLabel])
                 ->getContent();
 
             $data = [
-                'o:resource_template' => [
-                    'o:id' => $resourceTemplate->id()
-                ],
-                'o:resource_class' => [
-                    'o:id' => ''
-                ],
-                'dcterms:title' => [
-                    '0' => [
-                        'property_id' => '1',
-                        'type' => 'literal',
-                        '@language' => '',
-                        '@value' => $values['display_title'],
-                        'is_public' => '1'
-                    ]
-                ],
-                'o:thumbnail' => [
-                    'o:id' => ''
-                ],
-                'o:is_public' => '1'
+                'o:resource_template' => ['o:id' => $resourceTemplate->id()],
+                'o:resource_class' => ['o:id' => ''],
+                'dcterms:title' => [[
+                    'property_id' => '1',
+                    'type' => 'literal',
+                    '@language' => '',
+                    '@value' => $media_type,
+                    'is_public' => '1',
+                ]],
+                'o:thumbnail' => ['o:id' => ''],
+                'o:is_public' => '0',
             ];
 
+            $bulk = $this->bulk();
             foreach ($listterms_select as $term_item_name) {
                 if (isset($term_item_name['property'])) {
-                    foreach ($term_item_name['property'] as $val) {
-                        $term = explode(':', $val);
-
-                        $term_item = $this->api()->search('properties', ['vocabulary_id' => 1, 'local_name' => $term[1]])->getContent();
-
-                        $data [$val] = [
-                            '0' => [
-                                'property_id' => $term_item[0]->id(),
-                                'type' => 'literal',
-                                '@language' => '',
-                                '@value' => $term_item_name['field'],
-                                'is_public' => '1'
-                            ]
+                    foreach ($term_item_name['property'] as $term) {
+                        $data[$term][] =[
+                            'property_id' => $bulk->getPropertyId($term),
+                            'type' => 'literal',
+                            '@language' => '',
+                            '@value' => $term_item_name['field'],
+                            'is_public' => '1',
                         ];
                     }
                 }
             }
 
+            $form = $this->getForm(ResourceForm::class)
+                ->setAttribute('action', $this->url()->fromRoute(null, [], true))
+                ->setAttribute('enctype', 'multipart/form-data')
+                ->setAttribute('id', 'edit-item');
             $form->setData($data);
-
             $response = $this->api($form)->update('items', $omeka_item_id, $data);
 
             if ($response) {
@@ -248,7 +237,7 @@ class IndexController extends AbstractActionController
                 $request = $this->translate('Can’t update item property'); // @translate
             }
         } else {
-            $request = $this->translate('Can’t update item property'); // @translate
+            $request = $this->translate('Request empty.'); // @translate
         }
 
         $this->layout()
@@ -265,12 +254,12 @@ class IndexController extends AbstractActionController
         $total_files_can_recognized = 0;
         $error = '';
 
-        if ((isset($_REQUEST['folder'])) && ($_REQUEST['folder'] != '')) {
-            if (file_exists($_REQUEST['folder'])) {
-                $files = array_diff(scandir($_REQUEST['folder']), ['.', '..']);
+        $params = $this->params()->fromPost();
 
-                $file_path = $_REQUEST['folder'] . '/';
-
+        if (!empty($params['folder'])) {
+            if (file_exists($params['folder']) && is_dir($params['folder'])) {
+                $files = array_diff(scandir($params['folder']), ['.', '..']);
+                $file_path = $params['folder'] . '/';
                 foreach ($files as $file) {
                     $getId3 = new GetId3();
                     $file_source = $getId3
@@ -334,9 +323,10 @@ class IndexController extends AbstractActionController
             $baseUri = $serverUrlHelper($basePathHelper('files'));
         }
 
-        if (isset($_REQUEST['data_for_recognize_single'])) {
-            $full_file_path = $_REQUEST['directory'] . '/' . $_REQUEST['data_for_recognize_single'];
-            $delete_file_action = $_REQUEST['delete-file'];
+        $params = $this->params()->fromPost();
+        if (isset($params['data_for_recognize_single'])) {
+            $full_file_path = $params['directory'] . '/' . $params['data_for_recognize_single'];
+            $delete_file_action = $params['delete-file'];
 
             // TODO Use api standard method, not direct creation.
             // Create new media via temporary factory.
@@ -415,7 +405,7 @@ class IndexController extends AbstractActionController
             ];
 
             if (!isset($data['dcterms:title'][0])) {
-                $item_title = $_REQUEST['data_for_recognize_single'];
+                $item_title = $params['data_for_recognize_single'];
                 $data['dcterms:title'] = [[
                     'property_id' => 1,
                     'type' => 'literal',
@@ -436,7 +426,7 @@ class IndexController extends AbstractActionController
             $new_item = $this->api($form)->create('items', $data);
 
             if ($new_item) {
-                $data_for_recognize_row_id = $_REQUEST['data_for_recognize_row_id'];
+                $data_for_recognize_row_id = $params['data_for_recognize_row_id'];
             }
 
             if ($delete_file_action ===  'yes') {
@@ -514,7 +504,7 @@ class IndexController extends AbstractActionController
 
         try {
             $resourceTemplate = $this->api()
-                ->read('resource_templates', ['label' => 'Bulk import files'])
+                ->read('resource_templates', ['label' => $this->resourceTemplateLabel])
                 ->getContent();
         } catch (\Exception $e) {
             $this->messenger()->addError('The required resource template "Bulk import files" has been removed or renamed.'); // @translate

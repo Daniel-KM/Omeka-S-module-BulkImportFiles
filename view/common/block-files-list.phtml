@@ -44,6 +44,7 @@ $this->headScript()
                             <?php echo $files_data['file']['type']; ?>
                         </a>
                         <input type="hidden" value="<?= $files_data['file']['item_id']; ?>" class="omeka_item_id">
+                        <input type="hidden" value="<?= $files_data['file']['type']; ?>" class="media_type">
                     <?php else: ?>
                         <?php echo $files_data['file']['type']; ?>
                         <span class="errors"><?= $translate('[Type is not defined]') ?></span>
@@ -89,17 +90,15 @@ $this->headScript()
                                         <?php if (!empty($files_data['source_data'])):
                                             //var_dump($files_data['source_data']);
                                             foreach ($files_data['source_data'] as $val):
-
                                                 $additional_class = '';
                                                 $find_field = '';
 
-                                                // TODO Finalize recognized data dynamically.
-                                                if ((isset($files_data['recognized_data'])) && ($files_data['recognized_data'] != '')):
-                                                    foreach ($files_data['recognized_data'] as $key => $recognized_data_val):
-                                                        if ($recognized_data_val['field'] == substr($val['key'], 1)):
+                                                if (!empty($files_data['recognized_data'])):
+                                                    foreach ($files_data['recognized_data'] as $recognized_data_val):
+                                                        if ($recognized_data_val['field'] == $val['key']):
                                                             $additional_class = 'with_property';
                                                             $find_field .= '<div class="omeka_property">';
-                                                            $find_field .= '<span class="omeka_property_name">' . $key . '</span>';
+                                                            $find_field .= '<span class="omeka_property_name">' . $recognized_data_val['target'] . '</span>';
                                                             $find_field .= '<div class="js-action-property-button">';
                                                             // $find_field .= '<span class="js-add-action">+</span>';
                                                             $find_field .= '<span class="js-remove-action">-</span>';
@@ -128,10 +127,8 @@ $this->headScript()
 
                                                 <tr data-property-count="0" class="<?= $additional_class; ?>">
                                                     <td><?= $find_field; ?></td>
-                                                    <td class="js-file_field_property"><?= substr($val['key'], 1); ?></td>
-                                                    <td>
-                                                        <?= $val['value'] ?>
-                                                    </td>
+                                                    <td class="js-file_field_property"><?= $val['key'] ?></td>
+                                                    <td><?= $val['value'] ?></td>
                                                 </tr>
 
                                             <?php endforeach; ?>
@@ -164,9 +161,9 @@ $this->headScript()
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($files_data['recognized_data'] as $key => $val): ?>
+                                <?php foreach ($files_data['recognized_data'] as $val): ?>
                                     <tr>
-                                        <td><?= $key ?></td>
+                                        <td><?= $val['target'] ?></td>
                                         <td><?= $val['field'] ?></td>
                                         <td><?= $val['value'] ?></td>
                                     </tr>

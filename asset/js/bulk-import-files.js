@@ -226,6 +226,7 @@ $(document).ready(function () {
     function save_action(row) {
 
         omeka_item_id = row.parents('.selected-files-row').find('.omeka_item_id').val();
+        media_type = row.parents('.selected-files-row').find('.media_type').val();
 
         listterms_select_total = [];
 
@@ -251,7 +252,7 @@ $(document).ready(function () {
         });
 
         /**
-         * Add existed fields
+         * Add existing fields.
          */
 
         row.parents('tr.selected-files-row').find('.with_property').each(function () {
@@ -273,7 +274,7 @@ $(document).ready(function () {
         });
 
         /**
-         * Check double omeka property fields
+         * Check double omeka property fields.
          */
 
         check_same_property = '';
@@ -307,10 +308,11 @@ $(document).ready(function () {
             return false;
         }
 
-        url = basePath + '/admin/bulk-import-files/save-option';
+        url = basePath + '/admin/bulk-import-files/save-options';
 
         var form_data = {
             'omeka_item_id': omeka_item_id,
+            'media_type': media_type,
             'file_field_property': file_field_property,
             'listterms_select': listterms_select_total,
         }

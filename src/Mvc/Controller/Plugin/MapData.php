@@ -137,7 +137,7 @@ class MapData extends AbstractPlugin
 
             if (!is_array($input_fields)) {
                 $simpleExtract
-                    ? $this->simpleExtract($result, $input_fields, $target)
+                    ? $this->simpleExtract($result, $input_fields, $target, $query)
                     : $this->appendValueToTarget($result, $input_fields, $target);
             }
         }
@@ -185,7 +185,7 @@ class MapData extends AbstractPlugin
             // The answer has many nodes.
             foreach ($nodeList as $node) {
                 $simpleExtract
-                    ? $this->simpleExtract($result, $node->nodeValue, $target)
+                    ? $this->simpleExtract($result, $node->nodeValue, $target, $query)
                     : $this->appendValueToTarget($result, $node->nodeValue, $target);
             }
         }
@@ -193,10 +193,11 @@ class MapData extends AbstractPlugin
         return $result;
     }
 
-    protected function simpleExtract(ArrayObject $result, $value, $target)
+    protected function simpleExtract(ArrayObject $result, $value, $target, $source)
     {
         $result[] = [
-            'field' => $target,
+            'field' => $source,
+            'target' => $target,
             'value' => $value,
         ];
     }
