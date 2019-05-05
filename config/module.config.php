@@ -151,7 +151,7 @@ return [
     ],
     'bulkimportfiles' => [
         'config' => [
-            'bulkimportfiles_maps_settings' => [
+            'bulkimportfiles_mappings' => [
                 'image/jpeg' => 'data/mapping/map_jpeg.csv',
                 'pdf' => 'data/mapping/map_pdf.csv',
                 'mp3' => 'data/mapping/map_mp3.csv'

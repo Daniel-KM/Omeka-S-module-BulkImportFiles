@@ -12,10 +12,10 @@ class SettingsForm extends Form
     {
         $this->add([
             'type' => Element\Hidden::class,
-            'name' => 'bulkimportfiles_maps_settings',
+            'name' => 'bulkimportfiles_mappings',
             'attributes' => [
                 'value' => '',
-                'class' => 'bulkimportfiles_maps_settings',
+                'class' => 'bulkimportfiles_mappings',
             ]
         ]);
     }
