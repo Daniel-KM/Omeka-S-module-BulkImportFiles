@@ -29,7 +29,7 @@ return [
         'routes' => [
             'admin' => [
                 'child_routes' => [
-                    'bulkimportfiles' => [
+                    'bulk-import-files' => [
                         'type' => \Zend\Router\Http\Literal::class,
                         'options' => [
                             'route' => '/bulk-import-files',
@@ -41,69 +41,17 @@ return [
                         ],
                         'may_terminate' => true,
                         'child_routes' => [
-                            'mapimport' => [
-                                'type' => \Zend\Router\Http\Literal::class,
+                            'default' => [
+                                'type' => \Zend\Router\Http\Segment::class,
                                 'options' => [
-                                    'route' => '/map-import',
-                                    'defaults' => [
-                                        '__NAMESPACE__' => 'BulkImportFiles\Controller',
-                                        'controller' => 'Index',
-                                        'action' => 'map-import',
+                                    'route' => '/:action',
+                                    'constraints' => [
+                                        'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
                                     ],
-                                ],
-                            ],
-                            'get_files' => [
-                                'type' => \Zend\Router\Http\Literal::class,
-                                'options' => [
-                                    'route' => '/get-files',
                                     'defaults' => [
                                         '__NAMESPACE__' => 'BulkImportFiles\Controller',
                                         'controller' => 'Index',
-                                        'action' => 'get-files',
-                                    ],
-                                ],
-                            ],
-                            'save_options' => [
-                                'type' => \Zend\Router\Http\Literal::class,
-                                'options' => [
-                                    'route' => '/save-options',
-                                    'defaults' => [
-                                        '__NAMESPACE__' => 'BulkImportFiles\Controller',
-                                        'controller' => 'Index',
-                                        'action' => 'save-options',
-                                    ],
-                                ],
-                            ],
-                            'makeimport' => [
-                                'type' => \Zend\Router\Http\Literal::class,
-                                'options' => [
-                                    'route' => '/make-import',
-                                    'defaults' => [
-                                        '__NAMESPACE__' => 'BulkImportFiles\Controller',
-                                        'controller' => 'Index',
-                                        'action' => 'make-import',
-                                    ],
-                                ],
-                            ],
-                            'checkfolder' => [
-                                'type' => \Zend\Router\Http\Literal::class,
-                                'options' => [
-                                    'route' => '/check-folder',
-                                    'defaults' => [
-                                        '__NAMESPACE__' => 'BulkImportFiles\Controller',
-                                        'controller' => 'Index',
-                                        'action' => 'check-folder',
-                                    ],
-                                ],
-                            ],
-                            'processimport' => [
-                                'type' => \Zend\Router\Http\Literal::class,
-                                'options' => [
-                                    'route' => '/process-import',
-                                    'defaults' => [
-                                        '__NAMESPACE__' => 'BulkImportFiles\Controller',
-                                        'controller' => 'Index',
-                                        'action' => 'process-import',
+                                        'action' => 'index',
                                     ],
                                 ],
                             ],
@@ -117,22 +65,24 @@ return [
         'AdminModule' => [
             [
                 'label' => 'Bulk import files', // @translate
-                'route' => 'admin/bulkimportfiles',
+                'route' => 'admin/bulk-import-files',
                 'resource' => 'BulkImportFiles\Controller\Index',
                 'pages' => [
                     [
                         'label' => 'View mappings', // @translate
-                        'route' => 'admin/bulkimportfiles',
+                        'route' => 'admin/bulk-import-files',
                         'resource' => 'BulkImportFiles\Controller\Index',
                     ],
                     [
                         'label' => 'Create mappings', // @translate
-                        'route' => 'admin/bulkimportfiles/mapimport',
+                        'route' => 'admin/bulk-import-files/default',
+                        'action' => 'map-import',
                         'resource' => 'BulkImportFiles\Controller\Index',
                     ],
                     [
-                        'label' => 'Process import', // @translate
-                        'route' => 'admin/bulkimportfiles/makeimport',
+                        'label' => 'Make import', // @translate
+                        'route' => 'admin/bulk-import-files/default',
+                        'action' => 'make-import',
                         'resource' => 'BulkImportFiles\Controller\Index',
                     ]
                 ],

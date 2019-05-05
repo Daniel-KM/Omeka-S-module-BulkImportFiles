@@ -77,11 +77,11 @@ class IndexController extends AbstractActionController
         return $view;
     }
 
-    public function makeimportAction()
+    public function makeImportAction()
     {
     }
 
-    public function mapimportAction()
+    public function mapImportAction()
     {
         $form = $this->getForm(ImportForm::class);
 

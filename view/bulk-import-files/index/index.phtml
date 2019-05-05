@@ -22,7 +22,7 @@ $form->prepare();
 <?php if (count($filesMaps) == 0) : ?>
 
     <div><?= $translate('No available maps for import'); ?></div>
-    <div><?= $this->hyperlink($translate('Create'), $this->url('admin/bulkimportfiles/mapimport')) ?></div>
+    <div><?= $this->hyperlink($translate('Create'), $this->url('admin/bulk-import-files/default', ['action' => 'map-import'])) ?></div>
 
 <?php else : ?>
 
