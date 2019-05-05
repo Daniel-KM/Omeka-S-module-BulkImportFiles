@@ -1,8 +1,11 @@
 <?php
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ */
 
 $form->prepare();
 $escapeHtml = $this->plugin('escapeHtml');
-$this->headLink()->appendStylesheet($this->assetUrl('css/bulkimportfile.css', 'BulkImportFile'));
+$this->headLink()->appendStylesheet($this->assetUrl('css/bulk-import-files.css', 'BulkImportFiles'));
 ?>
 
 <?php echo $this->pageTitle($this->translate('View Module Maps Settings'), 1, $this->translate('Bulk import files')); ?>
@@ -16,7 +19,7 @@ $this->headLink()->appendStylesheet($this->assetUrl('css/bulkimportfile.css', 'B
 
 <?php if (count($this->values) == 0) : ?>
     <div><?php echo $this->translate('No available maps for import'); ?>
-    <a href="<?= $this->basePath() ?>/admin/bulkimportfile/mapimport">Create...</a>
+    <a href="<?= $this->basePath() ?>/admin/bulk-import-files/map-import">Create...</a>
     </div>
 
 <?php else : ?>

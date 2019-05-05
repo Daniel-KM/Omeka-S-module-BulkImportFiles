@@ -1,12 +1,12 @@
 $(document).ready(function () {
 
 
-    // available_maps = $.parseJSON($('.bulkimportfile_maps_settings').val());
+    // available_maps = $.parseJSON($('.bulkimportfiles_maps_settings').val());
     //
     // console.log(available_maps);
     //
     //
-    // available_maps_html = '<div class="title">BulkImportFile current maps:';
+    // available_maps_html = '<div class="title">Bulk import files current maps:';
     // available_maps_html += '</div>';
     // available_maps_html += '<div>';
     //
@@ -17,7 +17,7 @@ $(document).ready(function () {
     // available_maps_html += '</div>';
     //
     //
-    // $('.modulePreContent.module_BulkImportFile').append(available_maps_html);
+    // $('.modulePreContent.module_BulkImportFiles').append(available_maps_html);
 
 
     $('#flup').change(function (event) {
@@ -39,7 +39,7 @@ $(document).ready(function () {
 
         //var formData = new FormData($(this).parents('form')[0]);
 
-        url = basePath + '/admin/bulkimportfile/getfiles';
+        url = basePath + '/admin/bulk-import-files/get-files';
 
         var form_data = new FormData();
         var ins = document.getElementById('multiFiles').files.length;
@@ -88,7 +88,7 @@ $(document).ready(function () {
 
         // console.log(formData);
 
-        // url = basePath + '/admin/bulkimportfile/getfiles';
+        // url = basePath + '/admin/bulk-import-files/get-files';
         //
         // $.ajax({
         //     url: url,
@@ -142,7 +142,7 @@ $(document).ready(function () {
 
 
     $('#upload').on('click', function () {
-        url = basePath + '/admin/bulkimportfile/getfiles';
+        url = basePath + '/admin/bulk-import-files/get-files';
 
         var form_data = new FormData();
         var ins = document.getElementById('multiFiles').files.length;
@@ -319,7 +319,7 @@ $(document).ready(function () {
             return false;
         }
 
-        url = basePath + '/admin/bulkimportfile/saveoption';
+        url = basePath + '/admin/bulk-import-files/save-option';
 
 
         var form_data = {
@@ -351,7 +351,7 @@ $(document).ready(function () {
 
         directory = {'folder' : $('.make_import_form #directory').val()};
 
-        url = basePath + '/admin/bulkimportfile/checkfolder';
+        url = basePath + '/admin/bulk-import-files/check-folder';
 
         $.ajax({
             url: url,
@@ -396,7 +396,7 @@ $(document).ready(function () {
         //
         // console.log(data_for_recognize['filenames'][file_position_upload]);
 
-        url = basePath + '/admin/bulkimportfile/actionmakeimport';
+        url = basePath + '/admin/bulk-import-files/process-import';
 
         directory = $('.make_import_form #directory').val();
 

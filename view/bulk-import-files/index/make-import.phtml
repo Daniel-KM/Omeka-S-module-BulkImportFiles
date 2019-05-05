@@ -4,11 +4,11 @@
  */
 
 $escapeHtml = $this->plugin('escapeHtml');
-$this->headLink()->appendStylesheet($this->assetUrl('css/bulkimportfile.css', 'BulkImportFile'));
+$this->headLink()->appendStylesheet($this->assetUrl('css/bulk-import-files.css', 'BulkImportFiles'));
 $script = 'var basePath = ' . json_encode($this->basePath(), 320);
 $this->headScript()
     ->appendScript($script)
-    ->appendFile($this->assetUrl('js/bulkimportfile.js', 'BulkImportFile'));
+    ->appendFile($this->assetUrl('js/bulk-import-files.js', 'BulkImportFiles'));
 ?>
 
 <?php echo $this->pageTitle($this->translate('Make Bulk Import Files'), 1, $this->translate('Bulk import files')); ?>
@@ -18,7 +18,7 @@ $this->headScript()
         <div class="field-meta">
             <label for="directory">Bulk Import Files directory</label> <a href="#" class="expand" aria-label="Expand" title="Expand"></a>
             <div class="collapsible">
-                <div class="field-description">Enter the absolute path to the directory where files to be bulkimportfile
+                <div class="field-description">Enter the absolute path to the directory where files to be imported
                     will be added. The directory can be anywhere on your server. You root path is: <?php echo $_SERVER["DOCUMENT_ROOT"]; ?>
                 </div>
             </div>
@@ -32,7 +32,7 @@ $this->headScript()
         <div class="field-meta">
             <label for="delete-file">Delete original file from the folder?</label> <a href="#" class="expand" aria-label=" Expand"></a>
             <div class="collapsible">
-                <div class="field-description">Do you want to delete a file from the bulkimportfile directory after it has
+                <div class="field-description">Do you want to delete a file from the source directory after it has
                     been imported? If so, the directory must be server-writable.
                 </div>
             </div>

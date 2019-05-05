@@ -4,11 +4,11 @@
  */
 
 $escapeHtml = $this->plugin('escapeHtml');
-$this->headLink()->appendStylesheet($this->assetUrl('css/bulkimportfile.css', 'BulkImportFile'));
+$this->headLink()->appendStylesheet($this->assetUrl('css/bulk-import-files.css', 'BulkImportFiles'));
 $script = 'var basePath = ' . json_encode($this->basePath(), 320);
 $this->headScript()
     ->appendScript($script)
-    ->appendFile($this->assetUrl('js/bulkimportfile.js', 'BulkImportFile'));
+    ->appendFile($this->assetUrl('js/bulk-import-files.js', 'BulkImportFiles'));
 ?>
 <div class="messages">
     <div class="response"></div>

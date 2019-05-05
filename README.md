@@ -1,9 +1,9 @@
-Bulk Import File (module for Omeka S)
-=====================================
+Bulk Import Files (module for Omeka S)
+======================================
 
-[Bulk Import File] is a module for [Omeka S] that allows to import files in bulk
-with their internal metadata (for example exif, iptc and xmp for images, audio
-and video, or pdf properties, etc.).
+[Bulk Import Files] is a module for [Omeka S] that allows to import files in
+bulk with their internal metadata (for example exif, iptc and xmp for images,
+audio and video, or pdf properties, etc.).
 
 
 Installation
@@ -16,14 +16,14 @@ See general end user documentation for [installing a module].
 
 * From the zip
 
-Download the last release [`BulkImportFile.zip`] from the list of releases (the
+Download the last release [`BulkImportFiles.zip`] from the list of releases (the
 master does not contain the dependency), and uncompress it in the `modules`
 directory.
 
 * From the source and for development
 
 If the module was installed from the source, rename the name of the folder of
-the module to `BulkImportFile`, go to the root of the module, and run:
+the module to `BulkImportFiles`, go to the root of the module, and run:
 
 ```
     composer install
@@ -44,8 +44,8 @@ Usage
 *** Configuration
 
 The mapping of each media type (`image/jpg`, `image/png`, `application/pdf`) is
-managed via items with the resource template `BulkImportFile Resource`, that is
-an empty template created by the module.
+managed via items with the resource template `Bulk import files`, that is an
+empty template created by the module.
 
 So the first thing to do is to create private items will all the needed
 properties.
@@ -67,16 +67,16 @@ title is used as main title.
 
 These items should be kept private, else they will be displayed in public.
 
-Once saved, all the specific items can be checked in the main menu `Bulk Import Files`
+Once saved, all the specific items can be checked in the main menu `Bulk import files`
 on the main sidebar.
 
-This menu displays a second menu `Create file Maps` to automatically create
+This menu displays a second menu `Create mappings` to automatically create
 items from a config file, but it is still in development.
 
 *** Upload
 
 Once the item templates are ready, you can upload files via the third sub-menu
-`Make Import`. Just choose the folder, then check and add the files.
+`Process import`. Just choose the folder, then check and add the files.
 
 This workflow is experimental and will probably change in the future to avoid
 the creation of specific items.
@@ -133,11 +133,11 @@ Copyright
 * Copyright Daniel Berthereau, 2019
 
 
-[Bulk Import File]: https://github.com/Daniel-KM/Omeka-S-module-BulkImportFile
+[Bulk Import Files]: https://github.com/Daniel-KM/Omeka-S-module-BulkImportFiles
 [Omeka S]: https://omeka.org/s
-[`BulkImportFile.zip`]: https://github.com/Daniel-KM/Omeka-S-module-BulkImportFile/releases
+[`BulkImportFiles.zip`]: https://github.com/Daniel-KM/Omeka-S-module-BulkImportFiles/releases
 [installing a module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
-[module issues]: https://github.com/Daniel-KM/Omeka-S-module-BulkImportFile/issues
+[module issues]: https://github.com/Daniel-KM/Omeka-S-module-BulkImportFiles/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org

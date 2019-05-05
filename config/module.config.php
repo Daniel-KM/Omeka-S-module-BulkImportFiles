@@ -1,5 +1,5 @@
 <?php
-namespace BulkImportFile;
+namespace BulkImportFiles;
 
 return [
     'view_manager' => [
@@ -9,24 +9,24 @@ return [
     ],
     'form_elements' => [
         'factories' => [
-            'BulkImportFile\Form\SettingsForm' => Service\Form\SettingsFormFactory::class,
+            'BulkImportFiles\Form\SettingsForm' => Service\Form\SettingsFormFactory::class,
         ],
     ],
     'controllers' => [
         'factories' => [
-            'BulkImportFile\Controller\Index' => Service\Controller\IndexControllerFactory::class,
+            'BulkImportFiles\Controller\Index' => Service\Controller\IndexControllerFactory::class,
         ],
     ],
     'router' => [
         'routes' => [
             'admin' => [
                 'child_routes' => [
-                    'bulkimportfile' => [
+                    'bulkimportfiles' => [
                         'type' => \Zend\Router\Http\Literal::class,
                         'options' => [
-                            'route' => '/bulkimportfile',
+                            'route' => '/bulk-import-files',
                             'defaults' => [
-                                '__NAMESPACE__' => 'BulkImportFile\Controller',
+                                '__NAMESPACE__' => 'BulkImportFiles\Controller',
                                 'controller' => 'Index',
                                 'action' => 'index',
                             ],
@@ -36,66 +36,66 @@ return [
                             'mapimport' => [
                                 'type' => \Zend\Router\Http\Literal::class,
                                 'options' => [
-                                    'route' => '/mapimport',
+                                    'route' => '/map-import',
                                     'defaults' => [
-                                        '__NAMESPACE__' => 'BulkImportFile\Controller',
+                                        '__NAMESPACE__' => 'BulkImportFiles\Controller',
                                         'controller' => 'Index',
-                                        'action' => 'mapimport',
+                                        'action' => 'map-import',
                                     ],
                                 ],
                             ],
-                            'getFiles' => [
+                            'get_files' => [
                                 'type' => \Zend\Router\Http\Literal::class,
                                 'options' => [
-                                    'route' => '/getfiles',
+                                    'route' => '/get-files',
                                     'defaults' => [
-                                        '__NAMESPACE__' => 'BulkImportFile\Controller',
+                                        '__NAMESPACE__' => 'BulkImportFiles\Controller',
                                         'controller' => 'Index',
-                                        'action' => 'getFiles',
+                                        'action' => 'get-files',
                                     ],
                                 ],
                             ],
-                            'saveOption' => [
+                            'save_options' => [
                                 'type' => \Zend\Router\Http\Literal::class,
                                 'options' => [
-                                    'route' => '/saveoption',
+                                    'route' => '/save-options',
                                     'defaults' => [
-                                        '__NAMESPACE__' => 'BulkImportFile\Controller',
+                                        '__NAMESPACE__' => 'BulkImportFiles\Controller',
                                         'controller' => 'Index',
-                                        'action' => 'saveOption',
+                                        'action' => 'save-options',
                                     ],
                                 ],
                             ],
                             'makeimport' => [
                                 'type' => \Zend\Router\Http\Literal::class,
                                 'options' => [
-                                    'route' => '/makeimport',
+                                    'route' => '/make-import',
                                     'defaults' => [
-                                        '__NAMESPACE__' => 'BulkImportFile\Controller',
+                                        '__NAMESPACE__' => 'BulkImportFiles\Controller',
                                         'controller' => 'Index',
-                                        'action' => 'makeimport',
+                                        'action' => 'make-import',
                                     ],
                                 ],
                             ],
                             'checkfolder' => [
                                 'type' => \Zend\Router\Http\Literal::class,
                                 'options' => [
-                                    'route' => '/checkfolder',
+                                    'route' => '/check-folder',
                                     'defaults' => [
-                                        '__NAMESPACE__' => 'BulkImportFile\Controller',
+                                        '__NAMESPACE__' => 'BulkImportFiles\Controller',
                                         'controller' => 'Index',
-                                        'action' => 'checkFolder',
+                                        'action' => 'check-folder',
                                     ],
                                 ],
                             ],
-                            'actionmakeimport' => [
+                            'processimport' => [
                                 'type' => \Zend\Router\Http\Literal::class,
                                 'options' => [
-                                    'route' => '/actionmakeimport',
+                                    'route' => '/process-import',
                                     'defaults' => [
-                                        '__NAMESPACE__' => 'BulkImportFile\Controller',
+                                        '__NAMESPACE__' => 'BulkImportFiles\Controller',
                                         'controller' => 'Index',
-                                        'action' => 'actionMakeImport',
+                                        'action' => 'process-import',
                                     ],
                                 ],
                             ],
@@ -109,23 +109,23 @@ return [
         'AdminModule' => [
             [
                 'label' => 'Bulk import files', // @translate
-                'route' => 'admin/bulkimportfile',
-                'resource' => 'BulkImportFile\Controller\Index',
+                'route' => 'admin/bulkimportfiles',
+                'resource' => 'BulkImportFiles\Controller\Index',
                 'pages' => [
                     [
                         'label' => 'View mappings', // @translate
-                        'route' => 'admin/bulkimportfile',
-                        'resource' => 'BulkImportFile\Controller\Index',
+                        'route' => 'admin/bulkimportfiles',
+                        'resource' => 'BulkImportFiles\Controller\Index',
                     ],
                     [
                         'label' => 'Create mappings', // @translate
-                        'route' => 'admin/bulkimportfile/mapimport',
-                        'resource' => 'BulkImportFile\Controller\Index',
+                        'route' => 'admin/bulkimportfiles/mapimport',
+                        'resource' => 'BulkImportFiles\Controller\Index',
                     ],
                     [
                         'label' => 'Process import', // @translate
-                        'route' => 'admin/bulkimportfile/makeimport',
-                        'resource' => 'BulkImportFile\Controller\Index',
+                        'route' => 'admin/bulkimportfiles/makeimport',
+                        'resource' => 'BulkImportFiles\Controller\Index',
                     ]
                 ],
             ],
@@ -141,9 +141,9 @@ return [
             ],
         ],
     ],
-    'bulkimportfile' => [
+    'bulkimportfiles' => [
         'config' => [
-            'bulkimportfile_maps_settings' => [
+            'bulkimportfiles_maps_settings' => [
                 'image/jpeg' => 'data/mapping/map_jpeg.csv',
                 'pdf' => 'data/mapping/map_pdf.csv',
                 'mp3' => 'data/mapping/map_mp3.csv'

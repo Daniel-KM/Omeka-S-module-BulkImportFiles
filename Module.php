@@ -1,5 +1,5 @@
 <?php
-namespace BulkImportFile;
+namespace BulkImportFiles;
 
 require_once dirname(__DIR__) . '/Generic/AbstractModule.php';
 
@@ -22,7 +22,7 @@ class Module extends AbstractModule
 
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
-        $label = 'BulkImportFile Resource';
+        $label = 'Bulk import files';
         try {
             $resourceTemplate = $api
                 ->read('resource_templates', ['label' => $label])

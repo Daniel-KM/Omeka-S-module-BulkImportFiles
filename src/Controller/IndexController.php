@@ -1,9 +1,9 @@
 <?php
 
-namespace BulkImportFile\Controller;
+namespace BulkImportFiles\Controller;
 
-use BulkImportFile\Form\ImportForm;
-use BulkImportFile\Form\SettingsForm;
+use BulkImportFiles\Form\ImportForm;
+use BulkImportFiles\Form\SettingsForm;
 use GetId3\GetId3Core as GetId3;
 use Omeka\Entity\Media;
 use Omeka\File\TempFileFactory;
@@ -175,41 +175,7 @@ class IndexController extends AbstractActionController
             ->setVariable('filesMaps', $this->filesMaps);
     }
 
-    protected function array_keys_recursive($data_array, $keys = null)
-    {
-        foreach ($data_array as $key => $val) {
-            if (is_array($val)) {
-                $this->array_keys_recursive($val, $keys . '/' . $key);
-            } else {
-                if (!in_array($key, $this->ignoredKeys)) {
-                    $this->parsed_data[] = [
-                        'key' => $keys . '/' . $key,
-                        'value' => $val,
-                    ];
-                }
-            }
-        }
-    }
-
-    /**
-     * Return the list of properties by names and labels from Dublin Core.
-     *
-     * @return array Associative array of term names and term labels as key
-     * (ex: "dcterms:title" and "Dublin Core : Title") in two subarrays ("names"
-     * "labels", and properties as value.
-     */
-    protected function listTerms()
-    {
-        $result = [];
-        $vocabulary = $this->api()->search('vocabularies', ['vocabulary_id' => 1])->getContent();
-        $properties = $vocabulary[0]->properties();
-        foreach ($properties as $property) {
-            $result[] = $property->term();
-        }
-        return $result;
-    }
-
-    public function saveOptionAction()
+    public function saveOptionsAction()
     {
         if ((isset($_REQUEST['omeka_item_id'])) && $_REQUEST['omeka_item_id'] != '') {
             $omeka_item_id = $_REQUEST['omeka_item_id'];
@@ -225,7 +191,7 @@ class IndexController extends AbstractActionController
             $values = $items->valueRepresentation();
 
             $resourceTemplate = $this->api()
-                ->read('resource_templates', ['label' => 'BulkImportFile Resource'])
+                ->read('resource_templates', ['label' => 'Bulk import files'])
                 ->getContent();
 
             $data = [
@@ -284,7 +250,7 @@ class IndexController extends AbstractActionController
         }
 
         $this->layout()
-            ->setTemplate('bulk-import-file/index/save-option')
+            ->setTemplate('bulk-import-files/index/save-options')
             ->setVariable('request', $request);
     }
 
@@ -345,14 +311,14 @@ class IndexController extends AbstractActionController
         }
 
         $this->layout()
-            ->setTemplate('bulk-import-file/index/check-folder')
+            ->setTemplate('bulk-import-files/index/check-folder')
             ->setVariable('files_data', $files_data)
             ->setVariable('total_files', $total_files)
             ->setVariable('total_files_can_recognized', $total_files_can_recognized)
             ->setVariable('error', $error);
     }
 
-    public function actionMakeImportAction()
+    public function processImportAction()
     {
         $this->prepareFilesMaps();
 
@@ -531,13 +497,47 @@ class IndexController extends AbstractActionController
         }
 
         $this->layout()
-            ->setTemplate('bulk-import-file/index/action-make-import')
+            ->setTemplate('bulk-import-files/index/process-import')
             ->setVariable('data_for_recognize_row_id', $data_for_recognize_row_id)
             ->setVariable('error', $error);
     }
 
+    protected function array_keys_recursive($data_array, $keys = null)
+    {
+        foreach ($data_array as $key => $val) {
+            if (is_array($val)) {
+                $this->array_keys_recursive($val, $keys . '/' . $key);
+            } else {
+                if (!in_array($key, $this->ignoredKeys)) {
+                    $this->parsed_data[] = [
+                        'key' => $keys . '/' . $key,
+                        'value' => $val,
+                    ];
+                }
+            }
+        }
+    }
+
     /**
-     * Set filesMaps as object (stdClass) for all Items with BulkImportFile Resource
+     * Return the list of properties by names and labels from Dublin Core.
+     *
+     * @return array Associative array of term names and term labels as key
+     * (ex: "dcterms:title" and "Dublin Core : Title") in two subarrays ("names"
+     * "labels", and properties as value.
+     */
+    protected function listTerms()
+    {
+        $result = [];
+        $vocabulary = $this->api()->search('vocabularies', ['vocabulary_id' => 1])->getContent();
+        $properties = $vocabulary[0]->properties();
+        foreach ($properties as $property) {
+            $result[] = $property->term();
+        }
+        return $result;
+    }
+
+    /**
+     * Set filesMaps as object (stdClass) for all Items with template "Bulk import files"
      * (ex: public 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
      *
      * Set filesMapsArray as array with key "Item title" it's type of files
@@ -549,10 +549,10 @@ class IndexController extends AbstractActionController
 
         try {
             $resourceTemplate = $this->api()
-                ->read('resource_templates', ['label' => 'BulkImportFile Resource'])
+                ->read('resource_templates', ['label' => 'Bulk import files'])
                 ->getContent();
         } catch (\Exception $e) {
-            $this->messenger()->addError('The required resource template "BulkImportFile Resource" has been removed or renamed.'); // @translate
+            $this->messenger()->addError('The required resource template "Bulk import files" has been removed or renamed.'); // @translate
             return;
         }
 

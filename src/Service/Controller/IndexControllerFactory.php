@@ -1,7 +1,7 @@
 <?php
-namespace BulkImportFile\Service\Controller;
+namespace BulkImportFiles\Service\Controller;
 
-use BulkImportFile\Controller\IndexController;
+use BulkImportFiles\Controller\IndexController;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 

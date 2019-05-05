@@ -1,5 +1,5 @@
 <?php
-namespace BulkImportFile\Form;
+namespace BulkImportFiles\Form;
 
 use Zend\Form\Element;
 use Zend\Form\Form;
@@ -12,10 +12,10 @@ class SettingsForm extends Form
     {
         $this->add([
             'type' => Element\Hidden::class,
-            'name' => 'bulkimportfile_maps_settings',
+            'name' => 'bulkimportfiles_maps_settings',
             'attributes' => [
                 'value' => '',
-                'class' => 'bulkimportfile_maps_settings',
+                'class' => 'bulkimportfiles_maps_settings',
             ]
         ]);
     }

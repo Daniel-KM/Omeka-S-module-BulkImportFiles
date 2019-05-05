@@ -1,6 +1,6 @@
 <?php
 
-namespace BulkImportFile\Form;
+namespace BulkImportFiles\Form;
 
 use Zend\View\Helper\Url;
 use Zend\Form\Form;

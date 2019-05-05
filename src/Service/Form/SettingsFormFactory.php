@@ -1,8 +1,8 @@
 <?php
-namespace BulkImportFile\Service\Form;
+namespace BulkImportFiles\Service\Form;
 
 use Interop\Container\ContainerInterface;
-use BulkImportFile\Form\SettingsForm;
+use BulkImportFiles\Form\SettingsForm;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 class SettingsFormFactory implements FactoryInterface
