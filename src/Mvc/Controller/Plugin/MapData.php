@@ -2,16 +2,21 @@
 namespace BulkImportFiles\Mvc\Controller\Plugin;
 
 use ArrayObject;
-use BulkImport\Mvc\Controller\Plugin\Bulk;
 use DOMDocument;
 use DOMXPath;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Zend\Mvc\Controller\PluginManager;
 
 /**
  * Extract data from a string with a mapping.
  */
 class MapData extends AbstractPlugin
 {
+    /**
+     * @var PluginManager
+     */
+    protected $plugins;
+
     /**
      * @var \BulkImport\Mvc\Controller\Plugin\Bulk
      */
@@ -44,83 +49,38 @@ class MapData extends AbstractPlugin
     ];
 
     /**
-     * @param Bulk $bulk
+     * @param PluginManager $plugins
      */
-    public function __construct(Bulk $bulk)
+    public function __construct(PluginManager $plugins)
     {
-        $this->bulk = $bulk;
+        $this->plugins = $plugins;
+        $this->bulk = $plugins->get('bulk');
     }
 
     /**
-     * Extract data from a string with a mapping.
+     * @return \BulkImportFiles\Mvc\Controller\Plugin\MapData
+     */
+    public function __invoke()
+    {
+        return $this;
+    }
+
+    /**
+     * Extract data from an array with a mapping.
      *
-     * Mapping is either a single or a multiple list, either a target
-     * key or value, and either a xpath or a array:
-     * [dcterms:title => /xpath/to/data]
-     * [dcterms:title => object.to.data]
-     * [/xpath/to/data => dcterms:title]
-     * [object.to.data => dcterms:title]
-     * [[dcterms:title => /xpath/to/data]]
-     * [[dcterms:title => object.to.data]]
-     * [[/xpath/to/data => dcterms:title]]
-     * [[object.to.data => dcterms:title]]
-     *
-     * And the same mappings with a value as an array, for example:.
-     * [[object.to.data => [dcterms:title]]]
-     * The format is normalized into [[path/object => dcterms:title]].
-     *
-     * @param string|array $input A string is managed via xpath, an array via
-     * object notation.
+     * @param array $input Array of metadata..
      * @param array $mapping The mapping adapted to the input.
      * @param bool $simpleExtract Only extract metadata, don't map them.
      * @return array A resource array by property, suitable for api creation
      * or update.
      */
-    public function __invoke($input, array $mapping, $simpleExtract = false)
+    public function array(array $input, array $mapping, $simpleExtract = false)
     {
+        $mapping = $this->normalizeMapping($mapping);
         if (empty($input) || empty($mapping)) {
             return [];
         }
 
-        // Normalize the mapping to multiple data with source to target.
-        $keyValue = reset($mapping);
-        $isMultipleMapping = is_numeric(key($mapping));
-        if (!$isMultipleMapping) {
-            $mapping = $this->multipleFromSingle($mapping);
-            $keyValue = reset($mapping);
-        }
-
-        $value = reset($keyValue);
-        if (is_array($value)) {
-            $mapping = $this->multipleFromMultiple($mapping);
-            $keyValue = reset($mapping);
-        }
-
-        $key = key($keyValue);
-        $isTargetKey = strpos($key, ':') && strpos($key, '::') === false;
-        if ($isTargetKey) {
-            $mapping = $this->flipTargetToValues($mapping);
-        }
-
-        // $isArray = strpos($key, '/') === false;
-        $result = is_array($input)
-            ? $this->arrayExtract($input, $mapping, $simpleExtract)
-            : $this->xpathExtract($input, $mapping, $simpleExtract);
-        return $result->exchangeArray([]);
-    }
-
-    /**
-     * Extract metadata via array keys.
-     *
-     * @todo Move code from index controller to here.
-     *
-     * @param array $input
-     * @param array $mapping
-     * @param bool $simpleExtract Only extract metadata, don't map them.
-     * @return array
-     */
-    protected function arrayExtract(array $input, array $mapping, $simpleExtract = false)
-    {
         $result = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
 
         foreach ($mapping as $map) {
@@ -142,26 +102,38 @@ class MapData extends AbstractPlugin
             }
         }
 
-        return $result;
+        return $result->exchangeArray([]);
     }
 
     /**
-     * Extract metadata via xpath.
+     * Extract data from a xml file with a mapping.
      *
-     * @param string $xml
-     * @param array $mapping
+     * @param string $filepath
+     * @param array $mapping The mapping adapted to the input.
      * @param bool $simpleExtract Only extract metadata, don't map them.
-     * @return array
+     * @return array A resource array by property, suitable for api creation
+     * or update.
      */
-    protected function xpathExtract($xml, array $mapping, $simpleExtract = false)
+    public function xml($filepath, array $mapping, $simpleExtract = false)
     {
-        $result = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
+        $mapping = $this->normalizeMapping($mapping);
+        if (empty($mapping)) {
+            return [];
+        }
+
+        $extractStringFromFile = $this->plugins()->get('extractStringFromFile');
+        $xml = $extractStringFromFile($filepath, '<x:xmpmeta', '</x:xmpmeta>');
+        if (empty($xml)) {
+            return [];
+        }
 
         // Check if the xml is fully formed.
         $xml = trim($xml);
         if (strpos($xml, '<?xml ') !== 0) {
             $xml = '<?xml version="1.1" encoding="utf-8"?>' . $xml;
         }
+
+        $result = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
 
         libxml_use_internal_errors(true);
         $doc = new DOMDocument();
@@ -190,7 +162,7 @@ class MapData extends AbstractPlugin
             }
         }
 
-        return $result;
+        return $result->exchangeArray([]);
     }
 
     protected function simpleExtract(ArrayObject $result, $value, $target, $source)
@@ -359,6 +331,56 @@ class MapData extends AbstractPlugin
     }
 
     /**
+     * Normalize a mapping.
+     *
+     * Mapping is either a single or a multiple list, either a target
+     * key or value, and either a xpath or a array:
+     * [dcterms:title => /xpath/to/data]
+     * [dcterms:title => object.to.data]
+     * [/xpath/to/data => dcterms:title]
+     * [object.to.data => dcterms:title]
+     * [[dcterms:title => /xpath/to/data]]
+     * [[dcterms:title => object.to.data]]
+     * [[/xpath/to/data => dcterms:title]]
+     * [[object.to.data => dcterms:title]]
+     *
+     * And the same mappings with a value as an array, for example:.
+     * [[object.to.data => [dcterms:title]]]
+     * The format is normalized into [[path/object => dcterms:title]].
+     *
+     * @param array $mapping
+     * @return array
+     */
+    protected function normalizeMapping(array $mapping)
+    {
+        if (empty($mapping)) {
+            return $mapping;
+        }
+
+        // Normalize the mapping to multiple data with source to target.
+        $keyValue = reset($mapping);
+        $isMultipleMapping = is_numeric(key($mapping));
+        if (!$isMultipleMapping) {
+            $mapping = $this->multipleFromSingle($mapping);
+            $keyValue = reset($mapping);
+        }
+
+        $value = reset($keyValue);
+        if (is_array($value)) {
+            $mapping = $this->multipleFromMultiple($mapping);
+            $keyValue = reset($mapping);
+        }
+
+        $key = key($keyValue);
+        $isTargetKey = strpos($key, ':') && strpos($key, '::') === false;
+        if ($isTargetKey) {
+            $mapping = $this->flipTargetToValues($mapping);
+        }
+
+        return $mapping;
+    }
+
+    /**
      * Convert a single mapping to a multiple mapping.
      *
      * @param array $mapping
@@ -456,5 +478,10 @@ class MapData extends AbstractPlugin
                 ];
             }
         }
+    }
+
+    protected function plugins()
+    {
+        return $this->plugins;
     }
 }

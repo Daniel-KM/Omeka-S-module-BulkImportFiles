@@ -29,8 +29,8 @@
 
 namespace BulkImportFiles\Mvc\Controller\Plugin;
 
-use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 use Omeka\File\Exception\RuntimeException;
+use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 
 /**
  * Extract a string from a file of any size.

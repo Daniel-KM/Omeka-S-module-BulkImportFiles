@@ -134,7 +134,7 @@ class IndexController extends AbstractActionController
                         unset($filesMapsArray['item_id']);
 
                         // Only getId3 is managed (array).
-                        $data = $this->mapData($file_source, $filesMapsArray, true);
+                        $data = $this->mapData()->array($file_source, $filesMapsArray, true);
 
                         $this->parsed_data = $this->flatArray($file_source, $this->ignoredKeys);
                         break;
@@ -381,12 +381,14 @@ class IndexController extends AbstractActionController
             unset($filesMapsArray['media_type']);
             unset($filesMapsArray['item_id']);
 
-            $metadata = $this->extractStringFromFile($full_file_path, '<x:xmpmeta', '</x:xmpmeta>');
-
-            if ($metadata) {
-                $data = $this->mapData($metadata, $filesMapsArray);
+            // Use xml or array according to item mapping.
+            $query = reset($filesMapsArray);
+            $query = $query ? reset($query) : null;
+            $isXpath = $query && strpos($query, '/') !== false;
+            if ($isXpath) {
+                $data = $this->mapData()->xml($full_file_path, $filesMapsArray);
             } else {
-                $data = $this->mapData($file_source, $filesMapsArray);
+                $data = $this->mapData()->array($file_source, $filesMapsArray);
             }
 
             if (count($data) <= 0) {
