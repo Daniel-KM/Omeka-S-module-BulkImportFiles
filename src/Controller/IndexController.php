@@ -291,17 +291,17 @@ class IndexController extends AbstractActionController
     public function checkFolderAction()
     {
         $this->prepareFilesMaps();
-        $error = '';
+
         $files_data = [];
+        $total_files = 0;
+        $total_files_can_recognized = 0;
+        $error = '';
 
         if ((isset($_REQUEST['folder'])) && ($_REQUEST['folder'] != '')) {
             if (file_exists($_REQUEST['folder'])) {
                 $files = array_diff(scandir($_REQUEST['folder']), array('.', '..'));
 
                 $file_path = $_REQUEST['folder'] . '/';
-
-                $total_files = 0;
-                $total_files_can_recognized = 0;
 
                 foreach ($files as $file) {
                     $getId3 = new GetId3();
