@@ -17,6 +17,11 @@ return [
             'BulkImportFiles\Controller\Index' => Service\Controller\IndexControllerFactory::class,
         ],
     ],
+    'controller_plugins' => [
+        'invokables' => [
+            'extractStringFromFile' => Mvc\Controller\Plugin\ExtractStringFromFile::class,
+        ],
+    ],
     'router' => [
         'routes' => [
             'admin' => [
