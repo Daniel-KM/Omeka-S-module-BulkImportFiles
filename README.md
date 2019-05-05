@@ -41,9 +41,45 @@ Then install it like any other Omeka module.
 Usage
 -----
 
-### Configuration
+*** Configuration
 
-[BulkImportFile] module creates its own resource templates [BulkImportFile Resource].
+The mapping of each media type (`image/jpg`, `image/png`, `application/pdf`) is
+managed via items with the resource template `BulkImportFile Resource`, that is
+an empty template created by the module.
+
+So the first thing to do is to create private items will all the needed
+properties.
+
+For example, for the `JPG` format, the values are the one that are exposed via
+the following xml paths (`xmp` is xml and provide all `iptc` and `exif` metadata):
+
+```
+Title [dcterms:title] = image/jpeg
+Alternative Title [dcterms:alternative] = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:Label
+Date Created [dcterms:created] = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate
+Date Modified [dcterms:modified] = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:ModifyDate
+Format [dcterms:format] = /x:xmpmeta/rdf:RDF/rdf:Description/@tiff:Model
+Subject [dcterms:subject] = /x:xmpmeta/rdf:RDF/rdf:Description/dc:subject//rdf:li
+```
+
+Note that the title is used as media type to import files, so the alternative
+title is used as main title.
+
+These items should be kept private, else they will be displayed in public.
+
+Once saved, all the specific items can be checked in the main menu `Bulk Import Files`
+on the main sidebar.
+
+This menu displays a second menu `Create file Maps` to automatically create
+items from a config file, but it is still in development.
+
+*** Upload
+
+Once the item templates are ready, you can upload files via the third sub-menu
+`Make Import`. Just choose the folder, then check and add the files.
+
+This workflow is experimental and will probably change in the future to avoid
+the creation of specific items.
 
 
 Warning
