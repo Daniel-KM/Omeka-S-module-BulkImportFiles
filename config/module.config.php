@@ -8,11 +8,7 @@ return [
         ],
     ],
     'form_elements' => [
-        'invokables' => [
-            //Form\ConfigForm::class => Form\ConfigForm::class,
-        ],
         'factories' => [
-            //Form\ConfigFormSettings::class => Service\Form\ConfigFormFactory::class,
             'BulkImportFile\Form\SettingsForm' => Service\Form\SettingsFormFactory::class,
         ],
     ],
