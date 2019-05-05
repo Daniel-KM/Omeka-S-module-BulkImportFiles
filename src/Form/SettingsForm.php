@@ -16,7 +16,7 @@ class SettingsForm extends Form
             'attributes' => [
                 'value' => '',
                 'class' => 'bulkimportfiles_mappings',
-            ]
+            ],
         ]);
     }
 }

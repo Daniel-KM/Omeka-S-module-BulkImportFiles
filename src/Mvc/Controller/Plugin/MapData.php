@@ -45,7 +45,7 @@ class MapData extends AbstractPlugin
         'fileformat',
         'encoding',
         'mime_type',
-        'md5_data'
+        'md5_data',
     ];
 
     /**

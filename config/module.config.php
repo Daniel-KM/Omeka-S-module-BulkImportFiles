@@ -86,7 +86,7 @@ return [
                         'route' => 'admin/bulk-import-files/default',
                         'action' => 'make-import',
                         'resource' => 'BulkImportFiles\Controller\Index',
-                    ]
+                    ],
                 ],
             ],
         ],
@@ -107,8 +107,8 @@ return [
             'bulkimportfiles_mappings' => [
                 'image/jpeg' => 'data/mapping/map_jpeg.csv',
                 'pdf' => 'data/mapping/map_pdf.csv',
-                'mp3' => 'data/mapping/map_mp3.csv'
+                'mp3' => 'data/mapping/map_mp3.csv',
             ],
         ],
-    ]
+    ],
 ];

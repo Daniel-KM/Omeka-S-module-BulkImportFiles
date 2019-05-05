@@ -54,7 +54,7 @@ class IndexController extends AbstractActionController
         'fileformat',
         'encoding',
         'mime_type',
-        'md5_data'
+        'md5_data',
     ];
 
     protected $tempFileFactory;
@@ -139,7 +139,7 @@ class IndexController extends AbstractActionController
                 }
             }
 
-            /**
+            /*
              * selected files for uploads
              * $file array
              *      'name' => string
@@ -211,7 +211,7 @@ class IndexController extends AbstractActionController
             foreach ($listterms_select as $term_item_name) {
                 if (isset($term_item_name['property'])) {
                     foreach ($term_item_name['property'] as $term) {
-                        $data[$term][] =[
+                        $data[$term][] = [
                             'property_id' => $bulk->getPropertyId($term),
                             'type' => 'literal',
                             '@language' => '',
@@ -436,7 +436,7 @@ class IndexController extends AbstractActionController
                 ->setAttribute('id', 'add-item');
             $form->setData($data);
             $hasNewItem = $this->api($form)->create('items', $data);
-            if ($hasNewItem && $delete_file_action ===  'yes') {
+            if ($hasNewItem && $delete_file_action === 'yes') {
                 $tempFile->delete();
             }
         }
@@ -560,7 +560,7 @@ class IndexController extends AbstractActionController
         if (empty($dir) || !file_exists($dir) || !is_dir($dir) || !is_readable($dir)) {
             return [];
         }
-        $result = array_values(array_filter(scandir($dir), function($file) use ($dir) {
+        $result = array_values(array_filter(scandir($dir), function ($file) use ($dir) {
             return is_file($dir . DIRECTORY_SEPARATOR . $file);
         }));
         natcasesort($result);
