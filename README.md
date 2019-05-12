@@ -50,7 +50,7 @@ config of the module.
 Usage
 -----
 
-*** Configuration
+### Configuration
 
 The mapping of each media type (`image/jpg`, `image/png`, `application/pdf`) is
 managed via items with the resource template `Bulk import files`, that is an
@@ -60,7 +60,7 @@ So the first thing to do is to create private items will all the needed
 properties.
 
 For example, for the `JPG` format, the values are the one that are exposed via
-the following xml paths (`xmp` is xml and provide all `iptc` and `exif` metadata):
+the following xml paths (`xmp` is xml and provides all `iptc` and `exif` metadata):
 
 ```
 dcterms:title = image/jpeg
@@ -98,7 +98,7 @@ These items should be kept private, else they will be displayed in public.
 Once saved, all the specific items can be checked in the main menu `Bulk import files`
 on the main sidebar.
 
-*** Assistant to create or update a template
+### Assistant to create or update a template
 
 An assistant is available to create or update a template via the second
 sub-menu. Simply choose a directory where the files you want to import are
@@ -107,7 +107,7 @@ located, create your mapping and save it.
 The assistant works only with data extractable as an array (getid3 or pdf), not
 for xml data, that requires manual edition of xpaths.
 
-*** Upload
+### Upload
 
 Once the item templates are ready, you can upload files via the third sub-menu
 `Process import`. Just choose the folder where are files to import, then check
