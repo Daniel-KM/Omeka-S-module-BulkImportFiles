@@ -138,7 +138,8 @@ class IndexController extends AbstractActionController
 
                     default:
                         $getId3 = new GetId3();
-                        $file_source = $getId3
+                        // TODO Fix GetId3 that uses create_function(), deprecated.
+                        $file_source = @$getId3
                             ->setOptionMD5Data(true)
                             ->setOptionMD5DataSource(true)
                             ->setEncoding('UTF-8')
@@ -270,7 +271,8 @@ class IndexController extends AbstractActionController
                 $file_path = $params['folder'] . '/';
                 foreach ($files as $file) {
                     $getId3 = new GetId3();
-                    $file_source = $getId3
+                    // TODO Fix GetId3 that uses create_function(), deprecated.
+                    $file_source = @$getId3
                         ->setOptionMD5Data(true)
                         ->setOptionMD5DataSource(true)
                         ->setEncoding('UTF-8')
@@ -370,7 +372,8 @@ class IndexController extends AbstractActionController
             $url = $baseUri . '/original/' . $tempFile->getStorageId() . '.' . $tempFile->getExtension();
 
             $getId3 = new GetId3();
-            $file_source = $getId3
+            // TODO Fix GetId3 that uses create_function(), deprecated.
+            $file_source = @$getId3
                 ->setOptionMD5Data(true)
                 ->setOptionMD5DataSource(true)
                 ->setEncoding('UTF-8')
