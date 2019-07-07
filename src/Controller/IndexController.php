@@ -74,6 +74,16 @@ class IndexController extends AbstractActionController
 
     public function indexAction()
     {
+        return $this->forward()->dispatch('BulkImportFiles\Controller\Index', [
+            '__NAMESPACE__' => 'BulkImportFiles\Controller',
+            '__ADMIN__' => true,
+            'controller' => 'BulkImportFiles\Controller\Index',
+            'action' => 'make-import',
+        ]);
+    }
+
+    public function mapShowAction()
+    {
         $this->prepareFilesMaps();
 
         $form = $this->getForm(SettingsForm::class);
@@ -84,17 +94,17 @@ class IndexController extends AbstractActionController
         return $view;
     }
 
-    public function makeImportAction()
-    {
-    }
-
-    public function mapImportAction()
+    public function mapEditAction()
     {
         $form = $this->getForm(ImportForm::class);
 
         $view = new ViewModel;
         $view->setVariable('form', $form);
         return $view;
+    }
+
+    public function makeImportAction()
+    {
     }
 
     public function getFilesAction()

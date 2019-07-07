@@ -71,20 +71,20 @@ return [
                 'resource' => 'BulkImportFiles\Controller\Index',
                 'pages' => [
                     [
-                        'label' => 'View mappings', // @translate
+                        'label' => 'Make import', // @translate
                         'route' => 'admin/bulk-import-files',
+                        'resource' => 'BulkImportFiles\Controller\Index',
+                    ],
+                    [
+                        'label' => 'View mappings', // @translate
+                        'route' => 'admin/bulk-import-files/default',
+                        'action' => 'map-show',
                         'resource' => 'BulkImportFiles\Controller\Index',
                     ],
                     [
                         'label' => 'Create mappings', // @translate
                         'route' => 'admin/bulk-import-files/default',
-                        'action' => 'map-import',
-                        'resource' => 'BulkImportFiles\Controller\Index',
-                    ],
-                    [
-                        'label' => 'Make import', // @translate
-                        'route' => 'admin/bulk-import-files/default',
-                        'action' => 'make-import',
+                        'action' => 'map-edit',
                         'resource' => 'BulkImportFiles\Controller\Index',
                     ],
                 ],
