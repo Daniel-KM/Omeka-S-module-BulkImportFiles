@@ -10,6 +10,7 @@ use Omeka\File\TempFileFactory;
 use Omeka\Form\ResourceForm;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
 class IndexController extends AbstractActionController
@@ -431,9 +432,7 @@ class IndexController extends AbstractActionController
             $request = $this->translate('Request empty.'); // @translate
         }
 
-        $this->layout()
-            ->setTemplate('bulk-import-files/index/add-file')
-            ->setVariable('request', $request);
+        return new JsonModel($request);
     }
 
     public function deleteFileTypeAction()
@@ -473,10 +472,7 @@ class IndexController extends AbstractActionController
             $request['msg'] = $this->translate('Request empty.');
         }
 
-        $request = json_encode($request);
-        $this->layout()
-            ->setTemplate('bulk-import-files/index/add-file')
-            ->setVariable('request', $request);
+        return new JsonModel($request);
     }
 
     public function saveOptionsAction()
@@ -538,9 +534,7 @@ class IndexController extends AbstractActionController
             $request = $this->translate('Request empty.'); // @translate
         }
 
-        $this->layout()
-            ->setTemplate('bulk-import-files/index/save-options')
-            ->setVariable('request', $request);
+        return new JsonModel($request);
     }
 
     public function saveOptionsAction1()
@@ -606,9 +600,7 @@ class IndexController extends AbstractActionController
             $request = $this->translate('Request empty.'); // @translate
         }
 
-        $this->layout()
-            ->setTemplate('bulk-import-files/index/save-options')
-            ->setVariable('request', $request);
+        return new JsonModel($request);
     }
 
     /**

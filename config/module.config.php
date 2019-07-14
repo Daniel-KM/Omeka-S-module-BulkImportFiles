@@ -6,6 +6,9 @@ return [
         'template_path_stack' => [
             dirname(__DIR__) . '/view',
         ],
+        'strategies' => [
+            'ViewJsonStrategy',
+        ],
     ],
     'form_elements' => [
         'factories' => [
