@@ -24,6 +24,7 @@ return [
     'controller_plugins' => [
         'invokables' => [
             'extractStringFromFile' => Mvc\Controller\Plugin\ExtractStringFromFile::class,
+            'extractStringToFile' => Mvc\Controller\Plugin\ExtractStringToFile::class,
         ],
         'factories' => [
             'extractDataFromPdf' => Service\ControllerPlugin\ExtractDataFromPdfFactory::class,
