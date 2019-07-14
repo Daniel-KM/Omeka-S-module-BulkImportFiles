@@ -501,25 +501,31 @@ class IndexController extends AbstractActionController
             throw new NotFoundException;
         }
 
-        $params = $this->params()->fromPost();
+        $params = [];
+        $params['omeka_file_id'] = $this->params()->fromPost('omeka_file_id');
+        $params['media_type'] = $this->params()->fromPost('media_type');
+        $params['listterms_select'] = $this->params()->fromPost('listterms_select');
+
+        $error = '';
+        $request = '';
 
         if (!empty($params['omeka_file_id'])) {
             $omeka_file_id = $params['omeka_file_id'];
             $media_type = $params['media_type'];
             $listterms_select = $params['listterms_select'];
 
-            /** @var \Omeka\Api\Representation\ItemRepresentation $item */
+            $file_content = "$media_type = media_type\n";
 
-            $file_content = "";
-
-            $file_content = "<map>\n";
-            $file_content .= "$media_type = dcterms:title\n";
+            /** @var \BulkImport\Mvc\Controller\Plugin\Bulk $bulk */
+            $bulk = $this->bulk();
             foreach ($listterms_select as $term_item_name) {
                 foreach ($term_item_name['property'] as $term) {
-                    $file_content .= $term_item_name['field']." = ".$term."\n";
+                    if (!$bulk->getPropertyTerm($term)) {
+                        continue;
+                    }
+                    $file_content .= $term_item_name['field'] . ' = ' . $term . "\n";
                 }
             }
-            $file_content .= "</map>";
 
             $folder_path = dirname(dirname(__DIR__)) . '/data/mapping';
             $response = false;
@@ -527,20 +533,16 @@ class IndexController extends AbstractActionController
                 if (file_exists($folder_path) && is_dir($folder_path)) {
                     $files = $this->listFilesInDir($folder_path);
                     $file_path = $folder_path . '/';
-                    foreach ($files as $file_index => $file) {
-                        $getId3 = new GetId3();
-                        // TODO Fix GetId3 that uses create_function(), deprecated.
-                        $file_source = @$getId3
-                            ->setOptionMD5Data(true)
-                            ->setOptionMD5DataSource(true)
-                            ->setEncoding('UTF-8')
-                            ->analyze($file_path . $file);
-
+                    foreach ($files as $file) {
                         if ($file != $omeka_file_id) {
                             continue;
                         }
 
-                        $response = $this->extractStringToFile($file_path . $file, $file_content);
+                        if (!is_writeable($file_path . $file)) {
+                            $error = $this->translate('Filepath "%s" is not writeable.', $file_path . $file); // @translate
+                        }
+
+                        $response = file_put_contents($file_path . $file, $file_content);
                     }
                 } else {
                     $error = $this->translate('Folder not exist'); // @translate;
@@ -550,81 +552,18 @@ class IndexController extends AbstractActionController
             }
 
             if ($response) {
-                $request = $this->translate('Item property successfully updated'); // @translate
+                $request = $this->translate('Mapping of properties successfully updated.'); // @translate
             } else {
-                $request = $this->translate('Can’t update item property'); // @translate
+                $request = $this->translate('Can’t update mapping.'); // @translate
             }
         } else {
             $request = $this->translate('Request empty.'); // @translate
         }
 
-        return new JsonModel($request);
-    }
-
-    public function saveOptionsAction1()
-    {
-        $params = $this->params()->fromPost();
-
-        if (!empty($params['omeka_file_id'])) {
-            $omeka_file_id = $params['omeka_file_id'];
-            $media_type = $params['media_type'];
-            // $file_field_property = $params['file_field_property'];
-            $listterms_select = $params['listterms_select'];
-
-            /** @var \Omeka\Api\Representation\ItemRepresentation $item */
-
-            $item = $this->api()->read('items', ['id' => $omeka_file_id])->getContent();
-
-            $resourceTemplate = $this->api()
-                ->read('resource_templates', ['label' => $this->resourceTemplateLabel])
-                ->getContent();
-
-            $data = [
-                'o:resource_template' => ['o:id' => $resourceTemplate->id()],
-                'o:resource_class' => ['o:id' => ''],
-                'dcterms:title' => [[
-                    'property_id' => '1',
-                    'type' => 'literal',
-                    '@language' => '',
-                    '@value' => $media_type,
-                    'is_public' => '1',
-                ]],
-                'o:thumbnail' => ['o:id' => ''],
-                'o:is_public' => '0',
-            ];
-
-            $bulk = $this->bulk();
-            foreach ($listterms_select as $term_item_name) {
-                if (isset($term_item_name['property'])) {
-                    foreach ($term_item_name['property'] as $term) {
-                        $data[$term][] = [
-                            'property_id' => $bulk->getPropertyId($term),
-                            'type' => 'literal',
-                            '@language' => '',
-                            '@value' => $term_item_name['field'],
-                            'is_public' => '1',
-                        ];
-                    }
-                }
-            }
-
-            $form = $this->getForm(ResourceForm::class)
-                ->setAttribute('action', $this->url()->fromRoute(null, [], true))
-                ->setAttribute('enctype', 'multipart/form-data')
-                ->setAttribute('id', 'edit-item');
-            $form->setData($data);
-            $response = $this->api($form)->update('items', $omeka_file_id, $data);
-
-            if ($response) {
-                $request = $this->translate('Item property successfully updated'); // @translate
-            } else {
-                $request = $this->translate('Can’t update item property'); // @translate
-            }
-        } else {
-            $request = $this->translate('Request empty.'); // @translate
-        }
-
-        return new JsonModel($request);
+        $result = $error
+            ? ['state' => false, 'msg' => $error]
+            : ['state' => true, 'msg' => $request];
+        return new JsonModel($result);
     }
 
     /**
