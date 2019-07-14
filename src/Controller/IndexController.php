@@ -82,27 +82,6 @@ class IndexController extends AbstractActionController
         ]);
     }
 
-    public function mapShowAction()
-    {
-        $this->prepareFilesMaps();
-
-        $form = $this->getForm(SettingsForm::class);
-
-        $view = new ViewModel;
-        $view->setVariable('filesMaps', $this->filesMaps);
-        $view->setVariable('form', $form);
-        return $view;
-    }
-
-    public function mapEditAction()
-    {
-        $form = $this->getForm(ImportForm::class);
-
-        $view = new ViewModel;
-        $view->setVariable('form', $form);
-        return $view;
-    }
-
     public function makeImportAction()
     {
     }
@@ -181,77 +160,13 @@ class IndexController extends AbstractActionController
         }
 
         $this->layout()
-            ->setTemplate('common/block-files-list')
             ->setVariable('files_data_for_view', $files_data_for_view)
             ->setVariable('listTerms', $this->bulk()->getPropertyTerms())
             ->setVariable('filesMaps', $this->filesMaps);
     }
 
-    public function saveOptionsAction()
+    public function checkFilesAction()
     {
-        $params = $this->params()->fromPost();
-
-        if (!empty($params['omeka_item_id'])) {
-            $omeka_item_id = $params['omeka_item_id'];
-            $media_type = $params['media_type'];
-            // $file_field_property = $params['file_field_property'];
-            $listterms_select = $params['listterms_select'];
-
-            /** @var \Omeka\Api\Representation\ItemRepresentation $item */
-            $item = $this->api()->read('items', ['id' => $omeka_item_id])->getContent();
-
-            $resourceTemplate = $this->api()
-                ->read('resource_templates', ['label' => $this->resourceTemplateLabel])
-                ->getContent();
-
-            $data = [
-                'o:resource_template' => ['o:id' => $resourceTemplate->id()],
-                'o:resource_class' => ['o:id' => ''],
-                'dcterms:title' => [[
-                    'property_id' => '1',
-                    'type' => 'literal',
-                    '@language' => '',
-                    '@value' => $media_type,
-                    'is_public' => '1',
-                ]],
-                'o:thumbnail' => ['o:id' => ''],
-                'o:is_public' => '0',
-            ];
-
-            $bulk = $this->bulk();
-            foreach ($listterms_select as $term_item_name) {
-                if (isset($term_item_name['property'])) {
-                    foreach ($term_item_name['property'] as $term) {
-                        $data[$term][] = [
-                            'property_id' => $bulk->getPropertyId($term),
-                            'type' => 'literal',
-                            '@language' => '',
-                            '@value' => $term_item_name['field'],
-                            'is_public' => '1',
-                        ];
-                    }
-                }
-            }
-
-            $form = $this->getForm(ResourceForm::class)
-                ->setAttribute('action', $this->url()->fromRoute(null, [], true))
-                ->setAttribute('enctype', 'multipart/form-data')
-                ->setAttribute('id', 'edit-item');
-            $form->setData($data);
-            $response = $this->api($form)->update('items', $omeka_item_id, $data);
-
-            if ($response) {
-                $request = $this->translate('Item property successfully updated'); // @translate
-            } else {
-                $request = $this->translate('Can’t update item property'); // @translate
-            }
-        } else {
-            $request = $this->translate('Request empty.'); // @translate
-        }
-
-        $this->layout()
-            ->setTemplate('bulk-import-files/index/save-options')
-            ->setVariable('request', $request);
     }
 
     public function checkFolderAction()
@@ -382,7 +297,6 @@ class IndexController extends AbstractActionController
             $media_type = isset($file_source['mime_type']) ? $file_source['mime_type'] : 'undefined';
             if (!isset($this->filesMapsArray[$media_type])) {
                 $this->layout()
-                    ->setTemplate('bulk-import-files/index/process-import')
                     ->setVariable('data_for_recognize_row_id', $data_for_recognize_row_id)
                     ->setVariable('error', sprintf($this->translate('The media type "%s" is not managed or has no mapping.'), $media_type));
                 return;
@@ -455,11 +369,246 @@ class IndexController extends AbstractActionController
         }
 
         $this->layout()
-            ->setTemplate('bulk-import-files/index/process-import')
             ->setVariable('data_for_recognize_row_id', $data_for_recognize_row_id)
             ->setVariable('notice', empty($notice) ? null : $notice)
             ->setVariable('warning', empty($warning) ? null : $warning)
             ->setVariable('error', empty($error) ? null : $error);
+    }
+
+    public function mapShowAction()
+    {
+        $this->prepareFilesMaps();
+
+        $form = $this->getForm(SettingsForm::class);
+
+        $view = new ViewModel;
+        $view->setVariable('filesMaps', $this->filesMaps);
+        $view->setVariable('form', $form);
+        return $view;
+    }
+
+    public function mapEditAction()
+    {
+        $form = $this->getForm(ImportForm::class);
+
+        $view = new ViewModel;
+        $view->setVariable('form', $form);
+        return $view;
+    }
+
+    public function addFileTypeAction()
+    {
+        $params = $this->params()->fromPost();
+
+        if (!empty($params['media_type'])) {
+
+            $media_type = $params['media_type'];
+
+            $file_name = "map_".explode("/", $media_type)[1];
+            $filepath = dirname(__DIR__)."/../data/mapping/".$file_name.".csv";
+
+            if (!strlen($filepath)) {
+                throw new \RuntimeException('Filepath string should be longer that zero character.');
+            }
+
+            if (($handle = fopen($filepath, 'w')) === false) {
+                throw new \RuntimeException(sprintf('Could not save file "%s" for reading/'), $filepath);
+            }
+
+            $buffer = '';
+            $hasString = false;
+
+            $file_content = "";
+
+            $file_content = "<map>\n";
+                $file_content .= "$media_type = dcterms:title\n";
+            $file_content .= "</map>";
+
+            fwrite($handle, $file_content);
+            fclose($handle);
+            $request = $this->translate('File successfully added!');
+        }else {
+            $request = $this->translate('Request empty.'); // @translate
+        }
+
+        $this->layout()
+            ->setTemplate('bulk-import-files/index/add-file')
+            ->setVariable('request', $request);
+    }
+
+    public function deleteFileTypeAction()
+    {
+        $params = $this->params()->fromPost();
+
+        $helpers = $this->services->get('ViewHelperManager');
+        $url = $helpers->get('url');
+        $reloadURL = $url(
+            'admin/bulk-import-files',
+            ['action' => 'index']
+        );
+
+        if (!empty($params['media_type'])) {
+
+            $file_name = $params['media_type'];
+
+            $filepath = dirname(__DIR__)."/../data/mapping/".$file_name;
+
+            if (!strlen($filepath)) {
+                throw new \RuntimeException('Filepath string should be longer that zero character.');
+            }
+
+            if (($handle = fopen($filepath, 'w')) === false) {
+                throw new \RuntimeException(sprintf('Could not save file "%s" for reading/'), $filepath);
+            }
+
+            fclose($handle);
+            unlink($filepath) or die("Couldn't delete file");
+
+            $request['state'] = true;
+            $request['reloadURL'] = $reloadURL;
+            $request['msg'] = $this->translate('File successfully deleted!');
+        }else {
+            $request['state'] = false;
+            $request['reloadURL'] = $reloadURL;
+            $request['msg'] = $this->translate('Request empty.');
+        }
+
+        $request = json_encode($request);
+        $this->layout()
+            ->setTemplate('bulk-import-files/index/add-file')
+            ->setVariable('request', $request);
+    }
+
+    public function saveOptionsAction()
+    {
+        $params = $this->params()->fromPost();
+
+        if (!empty($params['omeka_file_id'])) {
+            $omeka_file_id = $params['omeka_file_id'];
+            $media_type = $params['media_type'];
+            $listterms_select = $params['listterms_select'];
+
+            /** @var \Omeka\Api\Representation\ItemRepresentation $item */
+
+            $file_content = "";
+
+            $file_content = "<map>\n";
+            $file_content .= "$media_type = dcterms:title\n";
+            foreach ($listterms_select as $term_item_name) {
+                foreach ($term_item_name['property'] as $term) {
+                    $file_content .= $term_item_name['field']." = ".$term."\n";
+                }
+            }
+            $file_content .= "</map>";
+
+            $folder_path = dirname(__DIR__)."/../data/mapping";
+            $response = false;
+            if (!empty($folder_path)) {
+                if (file_exists($folder_path) && is_dir($folder_path)) {
+                    $files = $this->listFilesInDir($folder_path);
+                    $file_path = $folder_path . '/';
+                    foreach ($files as $file_index => $file) {
+                        $getId3 = new GetId3();
+                        // TODO Fix GetId3 that uses create_function(), deprecated.
+                        $file_source = @$getId3
+                            ->setOptionMD5Data(true)
+                            ->setOptionMD5DataSource(true)
+                            ->setEncoding('UTF-8')
+                            ->analyze($file_path . $file);
+
+                        if ($file != $omeka_file_id) {
+                            continue;
+                        }
+
+                        $response = $this->extractStringToFile($file_path . $file, $file_content);
+                    }
+                } else {
+                    $error = $this->translate('Folder not exist'); // @translate;
+                }
+            } else {
+                $error = $this->translate('Can’t check empty folder'); // @translate;
+            }
+
+            if ($response) {
+                $request = $this->translate('Item property successfully updated'); // @translate
+            } else {
+                $request = $this->translate('Can’t update item property'); // @translate
+            }
+        } else {
+            $request = $this->translate('Request empty.'); // @translate
+        }
+
+        $this->layout()
+            ->setTemplate('bulk-import-files/index/save-options')
+            ->setVariable('request', $request);
+    }
+
+    public function saveOptionsAction1()
+    {
+        $params = $this->params()->fromPost();
+
+        if (!empty($params['omeka_file_id'])) {
+            $omeka_file_id = $params['omeka_file_id'];
+            $media_type = $params['media_type'];
+            // $file_field_property = $params['file_field_property'];
+            $listterms_select = $params['listterms_select'];
+
+            /** @var \Omeka\Api\Representation\ItemRepresentation $item */
+
+            $item = $this->api()->read('items', ['id' => $omeka_file_id])->getContent();
+
+            $resourceTemplate = $this->api()
+                ->read('resource_templates', ['label' => $this->resourceTemplateLabel])
+                ->getContent();
+
+            $data = [
+                'o:resource_template' => ['o:id' => $resourceTemplate->id()],
+                'o:resource_class' => ['o:id' => ''],
+                'dcterms:title' => [[
+                    'property_id' => '1',
+                    'type' => 'literal',
+                    '@language' => '',
+                    '@value' => $media_type,
+                    'is_public' => '1',
+                ]],
+                'o:thumbnail' => ['o:id' => ''],
+                'o:is_public' => '0',
+            ];
+
+            $bulk = $this->bulk();
+            foreach ($listterms_select as $term_item_name) {
+                if (isset($term_item_name['property'])) {
+                    foreach ($term_item_name['property'] as $term) {
+                        $data[$term][] = [
+                            'property_id' => $bulk->getPropertyId($term),
+                            'type' => 'literal',
+                            '@language' => '',
+                            '@value' => $term_item_name['field'],
+                            'is_public' => '1',
+                        ];
+                    }
+                }
+            }
+
+            $form = $this->getForm(ResourceForm::class)
+                ->setAttribute('action', $this->url()->fromRoute(null, [], true))
+                ->setAttribute('enctype', 'multipart/form-data')
+                ->setAttribute('id', 'edit-item');
+            $form->setData($data);
+            $response = $this->api($form)->update('items', $omeka_file_id, $data);
+
+            if ($response) {
+                $request = $this->translate('Item property successfully updated'); // @translate
+            } else {
+                $request = $this->translate('Can’t update item property'); // @translate
+            }
+        } else {
+            $request = $this->translate('Request empty.'); // @translate
+        }
+
+        $this->layout()
+            ->setTemplate('bulk-import-files/index/save-options')
+            ->setVariable('request', $request);
     }
 
     /**
@@ -514,13 +663,105 @@ class IndexController extends AbstractActionController
     }
 
     /**
+     * List files in a directory, not recursively, and without subdirs, and sort
+     * them alphabetically (case insenitive and natural order).
+     *
+     * @param string $dir
+     * @return array
+     */
+    protected function listFilesInDir($dir)
+    {
+        if (empty($dir) || !file_exists($dir) || !is_dir($dir) || !is_readable($dir)) {
+            return [];
+        }
+        $result = array_values(array_filter(scandir($dir), function ($file) use ($dir) {
+            return is_file($dir . DIRECTORY_SEPARATOR . $file);
+        }));
+        natcasesort($result);
+        return $result;
+    }
+
+    /**
      * Set filesMaps as object (stdClass) for all Items with template "Bulk import files"
      * (ex: public 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
      *
      * Set filesMapsArray as array with key "Item title" it's type of files
      * (ex: 'image/jpeg' => 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
      */
+
     protected function prepareFilesMaps()
+    {
+        $this->filesMaps = [];
+        $folder_path = dirname(__DIR__)."/../data/mapping";
+
+        if (!empty($folder_path)) {
+            if (file_exists($folder_path) && is_dir($folder_path)) {
+                $files = $this->listFilesInDir($folder_path);
+                $file_path = $folder_path . '/';
+                foreach ($files as $file_index => $file) {
+                    $getId3 = new GetId3();
+                    // TODO Fix GetId3 that uses create_function(), deprecated.
+                    $file_source = @$getId3
+                        ->setOptionMD5Data(true)
+                        ->setOptionMD5DataSource(true)
+                        ->setEncoding('UTF-8')
+                        ->analyze($file_path . $file);
+
+                    $data = $this->extractStringFromFile($file_path . $file, '<map', '</map>');
+
+                    $data = trim($data);
+                    if (empty($data)) {
+                        continue;
+                    }
+
+                    $data_rows = array_map('trim',preg_split('/\n|\r\n?/', $data));
+                    foreach ($data_rows as $key => $value) {
+                        if( trim($value) == "" ){
+                            array_splice($data_rows, $key, 1);
+                        }
+                    }
+                    array_splice($data_rows, 0, 1);
+                    array_splice($data_rows, count($data_rows)-1, 1);
+
+                    $current_maps = [];
+                    foreach ($data_rows as $key => $value) {
+
+                        $value_key = array_map('trim',explode(' = ', $value));
+                        $current_maps[$value_key[1]][] = $value_key[0];
+                    }
+                    // var_dump($current_maps);
+                    if (isset($current_maps['dcterms:title'][0])) {
+                        $mediaType = $current_maps['dcterms:title'][0];
+                        if (count($current_maps['dcterms:title']) <= 1) {
+                            unset($current_maps['dcterms:title']);
+                        } else {
+                            unset($current_maps['dcterms:title'][0]);
+                        }
+                        $current_maps['item_id'] = $file;
+                        $this->filesMapsArray[$mediaType] = $current_maps;
+                    } else {
+                        $mediaType = null;
+                    }
+
+                    $current_maps['media_type'] = $mediaType;
+                    $this->filesMaps[$file] = $current_maps;
+                }
+            } else {
+                $error = $this->translate('Folder not exist'); // @translate;
+            }
+        } else {
+            $error = $this->translate('Can’t check empty folder'); // @translate;
+        }
+    }
+
+    /**
+     * Set filesMaps as object (stdClass) for all Items with template "Bulk import files"
+     * (ex: public 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
+     *
+     * Set filesMapsArray as array with key "Item title" it's type of files
+     * (ex: 'image/jpeg' => 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
+     */
+    protected function prepareFilesMaps1()
     {
         $this->filesMaps = [];
 
@@ -559,24 +800,5 @@ class IndexController extends AbstractActionController
             $current_maps['media_type'] = $mediaType;
             $this->filesMaps[$item->id()] = $current_maps;
         }
-    }
-
-    /**
-     * List files in a directory, not recursively, and without subdirs, and sort
-     * them alphabetically (case insenitive and natural order).
-     *
-     * @param string $dir
-     * @return array
-     */
-    protected function listFilesInDir($dir)
-    {
-        if (empty($dir) || !file_exists($dir) || !is_dir($dir) || !is_readable($dir)) {
-            return [];
-        }
-        $result = array_values(array_filter(scandir($dir), function ($file) use ($dir) {
-            return is_file($dir . DIRECTORY_SEPARATOR . $file);
-        }));
-        natcasesort($result);
-        return $result;
     }
 }
