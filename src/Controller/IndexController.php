@@ -8,6 +8,7 @@ use GetId3\GetId3Core as GetId3;
 use Omeka\Entity\Media;
 use Omeka\File\TempFileFactory;
 use Omeka\Form\ResourceForm;
+use Omeka\Mvc\Exception\NotFoundException;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Model\JsonModel;
@@ -89,6 +90,10 @@ class IndexController extends AbstractActionController
 
     public function getFilesAction()
     {
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            throw new NotFoundException;
+        }
+
         $this->prepareFilesMaps();
 
         $request = $this->getRequest();
@@ -168,10 +173,17 @@ class IndexController extends AbstractActionController
 
     public function checkFilesAction()
     {
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            throw new NotFoundException;
+        }
     }
 
     public function checkFolderAction()
     {
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            throw new NotFoundException;
+        }
+
         $this->prepareFilesMaps();
 
         $files_data = [];
@@ -235,6 +247,10 @@ class IndexController extends AbstractActionController
 
     public function processImportAction()
     {
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            throw new NotFoundException;
+        }
+
         $this->prepareFilesMaps();
 
         $config = $this->services->get('Config');
@@ -399,6 +415,10 @@ class IndexController extends AbstractActionController
 
     public function addFileTypeAction()
     {
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            throw new NotFoundException;
+        }
+
         $params = $this->params()->fromPost();
 
         if (!empty($params['media_type'])) {
@@ -437,6 +457,10 @@ class IndexController extends AbstractActionController
 
     public function deleteFileTypeAction()
     {
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            throw new NotFoundException;
+        }
+
         $params = $this->params()->fromPost();
 
         $helpers = $this->services->get('ViewHelperManager');
@@ -477,6 +501,10 @@ class IndexController extends AbstractActionController
 
     public function saveOptionsAction()
     {
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            throw new NotFoundException;
+        }
+
         $params = $this->params()->fromPost();
 
         if (!empty($params['omeka_file_id'])) {
