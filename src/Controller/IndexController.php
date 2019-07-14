@@ -434,37 +434,25 @@ class IndexController extends AbstractActionController
             throw new NotFoundException;
         }
 
-        $params = $this->params()->fromPost();
+        $request = [];
+        $request['state'] = false;
+        $request['reloadURL'] = $this->url()->fromRoute(null, ['action' => 'map-edit'], true);
 
-        if (!empty($params['media_type'])) {
-
-            $media_type = $params['media_type'];
-
-            $file_name = 'map_' . explode('/', $media_type)[0] . '_' . explode('/', $media_type)[1] . '.ini';
-            $filepath = dirname(dirname(__FILE__)) . '/data/mapping/' . $file_name;
-
-            if (!strlen($filepath)) {
-                throw new \RuntimeException('Filepath string should be longer that zero character.');
-            }
-
+        $mediaType = $this->params()->fromPost('media_type');
+        if (empty($mediaType)) {
+            $request['msg'] = $this->translate('Request empty.'); // @translate
+        } else {
+            $filename = 'map_' . explode('/', $mediaType)[0] . '_' . explode('/', $mediaType)[1] . '.ini';
+            $filepath = dirname(dirname(__DIR__)) . '/data/mapping/' . $filename;
             if (($handle = fopen($filepath, 'w')) === false) {
-                throw new \RuntimeException(sprintf('Could not save file "%s" for reading/'), $filepath);
+                $request['msg'] = $this->translate(sprintf('Could not save file "%s" for writing.', $filepath)); // @translate
+            } else {
+                $content = "$mediaType = media_type\n";
+                fwrite($handle, $content);
+                fclose($handle);
+                $request['state'] = true;
+                $request['msg'] = $this->translate('File successfully added!'); // @translate
             }
-
-            $buffer = '';
-            $hasString = false;
-
-            $file_content = "";
-
-            $file_content = "<map>\n";
-                $file_content .= "$media_type = dcterms:title\n";
-            $file_content .= "</map>";
-
-            fwrite($handle, $file_content);
-            fclose($handle);
-            $request = $this->translate('File successfully added!');
-        }else {
-            $request = $this->translate('Request empty.'); // @translate
         }
 
         return new JsonModel($request);
@@ -476,39 +464,32 @@ class IndexController extends AbstractActionController
             throw new NotFoundException;
         }
 
-        $params = $this->params()->fromPost();
+        $request = [];
+        $request['state'] = false;
+        $request['reloadURL'] = $this->url()->fromRoute(null, ['action' => 'map-edit'], true);
 
-        $helpers = $this->services->get('ViewHelperManager');
-        $url = $helpers->get('url');
-        $reloadURL = $url(
-            'admin/bulk-import-files',
-            ['action' => 'index']
-        );
-
-        if (!empty($params['media_type'])) {
-
-            $file_name = $params['media_type'];
-
-            $filepath = dirname(__DIR__)."/../data/mapping/".$file_name;
-
+        $mediaType = $this->params()->fromPost('media_type');
+        if (empty($mediaType)) {
+            $request['msg'] = $this->translate('Request empty.'); // @translate
+        } else {
+            $filename = 'map_' . explode('/', $mediaType)[0] . '_' . explode('/', $mediaType)[1] . '.ini';
+            $filepath = dirname(dirname(__DIR__)) . '/data/mapping/' . $filename;
             if (!strlen($filepath)) {
-                throw new \RuntimeException('Filepath string should be longer that zero character.');
+                $request['msg'] = $this->translate('Filepath string should be longer that zero character.'); // @translate
+            } elseif (!is_writeable($filepath)) {
+                $request['msg'] = $this->translate(sprintf('File "%s" is not writeable. Check rights.', $filepath)); // @translate
+            } elseif (($handle = fopen($filepath, 'w')) === false) {
+                $request['msg'] = $this->translate(sprintf('Could not save file "%s" for writing.', $filepath)); // @translate
+            } else {
+                fclose($handle);
+                $result = unlink($filepath);
+                if (!$result) {
+                    $request['msg'] = $this->translate(sprintf('Could not delete file "%s".', $filepath)); // @translate
+                } else {
+                    $request['state'] = true;
+                    $request['msg'] = $this->translate('File successfully deleted!'); // @translate
+                }
             }
-
-            if (($handle = fopen($filepath, 'w')) === false) {
-                throw new \RuntimeException(sprintf('Could not save file "%s" for reading/'), $filepath);
-            }
-
-            fclose($handle);
-            unlink($filepath) or die("Couldn't delete file");
-
-            $request['state'] = true;
-            $request['reloadURL'] = $reloadURL;
-            $request['msg'] = $this->translate('File successfully deleted!');
-        }else {
-            $request['state'] = false;
-            $request['reloadURL'] = $reloadURL;
-            $request['msg'] = $this->translate('Request empty.');
         }
 
         return new JsonModel($request);
@@ -540,7 +521,7 @@ class IndexController extends AbstractActionController
             }
             $file_content .= "</map>";
 
-            $folder_path = dirname(__DIR__)."/../data/mapping";
+            $folder_path = dirname(dirname(__DIR__)) . '/data/mapping';
             $response = false;
             if (!empty($folder_path)) {
                 if (file_exists($folder_path) && is_dir($folder_path)) {
@@ -719,7 +700,7 @@ class IndexController extends AbstractActionController
     protected function prepareFilesMaps()
     {
         $this->filesMaps = [];
-        $folder_path = dirname(__DIR__)."/../data/mapping";
+        $folder_path = dirname(dirname(__DIR__)) . '/data/mapping';
 
         if (!empty($folder_path)) {
             if (file_exists($folder_path) && is_dir($folder_path)) {
