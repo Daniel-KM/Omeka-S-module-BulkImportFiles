@@ -97,6 +97,10 @@ class IndexController extends AbstractActionController
         $this->prepareFilesMaps();
         $request = $this->getRequest();
         $files = $request->getFiles()->toArray();
+        // Skip dot files.
+        $files['files'] = array_filter($files['files'], function($v) {
+            return strpos($v['name'], '.') !== 0;
+        });
         $files_data_for_view = [];
 
         foreach ($files['files'] as $file) {
@@ -207,10 +211,13 @@ class IndexController extends AbstractActionController
         $error = '';
 
         $params = $this->params()->fromPost();
-
         if (!empty($params['folder'])) {
             if (file_exists($params['folder']) && is_dir($params['folder'])) {
                 $files = $this->listFilesInDir($params['folder']);
+                // Skip dot files.
+                $files = array_filter($files, function($v) {
+                    return strpos($v, '.') !== 0;
+                });
                 $file_path = $params['folder'] . '/';
                 foreach ($files as $file) {
                     $getId3 = new GetId3();
