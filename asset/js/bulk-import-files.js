@@ -224,8 +224,8 @@ $(document).ready(function () {
     }
 
     function save_action(row) {
-
-        omeka_item_id = row.parents('.selected-files-row').find('.omeka_item_id').val();
+        // Omeka_file_id is the filename.
+        omeka_file_id = row.parents('.selected-files-row').find('.omeka_file_id').val();
         media_type = row.parents('.selected-files-row').find('.media_type').val();
 
         listterms_select_total = [];
@@ -234,61 +234,49 @@ $(document).ready(function () {
          * First find new added fields
          */
         row.parents('tr.selected-files-row').find('.listterms_with_action_row').each(function () {
-
-            file_field_property = $(this).find('.js-file_field_property').html();
             listterms_select = [];
+            file_field_property = $(this).find('.js-file_field_property').html();
             $(this).find('.listterms_with_action').each(function () {
-
                 listterms_select.push($(this).find('.listterms_select').val());
-
             });
 
-            if (listterms_select.length > 0)
+            if (listterms_select.length > 0) {
                 listterms_select_total.push({
                     'field': file_field_property,
                     'property': listterms_select
                 });
-
+            }
         });
 
         /**
          * Add existing fields.
          */
-
         row.parents('tr.selected-files-row').find('.with_property').each(function () {
-
             file_field_property = $(this).find('.js-file_field_property').html();
             listterms_select = [];
             $(this).find('.omeka_property_name').each(function () {
-
-                listterms_select.push($(this).html());
-
+                var selected_option = jQuery(this).html();
+                listterms_select.push(selected_option);
             });
 
-            if (listterms_select.length > 0)
+            if (listterms_select.length > 0) {
                 listterms_select_total.push({
                     'field': file_field_property,
                     'property': listterms_select
                 });
-
+            }
         });
 
         /**
          * Check double omeka property fields.
          */
-
         check_same_property = '';
-
         $('.response').removeClass('error');
-
         property_for_check = [];
 
         $.each(listterms_select_total, function (key, val) {
-
             $.each(val['property'], function (pr_key, pr_val) {
-
                 check_same_property = $.inArray(pr_val, property_for_check);
-
                 if (check_same_property == 0) {
                     $('.response').addClass('error');
                     $('.response').html('Omeka property can’t be same!');
@@ -311,7 +299,7 @@ $(document).ready(function () {
         url = basePath + '/admin/bulk-import-files/save-options';
 
         var form_data = {
-            'omeka_item_id': omeka_item_id,
+            'omeka_file_id': omeka_file_id,
             'media_type': media_type,
             'file_field_property': file_field_property,
             'listterms_select': listterms_select_total,
@@ -436,24 +424,18 @@ $(document).ready(function () {
             } else {
                 clearTimeout(create_action);
             }
-
         }
-
     }
 
     function action_for_recognize_files() {
         $('.js-recognize_files').click(function () {
-
             filenames = [];
             row_id = [];
-
             $('.response').find('.total_info').remove();
-
             $('.response .isset_yes').each(function () {
                 filenames.push($(this).find('.filename').html());
                 row_id.push($(this).find('.filename').data('row-id'));
             });
-
             data_for_recognize = {
                 'directory': directory,
                 'filenames': filenames,
@@ -465,9 +447,7 @@ $(document).ready(function () {
             total_files_for_upload = data_for_recognize['filenames'].length;
             make_action = true;
             create_action = setTimeout(make_single_file_upload(file_position_upload), 1000);
-
         });
-
     }
 
     $('#delete-file').click(function () {
