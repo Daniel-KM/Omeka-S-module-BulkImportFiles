@@ -95,11 +95,8 @@ class IndexController extends AbstractActionController
         }
 
         $this->prepareFilesMaps();
-
         $request = $this->getRequest();
-
         $files = $request->getFiles()->toArray();
-
         $files_data_for_view = [];
 
         foreach ($files['files'] as $file) {
@@ -165,9 +162,27 @@ class IndexController extends AbstractActionController
             ];
         }
 
+        // The simplest way to get the list of all properties by vocabulary.
+        // TODO Use a true form element and use chosen dynamically.
+        $factory = new \Zend\Form\Factory($this->services->get('FormElementManager'));
+        $element = $factory->createElement([
+            'type' => \Omeka\Form\Element\PropertySelect::class,
+        ]);
+        $listTerms = $element->getValueOptions();
+        // Convert the list to a list for select whit option group.
+        // TODO Keep the full select array, compatible with js chosen.
+        $result = [];
+        foreach ($listTerms as $vocabulary) {
+            foreach ($vocabulary['options'] as $property) {
+                $result[$vocabulary['label']][$property['attributes']['data-term']] = $property['label'];
+            }
+        }
+        $listTerms = $result;
+
         $this->layout()
+            ->setTemplate('bulk-import-files/index/get-files')
             ->setVariable('files_data_for_view', $files_data_for_view)
-            ->setVariable('listTerms', $this->bulk()->getPropertyTerms())
+            ->setVariable('listTerms', $listTerms)
             ->setVariable('filesMaps', $this->filesMaps);
     }
 
@@ -701,14 +716,6 @@ class IndexController extends AbstractActionController
         return $result;
     }
 
-    /**
-     * Set filesMaps as object (stdClass) for all Items with template "Bulk import files"
-     * (ex: public 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
-     *
-     * Set filesMapsArray as array with key "Item title" it's type of files
-     * (ex: 'image/jpeg' => 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
-     */
-
     protected function prepareFilesMaps()
     {
         $this->filesMaps = [];
@@ -716,51 +723,60 @@ class IndexController extends AbstractActionController
 
         if (!empty($folder_path)) {
             if (file_exists($folder_path) && is_dir($folder_path)) {
+                /** @var \BulkImport\Mvc\Controller\Plugin\Bulk $bulk */
+                $bulk = $this->bulk();
+
                 $files = $this->listFilesInDir($folder_path);
                 $file_path = $folder_path . '/';
-                foreach ($files as $file_index => $file) {
-                    $getId3 = new GetId3();
-                    // TODO Fix GetId3 that uses create_function(), deprecated.
-                    $file_source = @$getId3
-                        ->setOptionMD5Data(true)
-                        ->setOptionMD5DataSource(true)
-                        ->setEncoding('UTF-8')
-                        ->analyze($file_path . $file);
-
-                    $data = $this->extractStringFromFile($file_path . $file, '<map', '</map>');
-
+                foreach ($files as $file) {
+                    $data = file_get_contents($file_path . $file);
                     $data = trim($data);
                     if (empty($data)) {
                         continue;
                     }
 
-                    $data_rows = array_map('trim',preg_split('/\n|\r\n?/', $data));
-                    foreach ($data_rows as $key => $value) {
-                        if( trim($value) == "" ){
-                            array_splice($data_rows, $key, 1);
-                        }
-                    }
-                    array_splice($data_rows, 0, 1);
-                    array_splice($data_rows, count($data_rows)-1, 1);
+                    $data_rows = array_filter(array_map('trim', preg_split('/\n|\r\n?/', $data)));
 
+                    $mediaType = null;
                     $current_maps = [];
-                    foreach ($data_rows as $key => $value) {
-
-                        $value_key = array_map('trim',explode(' = ', $value));
-                        $current_maps[$value_key[1]][] = $value_key[0];
-                    }
-                    // var_dump($current_maps);
-                    if (isset($current_maps['dcterms:title'][0])) {
-                        $mediaType = $current_maps['dcterms:title'][0];
-                        if (count($current_maps['dcterms:title']) <= 1) {
-                            unset($current_maps['dcterms:title']);
-                        } else {
-                            unset($current_maps['dcterms:title'][0]);
+                    foreach ($data_rows as $value) {
+                        $value = array_map('trim', explode('=', $value));
+                        if (count($value) !== 2) {
+                            continue;
                         }
+
+                        if (in_array('media_type', $value)) {
+                            $mediaType = $value[0] === 'media_type' ? $value[1] : $value[0];
+                            continue;
+                        }
+
+                        // Reorder as mapping = term.
+                        // A term has no "/" and no ".", but requires a ":".
+                        if (strpos($value[0], '/') === false
+                            && strpos($value[0], '.') === false
+                            && strpos($value[0], ':') !== false
+                        ) {
+                            $term = $value[0];
+                            $map = $value[1];
+                        } else {
+                            $term = $value[1];
+                            $map = $value[0];
+                        }
+
+                        if (strpos($term, ':') === false || count(explode(':', $term)) !== 2) {
+                            continue;
+                        }
+                        $term = $bulk->getPropertyTerm($term);
+                        if (!$term) {
+                            continue;
+                        }
+
+                        $current_maps[$term][] = $map;
+                    }
+
+                    if ($mediaType) {
                         $current_maps['item_id'] = $file;
                         $this->filesMapsArray[$mediaType] = $current_maps;
-                    } else {
-                        $mediaType = null;
                     }
 
                     $current_maps['media_type'] = $mediaType;
@@ -771,54 +787,6 @@ class IndexController extends AbstractActionController
             }
         } else {
             $error = $this->translate('Can’t check empty folder'); // @translate;
-        }
-    }
-
-    /**
-     * Set filesMaps as object (stdClass) for all Items with template "Bulk import files"
-     * (ex: public 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
-     *
-     * Set filesMapsArray as array with key "Item title" it's type of files
-     * (ex: 'image/jpeg' => 'dcterms:created' => string '/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate')
-     */
-    protected function prepareFilesMaps1()
-    {
-        $this->filesMaps = [];
-
-        try {
-            $resourceTemplate = $this->api()
-                ->read('resource_templates', ['label' => $this->resourceTemplateLabel])
-                ->getContent();
-        } catch (\Exception $e) {
-            $this->messenger()->addError('The required resource template "Bulk import files" has been removed or renamed.'); // @translate
-            return;
-        }
-
-        $items = $this->api()
-            ->search('items', ['resource_template_id' => $resourceTemplate->id()])
-            ->getContent();
-
-        $options = [];
-        $options['viewName'] = 'common/item-resource-values';
-
-        foreach ($items as $item) {
-            $current_maps = json_decode($item->displayValues($options), true);
-            if (isset($current_maps['dcterms:title'][0])) {
-                $mediaType = $current_maps['dcterms:title'][0];
-                if (count($current_maps['dcterms:title']) <= 1) {
-                    unset($current_maps['dcterms:title']);
-                } else {
-                    unset($current_maps['dcterms:title'][0]);
-                }
-                $current_maps['item_id'] = $item->id();
-                $this->filesMapsArray[$mediaType] = $current_maps;
-            } else {
-                $mediaType = null;
-            }
-
-            unset($current_maps['item_id']);
-            $current_maps['media_type'] = $mediaType;
-            $this->filesMaps[$item->id()] = $current_maps;
         }
     }
 }
