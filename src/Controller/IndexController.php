@@ -2,12 +2,14 @@
 
 namespace BulkImportFiles\Controller;
 
+// The autoload doesn‘t work with GetId3.
+if (!class_exists(\JamesHeinrich\GetID3\GetId3::class)) {
+    require dirname(dirname(__DIR__)) . '/vendor/james-heinrich/getid3/src/GetID3.php';
+}
+
 use BulkImportFiles\Form\ImportForm;
 use BulkImportFiles\Form\SettingsForm;
-use GetId3\GetId3Core as GetId3;
-use Omeka\Entity\Media;
-use Omeka\File\TempFileFactory;
-use Omeka\Form\ResourceForm;
+use JamesHeinrich\GetID3\GetId3;
 use Omeka\Mvc\Exception\NotFoundException;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -126,11 +128,7 @@ class IndexController extends AbstractActionController
 
                     default:
                         $getId3 = new GetId3();
-                        // TODO Fix GetId3 that uses create_function(), deprecated.
-                        $file_source = @$getId3
-                            ->setOptionMD5Data(true)
-                            ->setOptionMD5DataSource(true)
-                            ->setEncoding('UTF-8')
+                        $file_source = $getId3
                             ->analyze($file['tmp_name']);
                         $this->parsed_data = $this->flatArray($file_source, $this->ignoredKeys);
                         $data = $this->mapData()->array($file_source, $filesMapsArray, true);
@@ -228,11 +226,7 @@ class IndexController extends AbstractActionController
 
                 if ($file['error'] === UPLOAD_ERR_OK) {
                     $getId3 = new GetId3();
-                    // TODO Fix GetId3 that uses create_function(), deprecated.
-                    $file_source = @$getId3
-                        ->setOptionMD5Data(true)
-                        ->setOptionMD5DataSource(true)
-                        ->setEncoding('UTF-8')
+                    $file_source = $getId3
                         ->analyze($file['tmp_name']);
 
                     ++$total_files;
@@ -319,11 +313,7 @@ class IndexController extends AbstractActionController
                 $file_path = $params['folder'] . '/';
                 foreach ($files as $file) {
                     $getId3 = new GetId3();
-                    // TODO Fix GetId3 that uses create_function(), deprecated.
-                    $file_source = @$getId3
-                        ->setOptionMD5Data(true)
-                        ->setOptionMD5DataSource(true)
-                        ->setEncoding('UTF-8')
+                    $file_source = $getId3
                         ->analyze($file_path . $file);
 
                     ++$total_files;
@@ -411,11 +401,7 @@ class IndexController extends AbstractActionController
             // Create new media via temporary factory.
 
             $getId3 = new GetId3();
-            // TODO Fix GetId3 that uses create_function(), deprecated.
-            $file_source = @$getId3
-                ->setOptionMD5Data(true)
-                ->setOptionMD5DataSource(true)
-                ->setEncoding('UTF-8')
+            $file_source = $getId3
                 ->analyze($full_file_path);
 
             $media_type = isset($file_source['mime_type']) ? $file_source['mime_type'] : 'undefined';
