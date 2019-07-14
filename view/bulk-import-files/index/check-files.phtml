@@ -1,0 +1,12 @@
+<?php
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ * @var array $files_data
+ * @var int $total_files
+ * @var int $total_files_can_recognized
+ * @var string $error
+ * @var bool $is_server
+ */
+
+// TODO Find why the other common template cannot be called directly from the controller (this is a partial view, not a full response with layout).
+echo $this->partial('bulk-import-files/index/check-folder', $this->vars());

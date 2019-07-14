@@ -197,6 +197,102 @@ class IndexController extends AbstractActionController
         if (!$this->getRequest()->isXmlHttpRequest()) {
             throw new NotFoundException;
         }
+
+        $this->prepareFilesMaps();
+
+        $request = $this->getRequest();
+        $files = $request->getFiles()->toArray();
+        // Skip dot files.
+        $files['files'] = array_filter($files['files'], function($v) {
+            return strpos($v['name'], '.') !== 0;
+        });
+
+        $files_data = [];
+        $total_files = 0;
+        $total_files_can_recognized = 0;
+        $error = '';
+
+        // Save the files temporary for the next request.
+        $dest = sys_get_temp_dir() . '/bulkimportfiles_upload/';
+        if (!file_exists($dest)) {
+            mkdir($dest, 0775, true);
+        }
+
+        if (!empty($files['files'])) {
+            foreach ($files['files'] as $file) {
+                // Check name for security.
+                if (basename($file['name']) !== $file['name']) {
+                    $error = $this->translate('All files must have a regular name. Check ended.'); // @translate
+                    break;
+                }
+
+                if ($file['error'] === UPLOAD_ERR_OK) {
+                    $getId3 = new GetId3();
+                    // TODO Fix GetId3 that uses create_function(), deprecated.
+                    $file_source = @$getId3
+                        ->setOptionMD5Data(true)
+                        ->setOptionMD5DataSource(true)
+                        ->setEncoding('UTF-8')
+                        ->analyze($file['tmp_name']);
+
+                    ++$total_files;
+
+                    $media_type = 'undefined';
+                    $file_isset_maps = 'no';
+
+                    if (isset($file_source['mime_type'])) {
+                        $media_type = $file_source['mime_type'];
+                        if (isset($this->filesMapsArray[$media_type])) {
+                            $file_isset_maps = 'yes';
+                            ++$total_files_can_recognized;
+                        }
+                    }
+
+                    $files_data[] = [
+                        'source' => $file['name'],
+                        'filename' => basename($file['tmp_name']),
+                        'file_size' => $file_source['filesize'],
+                        'file_type' => $media_type,
+                        'file_isset_maps' => $file_isset_maps,
+                        'has_error' => $file['error'],
+                    ];
+
+                    $full_file_path = $dest . basename($file['tmp_name']);
+                    move_uploaded_file($file['tmp_name'], $full_file_path);
+                } else {
+                    if (isset($this->filesMapsArray[$file['type']])) {
+                        $file_isset_maps = 'yes';
+                        ++$total_files_can_recognized;
+                    } else {
+                        $file_isset_maps = 'no';
+                    }
+
+                    $files_data[] = [
+                        'source' => $file['name'],
+                        'filename' => basename($file['tmp_name']),
+                        'file_size' => $file['size'],
+                        'file_type' => $file['type'],
+                        'file_isset_maps' => $file_isset_maps,
+                        'has_error' => $file['error'],
+                    ];
+                }
+            }
+
+            if (!$error && count($files_data) == 0) {
+                $error = $this->translate('Folder is empty'); // @translate
+            }
+        } else {
+            $error = $this->translate('Can’t check empty folder'); // @translate
+        }
+
+        // This is not a full view, only a partial html.
+        $this->layout()
+            ->setTemplate('bulk-import-files/index/check-files')
+            ->setVariable('files_data', $files_data)
+            ->setVariable('total_files', $total_files)
+            ->setVariable('total_files_can_recognized', $total_files_can_recognized)
+            ->setVariable('error', $error)
+            ->setVariable('is_server', false);
     }
 
     public function checkFolderAction()
@@ -279,7 +375,12 @@ class IndexController extends AbstractActionController
 
         $this->prepareFilesMaps();
 
+        // Because there is no ingester for server, the ingester "url" is used
+        // with a local folder inside "files/bulkimportfiles_temp", that is
+        // available via https.
+
         $config = $this->services->get('Config');
+        $basePath = $config['file_store']['local']['base_path'] ?: OMEKA_PATH . '/files';
         $baseUri = $config['file_store']['local']['base_uri'];
         if (!$baseUri) {
             $helpers = $this->services->get('ViewHelperManager');
@@ -289,8 +390,8 @@ class IndexController extends AbstractActionController
         }
 
         $params = $this->params()->fromPost();
-
         $isServer = $params['is_server'] === 'true';
+        $params['delete_file'] = !$isServer || $params['delete_file'];
 
         $row_id = $params['row_id'];
         $notice = null;
@@ -332,6 +433,7 @@ class IndexController extends AbstractActionController
             if (!$isMapped) {
                 if (!$params['import_unmapped']) {
                     $this->layout()
+                        ->setTemplate('bulk-import-files/index/process-import')
                         ->setVariable('row_id', $row_id)
                         ->setVariable('error', sprintf($this->translate('The media type "%s" is not managed or has no mapping.'), $media_type)); // @translate
                     return;
@@ -370,68 +472,56 @@ class IndexController extends AbstractActionController
                 }
             }
 
-            // Create new Item.
+            if (empty($data['dcterms:title'])) {
+                $data['dcterms:title'][] = [
+                    'property_id' => 1,
+                    'type' => 'literal',
+                    '@language' => null,
+                    '@value' =>  $isServer ? $params['filename'] : $params['source'],
+                    'is_public' => '1',
+                ];
+            }
 
-            $fileinfo = new \SplFileInfo($full_file_path);
-            $tempPath = $fileinfo->getRealPath();
+            // Create the item with the data and the file.
 
-            $this->tempFileFactory = new TempFileFactory($this->services);
+            // Save the file if not to be deleted.
+            $tmpDir = $basePath . '/bulkimportfiles_temp';
+            if (!file_exists($tmpDir)) {
+                mkdir($tmpDir, 0775, true);
+            }
+            $tmpPath = tempnam($tmpDir, 'omk_bif_');
+            copy($full_file_path, $tmpPath);
+            @chmod($tmpPath, 0775);
 
-            $tempFile = $this->tempFileFactory->build();
-            $tempFile->setTempPath($tempPath);
-            $tempFile->setSourceName($full_file_path);
+            $url = $baseUri . '/bulkimportfiles_temp/' . basename($tmpPath);
 
-            $media = new Media();
-            $media->setStorageId($tempFile->getStorageId());
-            $media->setExtension($tempFile->getExtension());
-            $media->setMediaType($tempFile->getMediaType());
-            $media->setSha256($tempFile->getSha256());
-            $media->setSize($tempFile->getSize());
-
-            $hasThumbnails = $tempFile->storeThumbnails();
-            $media->setHasThumbnails($hasThumbnails);
-            $media->setSource($full_file_path);
-
-            $tempFile->storeOriginal();
-            $media->setHasOriginal(true);
-
-            // Get metadata from $full_file_path
-            $url = $baseUri . '/original/' . $tempFile->getStorageId() . '.' . $tempFile->getExtension();
-
-            // Append default metadata if needed.
+            // Append default metadata and media with url.
             $data += [
                 'o:resource_template' => ['o:id' => ''],
                 'o:resource_class' => ['o:id' => ''],
                 'o:thumbnail' => ['o:id' => ''],
                 'o:media' => [[
                     'o:is_public' => '1',
-                    'ingest_url' => $url,
+                    'dcterms:title' => [[
+                        'property_id' => 1,
+                        'type' => 'literal',
+                        '@language' => null,
+                        '@value' => $isServer ? $params['filename'] : $params['source'],
+                        'is_public' => '1',
+                    ]],
                     'o:ingester' => 'url',
+                    'ingest_url' => $url,
+                    'o:source' => $isServer ? $params['filename'] : $params['source'],
                 ]],
                 'o:is_public' => '1',
             ];
 
-            if (!isset($data['dcterms:title'][0])) {
-                $item_title = $params['filename'];
-                $data['dcterms:title'] = [[
-                    'property_id' => 1,
-                    'type' => 'literal',
-                    '@language' => '',
-                    '@value' => $item_title,
-                    'is_public' => '1',
-                ]];
-            }
+            $newItem = $this->api()->create('items', $data);
 
-            /** @var \Omeka\Form\ResourceForm $form */
-            $form = $this->getForm(ResourceForm::class);
-            $form
-                ->setAttribute('action', $this->url()->fromRoute(null, [], true))
-                ->setAttribute('enctype', 'multipart/form-data')
-                ->setAttribute('id', 'add-item');
-            $form->setData($data);
-            $hasNewItem = $this->api($form)->create('items', $data);
-            if ($hasNewItem && $delete_file_action) {
-                $tempFile->delete();
+            // The temp file is removed in all cases.
+            @unlink($tmpPath);
+            if ($newItem && $delete_file_action) {
+                @unlink($full_file_path);
             }
         }
 
