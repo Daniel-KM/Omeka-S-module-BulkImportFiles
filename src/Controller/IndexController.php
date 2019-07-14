@@ -95,12 +95,14 @@ class IndexController extends AbstractActionController
         }
 
         $this->prepareFilesMaps();
+
         $request = $this->getRequest();
         $files = $request->getFiles()->toArray();
         // Skip dot files.
         $files['files'] = array_filter($files['files'], function($v) {
             return strpos($v['name'], '.') !== 0;
         });
+
         $files_data_for_view = [];
 
         foreach ($files['files'] as $file) {
@@ -242,6 +244,7 @@ class IndexController extends AbstractActionController
                     }
 
                     $files_data[] = [
+                        'source' => $file,
                         'filename' => $file_source['filename'],
                         'file_size' => $file_source['filesize'],
                         'file_type' => $media_type,
@@ -264,7 +267,8 @@ class IndexController extends AbstractActionController
             ->setVariable('files_data', $files_data)
             ->setVariable('total_files', $total_files)
             ->setVariable('total_files_can_recognized', $total_files_can_recognized)
-            ->setVariable('error', $error);
+            ->setVariable('error', $error)
+            ->setVariable('is_server', true);
     }
 
     public function processImportAction()
@@ -285,17 +289,88 @@ class IndexController extends AbstractActionController
         }
 
         $params = $this->params()->fromPost();
-        $data_for_recognize_row_id = $params['data_for_recognize_row_id'];
+
+        $isServer = $params['is_server'] === 'true';
+
+        $row_id = $params['row_id'];
         $notice = null;
         $warning = null;
         $error = null;
 
-        if (isset($params['data_for_recognize_single'])) {
-            $full_file_path = $params['directory'] . '/' . $params['data_for_recognize_single'];
-            $delete_file_action = $params['delete_file'] === 'true';
+        if (isset($params['filename'])) {
+            if ($isServer) {
+                $full_file_path = $params['directory'] . '/' . $params['filename'];
+            } else {
+                $full_file_path = sys_get_temp_dir() . '/bulkimportfiles_upload/' . $params['filename'];
+            }
+
+            $delete_file_action = $params['delete_file'];
 
             // TODO Use api standard method, not direct creation.
             // Create new media via temporary factory.
+
+            $getId3 = new GetId3();
+            // TODO Fix GetId3 that uses create_function(), deprecated.
+            $file_source = @$getId3
+                ->setOptionMD5Data(true)
+                ->setOptionMD5DataSource(true)
+                ->setEncoding('UTF-8')
+                ->analyze($full_file_path);
+
+            $media_type = isset($file_source['mime_type']) ? $file_source['mime_type'] : 'undefined';
+            if ($media_type == 'undefined') {
+                $file_extension = pathinfo($full_file_path, PATHINFO_EXTENSION);
+                $file_extension = strtolower($file_extension);
+
+                // TODO Why pdf is an exception ?
+                if ($file_extension == 'pdf') {
+                    $media_type = 'application/pdf';
+                }
+            }
+
+            $isMapped = isset($this->filesMapsArray[$media_type]);
+            if (!$isMapped) {
+                if (!$params['import_unmapped']) {
+                    $this->layout()
+                        ->setVariable('row_id', $row_id)
+                        ->setVariable('error', sprintf($this->translate('The media type "%s" is not managed or has no mapping.'), $media_type)); // @translate
+                    return;
+                }
+
+                $data = [];
+                $notice = $this->translate('No mapping for this file.'); // @translate
+            } else {
+                $filesMapsArray = $this->filesMapsArray[$media_type];
+                unset($filesMapsArray['media_type']);
+                unset($filesMapsArray['item_id']);
+
+                // Use xml or array according to item mapping.
+                $query = reset($filesMapsArray);
+                $query = $query ? reset($query) : null;
+                $isXpath = $query && strpos($query, '/') !== false;
+                if ($isXpath) {
+                    $data = $this->mapData()->xml($full_file_path, $filesMapsArray);
+                } else {
+                    switch ($media_type) {
+                        case 'application/pdf':
+                            $data = $this->mapData()->pdf($full_file_path, $filesMapsArray);
+                            break;
+                        default:
+                            $data = $this->mapData()->array($file_source, $filesMapsArray);
+                            break;
+                    }
+                }
+
+                if (count($data) <= 0) {
+                    if ($query) {
+                        $warning = $this->translate('No metadata to import. You may see log for more info.'); // @translate
+                    } else {
+                        $notice = $this->translate('No metadata: mapping is empty.'); // @translate
+                    }
+                }
+            }
+
+            // Create new Item.
 
             $fileinfo = new \SplFileInfo($full_file_path);
             $tempPath = $fileinfo->getRealPath();
@@ -320,55 +395,8 @@ class IndexController extends AbstractActionController
             $tempFile->storeOriginal();
             $media->setHasOriginal(true);
 
-            // Create new Item.
-
             // Get metadata from $full_file_path
             $url = $baseUri . '/original/' . $tempFile->getStorageId() . '.' . $tempFile->getExtension();
-
-            $getId3 = new GetId3();
-            // TODO Fix GetId3 that uses create_function(), deprecated.
-            $file_source = @$getId3
-                ->setOptionMD5Data(true)
-                ->setOptionMD5DataSource(true)
-                ->setEncoding('UTF-8')
-                ->analyze($full_file_path);
-
-            $media_type = isset($file_source['mime_type']) ? $file_source['mime_type'] : 'undefined';
-            if (!isset($this->filesMapsArray[$media_type])) {
-                $this->layout()
-                    ->setVariable('data_for_recognize_row_id', $data_for_recognize_row_id)
-                    ->setVariable('error', sprintf($this->translate('The media type "%s" is not managed or has no mapping.'), $media_type));
-                return;
-            }
-
-            $filesMapsArray = $this->filesMapsArray[$media_type];
-            unset($filesMapsArray['media_type']);
-            unset($filesMapsArray['item_id']);
-
-            // Use xml or array according to item mapping.
-            $query = reset($filesMapsArray);
-            $query = $query ? reset($query) : null;
-            $isXpath = $query && strpos($query, '/') !== false;
-            if ($isXpath) {
-                $data = $this->mapData()->xml($full_file_path, $filesMapsArray);
-            } else {
-                switch ($media_type) {
-                    case 'application/pdf':
-                        $data = $this->mapData()->pdf($full_file_path, $filesMapsArray);
-                        break;
-                    default:
-                        $data = $this->mapData()->array($file_source, $filesMapsArray);
-                        break;
-                }
-            }
-
-            if (count($data) <= 0) {
-                if ($query) {
-                    $warning = $this->translate('No metadata to import. You may see log for more info.'); // @translate
-                } else {
-                    $notice = $this->translate('No metadata: mapping is empty.'); // @translate
-                }
-            }
 
             // Append default metadata if needed.
             $data += [
@@ -384,7 +412,7 @@ class IndexController extends AbstractActionController
             ];
 
             if (!isset($data['dcterms:title'][0])) {
-                $item_title = $params['data_for_recognize_single'];
+                $item_title = $params['filename'];
                 $data['dcterms:title'] = [[
                     'property_id' => 1,
                     'type' => 'literal',
@@ -408,10 +436,11 @@ class IndexController extends AbstractActionController
         }
 
         $this->layout()
-            ->setVariable('data_for_recognize_row_id', $data_for_recognize_row_id)
-            ->setVariable('notice', empty($notice) ? null : $notice)
-            ->setVariable('warning', empty($warning) ? null : $warning)
-            ->setVariable('error', empty($error) ? null : $error);
+            ->setTemplate('bulk-import-files/index/process-import')
+            ->setVariable('row_id', $row_id)
+            ->setVariable('notice', $notice)
+            ->setVariable('warning', $warning)
+            ->setVariable('error', $error);
     }
 
     public function mapShowAction()
