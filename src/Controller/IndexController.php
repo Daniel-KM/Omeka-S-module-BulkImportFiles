@@ -404,8 +404,8 @@ class IndexController extends AbstractActionController
 
             $media_type = $params['media_type'];
 
-            $file_name = "map_".explode("/", $media_type)[1];
-            $filepath = dirname(__DIR__)."/../data/mapping/".$file_name.".csv";
+            $file_name = 'map_' . explode('/', $media_type)[0] . '_' . explode('/', $media_type)[1] . '.ini';
+            $filepath = dirname(dirname(__FILE__)) . '/data/mapping/' . $file_name;
 
             if (!strlen($filepath)) {
                 throw new \RuntimeException('Filepath string should be longer that zero character.');

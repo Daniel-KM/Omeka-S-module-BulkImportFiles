@@ -1,7 +1,0 @@
-/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate = dcterms:created
-/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:ModifyDate = dcterms:modified
-/x:xmpmeta/rdf:RDF/rdf:Description/@xmp:Label = dcterms:title
-/x:xmpmeta/rdf:RDF/rdf:Description/@tiff:Model = dcterms:format
-/x:xmpmeta/rdf:RDF/rdf:Description/@exif:DateTimeOriginal = dcterms:created
-/x:xmpmeta/rdf:RDF/rdf:Description/@dc:format = dcterms:format
-/x:xmpmeta/rdf:RDF/rdf:Description/dc:subject//rdf:li = dcterms:subject
