@@ -73,11 +73,13 @@ return [
                 'label' => 'Bulk import files', // @translate
                 'route' => 'admin/bulk-import-files',
                 'resource' => 'BulkImportFiles\Controller\Index',
+                'privilege' => 'make-import',
                 'pages' => [
                     [
                         'label' => 'Make import', // @translate
                         'route' => 'admin/bulk-import-files',
                         'resource' => 'BulkImportFiles\Controller\Index',
+                        'privilege' => 'make-import',
                     ],
                     [
                         'label' => 'View mappings', // @translate

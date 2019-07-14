@@ -36,10 +36,9 @@ class Module extends AbstractModule
         /** @var \Omeka\Permissions\Acl $acl */
         $acl = $this->getServiceLocator()->get('Omeka\Acl');
 
-        // Only admins can edit mapping, else can only import, that uses some
-        // ajax actions.
+        // Only global admin can edit mapping, other people can only import.
+        // The rules include some ajax actions.
         $roles = [
-            \Omeka\Permissions\Acl::ROLE_GLOBAL_ADMIN,
             \Omeka\Permissions\Acl::ROLE_SITE_ADMIN,
             \Omeka\Permissions\Acl::ROLE_EDITOR,
             \Omeka\Permissions\Acl::ROLE_REVIEWER,
@@ -60,12 +59,19 @@ class Module extends AbstractModule
                     'check-files',
                     'check-folder',
                     'process-import',
-                    // 'map-show',
-                    // 'map-edit',
-                    // 'add-file-type',
-                    // 'delete-file-type',
-                    // 'save-options',
+                    'map-show',
+                ]
+            )
+            ->deny(
+                [\Omeka\Permissions\Acl::ROLE_SITE_ADMIN],
+                ['BulkImportFiles\Controller\Index'],
+                [
+                    'map-edit',
+                    'add-file-type',
+                    'delete-file-type',
+                    'save-options',
                 ]
             );
+
     }
 }
