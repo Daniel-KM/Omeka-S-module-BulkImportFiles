@@ -521,7 +521,10 @@ class IndexController extends AbstractActionController
             // The temp file is removed in all cases.
             @unlink($tmpPath);
             if ($newItem && $delete_file_action) {
-                @unlink($full_file_path);
+                $result = @unlink($full_file_path);
+                if (!$result) {
+                    $warning = error_get_last()['message'];
+                }
             }
         }
 
