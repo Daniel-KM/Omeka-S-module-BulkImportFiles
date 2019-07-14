@@ -5,6 +5,8 @@ Bulk Import Files (module for Omeka S)
 bulk with their internal metadata (for example exif, iptc and xmp for images,
 audio and video, or pdf properties, etc.).
 
+This module is backported as a [plugin] for [Omeka Classic]
+
 
 Installation
 ------------
@@ -53,17 +55,15 @@ Usage
 ### Configuration
 
 The mapping of each media type (`image/jpg`, `image/png`, `application/pdf`) is
-managed via items with the resource template `Bulk import files`, that is an
-empty template created by the module.
+managed via the files inside the folder `data/mapping`.
 
-So the first thing to do is to create private items will all the needed
-properties.
+So the first thing to do is to create mappings will all the needed elements.
 
 For example, for the `JPG` format, the values are the one that are exposed via
 the following xml paths (`xmp` is xml and provides all `iptc` and `exif` metadata):
 
 ```
-dcterms:title = image/jpeg
+media_type = image/jpeg
 dcterms:title = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:Label
 dcterms:description = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:Caption
 dcterms:created = /x:xmpmeta/rdf:RDF/rdf:Description/@xmp:CreateDate
@@ -78,18 +78,21 @@ as title, if any.
 If you prefer to use `exif` or `iptc`, here is the equivalent config:
 
 ```
-dcterms:title = image/jpeg
+media_type = image/jpeg
 dcterms:title = iptc.IPTCApplication.Headline
 dcterms:description = iptc.IPTCApplication.Caption
 dcterms:created = jpg.exif.EXIF.DateTimeOriginal
 dcterms:modified = jpg.exif.EXIF.DateTimeDigitized
 dcterms:format = jpg.exif.FILE.MimeType
-dcterms:subject = iptc.IPTCApplication.Keywords/0
-dcterms:subject = iptc.IPTCApplication.Keywords/1
-dcterms:subject = iptc.IPTCApplication.Keywords/2
-dcterms:subject = iptc.IPTCApplication.Keywords/3
-dcterms:subject = iptc.IPTCApplication.Keywords/4
+dcterms:subject = iptc.IPTCApplication.Keywords.0
+dcterms:subject = iptc.IPTCApplication.Keywords.1
+dcterms:subject = iptc.IPTCApplication.Keywords.2
+dcterms:subject = iptc.IPTCApplication.Keywords.3
+dcterms:subject = iptc.IPTCApplication.Keywords.4
 ```
+
+The order of the mapping can be the opposite (`iptc.IPTCApplication.Headline = dcterms:title`),
+but all the maps should be in the same order.
 
 Note that metadata can be slighly different between standards.
 
@@ -98,9 +101,9 @@ These items should be kept private, else they will be displayed in public.
 Once saved, all the specific items can be checked in the main menu `Bulk import files`
 on the main sidebar.
 
-### Assistant to create or update a template
+### Assistant to create or update a mapping
 
-An assistant is available to create or update a template via the second
+An assistant is available to create or update a mapping via the second
 sub-menu. Simply choose a directory where the files you want to import are
 located, create your mapping and save it.
 
@@ -109,14 +112,9 @@ for xml data, that requires manual edition of xpaths.
 
 ### Upload
 
-Once the item templates are ready, you can upload files via the third sub-menu
+Once the mappings are ready, you can upload files via the third sub-menu
 `Process import`. Just choose the folder where are files to import, then check
 and add the files.
-
-This workflow is experimental and will change in the future to avoid the
-creation of specific items.
-
-This module will probably be merged with module [Bulk Import].
 
 
 Warning
@@ -178,7 +176,8 @@ Copyright
 
 [Bulk Import Files]: https://github.com/Daniel-KM/Omeka-S-module-BulkImportFiles
 [Omeka S]: https://omeka.org/s
-[Bulk Import]: https://github.com/Daniel-KM/Omeka-S-module-BulkImport
+[Omeka Classic]: https://omeka.org/classic
+[plugin]: https://github.com/Daniel-KM/Omeka-plugin-BulkImportFiles
 [`getid3`]: https://getid3.org
 [`php-pdftk`]: https://github.com/mikehaertl/php-pdftk
 [`pdftk`]: https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit
