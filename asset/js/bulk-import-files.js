@@ -10,7 +10,7 @@ $(document).ready(function () {
     // available_maps_html += '<div>';
     //
     // $.each(available_maps, function (key, val) {
-    //     available_maps_html += '<div class="field js-maps-' + val + '">'+key+' - <a class="button">' + val + '</a></div>';
+    //     available_maps_html += '<div class="field js-maps-' + val + '">' + key + ' - <a class="button">' + val + '</a></div>';
     // })
     //
     // available_maps_html += '</div>';
@@ -105,7 +105,6 @@ $(document).ready(function () {
         // });
         // return false;
 
-
         // $.each(files , function() {
         //
         // });
@@ -132,11 +131,13 @@ $(document).ready(function () {
 
     $('#multiFiles').change(function (event) {
         // console.log('change');
-
         $('#upload').click();
     });
 
-    $('#upload').on('click', function () {
+    $('.map-edit #upload').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
         url = basePath + '/admin/bulk-import-files/get-files';
 
         var form_data = new FormData();
@@ -144,6 +145,7 @@ $(document).ready(function () {
         for (var x = 0; x < ins; x++) {
             form_data.append('files[]', document.getElementById('multiFiles').files[x]);
         }
+
         $.ajax({
             url: url,
             dataType: 'html',
@@ -154,17 +156,13 @@ $(document).ready(function () {
             type: 'post',
             success: function (response) {
                 $('.files-map-block').html(response);
-
                 $('#table-selected-files .o-icon-more.sidebar-content').click(function () {
-
                     $(this).parent().parent().find('.full_info').toggle();
                 })
-
                 add_button_action();
-
             },
             error: function (response) {
-                //$('#msg').html(response); // display error response from the PHP script
+                $('.response').html(response);
             }
         });
     });
@@ -175,13 +173,10 @@ $(document).ready(function () {
         $('.omeka_property .js-add-action').unbind('click');
 
         $('.omeka_property .js-add-action').on('click', function () {
-
             var row_td = $(this).parent().parent().parent();
             row_td.find('.omeka_list_property').append(listterms);
-
             count = parseInt(row_td.parent().data('property-count'));
-
-            count++;
+            ++count;
             row_td.parent().data('property-count', count);
 
             add_button_action();
@@ -194,9 +189,7 @@ $(document).ready(function () {
 
             $('.omeka_property .js-single-remove-action').unbind('click');
 
-
             $('.omeka_list_property .js-single-remove-action').on('click', function () {
-
                 listterms_with_action_row = $(this).parent().parent().parent();
 
                 count = parseInt(listterms_with_action_row.parent().parent().data('property-count'));
@@ -209,24 +202,24 @@ $(document).ready(function () {
                 }
 
                 $(this).parent().parent().remove();
-
             });
-
         });
 
         $('.omeka_property .js-remove-action').on('click', function () {
             $(this).parent().parent().remove();
         });
 
-        $('.full_info').find('.js-save-button button').click(function () {
+        $('.full_info .js-save-button button').off('click');
+        $('.full_info .js-save-button button').on('click', function () {
             save_action($(this));
-        })
+            event.preventDefault();
+        });
     }
 
     function save_action(row) {
         // Omeka_file_id is the filename.
-        omeka_file_id = row.parents('.selected-files-row').find('.omeka_file_id').val();
-        media_type = row.parents('.selected-files-row').find('.media_type').val();
+        omeka_file_id = row.parents('.selected-files-row').first().data('file-item-id');
+        media_type = row.parents('.selected-files-row').first().data('file-type');
 
         listterms_select_total = [];
 
@@ -255,7 +248,7 @@ $(document).ready(function () {
             file_field_property = $(this).find('.js-file_field_property').html();
             listterms_select = [];
             $(this).find('.omeka_property_name').each(function () {
-                var selected_option = jQuery(this).html();
+                var selected_option = $(this).html();
                 listterms_select.push(selected_option);
             });
 
@@ -318,10 +311,11 @@ $(document).ready(function () {
                 $('.response').html(response);
             }
         });
-
     }
 
     directory = '';
+
+    // Import by a directory on the server.
     $('.make_import_form .check_button').click(function () {
         directory = {'folder' : $('.make_import_form #directory').val()};
         url = basePath + '/admin/bulk-import-files/check-folder';
@@ -349,6 +343,47 @@ $(document).ready(function () {
         return false;
     });
 
+    // Import by a directory on the computer.
+    $('.make-import #upload').click(function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        url = basePath + '/admin/bulk-import-files/check-files';
+
+        var form_data = new FormData();
+        var ins = document.getElementById('multiFiles').files.length;
+        for (var x = 0; x < ins; x++) {
+            form_data.append('files[]', document.getElementById('multiFiles').files[x]);
+        }
+
+        $.ajax({
+            url: url,
+            dataType: 'html',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: form_data,
+            type: 'post',
+            beforeSend: function() {
+                $('.modal-loader').show();
+                $('.response').html('');
+            },
+            success: function (response) {
+                $('.response').html(response);
+            },
+            error: function (response) {
+                $('.response').html(response);
+            },
+            complete: function () {
+                $('.modal-loader').hide();
+                action_for_recognize_files();
+            }
+        });
+
+        // console.log(form_data);
+        return false;
+    });
+
     make_action = false;
     data_for_recognize  = {};
     create_action = '';
@@ -363,6 +398,8 @@ $(document).ready(function () {
         url = basePath + '/admin/bulk-import-files/process-import';
         directory = $('.make_import_form #directory').val();
         $('.directory').val(directory);
+        isServer = data_for_recognize['is_server'];
+        importUnmapped = $('#import_unmapped').is(':checked');
 
         if ((file_position_upload >= total_files_for_upload) || (typeof data_for_recognize['filenames'][file_position_upload] == 'undefined')) {
             clearTimeout(create_action);
@@ -372,17 +409,21 @@ $(document).ready(function () {
         } else {
             if (make_action == true) {
                 var rowId = data_for_recognize['row_id'][file_position_upload];
-                var row = $('.response .isset_yes.row_id_' + rowId);
-                data_for_recognize_single = {
-                    'data_for_recognize_single' : data_for_recognize['filenames'][file_position_upload],
-                    'directory': directory,
-                    'delete_file': $('#delete_file').is(':checked'),
-                    'data_for_recognize_row_id' : rowId,
+                var row = importUnmapped
+                    ? $('.response .file_data.row_id_' + rowId)
+                    : $('.response .isset_yes.row_id_' + rowId);
+                data_process = {
+                    'is_server': isServer,
+                    'row_id' : rowId,
+                    'filename' : data_for_recognize['filenames'][file_position_upload],
+                    'source' : data_for_recognize['sources'][file_position_upload],
+                    'directory': isServer ? directory : null,
+                    'import_unmapped': importUnmapped,
+                    'delete_file': isServer ? $('#delete_file').is(':checked') : true,
                 };
-
                 $.ajax({
                     url: url,
-                    data: data_for_recognize_single,
+                    data: data_process,
                     type: 'post',
                     beforeSend: function() {
                         make_action = false;
@@ -426,16 +467,28 @@ $(document).ready(function () {
     function action_for_recognize_files() {
         $('.js-recognize_files').click(function () {
             filenames = [];
+            sources = [];
             row_id = [];
+            isServer = $('.response').find('.total_info .origin').data('origin') === 'server';
+
             $('.response').find('.total_info').remove();
-            $('.response .isset_yes').each(function () {
-                filenames.push($(this).find('.filename').html());
-                row_id.push($(this).find('.filename').data('row-id'));
+            importUnmapped = $('#import_unmapped').is(':checked');
+            rows =importUnmapped
+                ? $('.response .file_data')
+                : $('.response .isset_yes')
+            rows.each(function () {
+                filedata = $(this).find('.filename');
+                filenames.push(filedata.data('filename'));
+                sources.push(filedata.data('source'));
+                row_id.push(filedata.data('row-id'));
             });
+
             data_for_recognize = {
-                'directory': directory,
+                'is_server': isServer,
+                'directory': isServer ? directory : null,
                 'filenames': filenames,
-                'row_id': row_id
+                'sources': sources,
+                'row_id': row_id,
             }
 
             // console.log(data_for_recognize);
@@ -445,5 +498,61 @@ $(document).ready(function () {
             create_action = setTimeout(make_single_file_upload(file_position_upload), 1000);
         });
     }
+
+    $('.bulk-import-files.map-edit').on('click', '.file-type', function(e) {
+        e.preventDefault();
+
+        var process;
+        var url;
+
+        if ($(this).hasClass('add-file-type')) {
+            process = 'add';
+            url = basePath + '/admin/bulk-import-files/add-file-type';
+        } else if ($(this).hasClass('delete-file-type')) {
+            if (!confirm('Do you want to delete this file type?')) {
+                return;
+            }
+            process = 'delete';
+            url = basePath + '/admin/bulk-import-files/delete-file-type';
+        } else {
+            return;
+        }
+
+        var media_type = $(this).parents('.selected-files-row').first().data('file-type');
+        var form_data = {
+            'media_type': media_type,
+        }
+
+        $.ajax({
+            url: url,
+            data: form_data,
+            type: 'post',
+            beforeSend: function() {
+                $('.response').html('');
+                $('.response').removeClass('success warning error');
+            },
+            success: function (response) {
+                response = $.parseJSON(response);
+                $('.response').html(response.msg);
+                $('html, body').animate({scrollTop: 0}, 'slow');
+                if (response.state == true) {
+                    $('.response').addClass('success');
+                    location.href = response.reloadURL;
+                } else {
+                    $('.response').addClass('warning');
+                }
+            },
+            error: function (response) {
+                response = $.parseJSON(response.responseText);
+                $('.response').html(response.msg);
+                $('html, body').animate({scrollTop: 0}, 'slow');
+                if (response.state == true) {
+                    location.href = response.reloadURL;
+                } else {
+                    $('.response').addClass('error');
+                }
+            }
+        });
+    });
 
 });
