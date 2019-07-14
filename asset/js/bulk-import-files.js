@@ -322,19 +322,16 @@ $(document).ready(function () {
     }
 
     directory = '';
-
     $('.make_import_form .check_button').click(function () {
-
         directory = {'folder' : $('.make_import_form #directory').val()};
-
         url = basePath + '/admin/bulk-import-files/check-folder';
-
         $.ajax({
             url: url,
             data: directory,
             type: 'post',
             beforeSend: function() {
                 $('.modal-loader').show();
+                $('.response').html('');
             },
             success: function (response) {
                 $('.response').html(response);
@@ -349,7 +346,6 @@ $(document).ready(function () {
         });
 
         // console.log(directory);
-
         return false;
     });
 
