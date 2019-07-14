@@ -8,8 +8,8 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 }
 
 use Generic\AbstractModule;
+use Zend\Mvc\MvcEvent;
 use Zend\ModuleManager\ModuleManager;
-use Zend\ServiceManager\ServiceLocatorInterface;
 
 class Module extends AbstractModule
 {
@@ -22,24 +22,50 @@ class Module extends AbstractModule
         require_once __DIR__ . '/vendor/autoload.php';
     }
 
-    public function install(ServiceLocatorInterface $serviceLocator)
+    public function onBootstrap(MvcEvent $event)
     {
-        parent::install($serviceLocator);
+        parent::onBootstrap($event);
+        $this->addAclRules();
+    }
 
-        $services = $this->getServiceLocator();
-        $api = $services->get('Omeka\ApiManager');
-        $label = 'Bulk import files';
-        try {
-            $resourceTemplate = $api
-                ->read('resource_templates', ['label' => $label])
-                ->getContent();
-        } catch (\Exception $e) {
-        }
+    /**
+     * Add ACL rules for this module.
+     */
+    protected function addAclRules()
+    {
+        /** @var \Omeka\Permissions\Acl $acl */
+        $acl = $this->getServiceLocator()->get('Omeka\Acl');
 
-        if (!isset($resourceTemplate)) {
-            $data = [];
-            $data['o:label'] = $label;
-            $api->create('resource_templates', $data);
-        }
+        // Only admins can edit mapping, else can only import, that uses some
+        // ajax actions.
+        $roles = [
+            \Omeka\Permissions\Acl::ROLE_GLOBAL_ADMIN,
+            \Omeka\Permissions\Acl::ROLE_SITE_ADMIN,
+            \Omeka\Permissions\Acl::ROLE_EDITOR,
+            \Omeka\Permissions\Acl::ROLE_REVIEWER,
+            \Omeka\Permissions\Acl::ROLE_AUTHOR,
+        ];
+        $acl
+            ->deny(
+                null,
+                ['BulkImportFiles\Controller\Index']
+            )
+            ->allow(
+                $roles,
+                ['BulkImportFiles\Controller\Index'],
+                [
+                    'index',
+                    'make-import',
+                    'get-files',
+                    'check-files',
+                    'check-folder',
+                    'process-import',
+                    // 'map-show',
+                    // 'map-edit',
+                    // 'add-file-type',
+                    // 'delete-file-type',
+                    // 'save-options',
+                ]
+            );
     }
 }

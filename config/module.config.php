@@ -80,12 +80,14 @@ return [
                         'route' => 'admin/bulk-import-files/default',
                         'action' => 'map-show',
                         'resource' => 'BulkImportFiles\Controller\Index',
+                        'privilege' => 'map-show',
                     ],
                     [
                         'label' => 'Create mappings', // @translate
                         'route' => 'admin/bulk-import-files/default',
                         'action' => 'map-edit',
                         'resource' => 'BulkImportFiles\Controller\Index',
+                        'privilege' => 'map-edit',
                     ],
                 ],
             ],
