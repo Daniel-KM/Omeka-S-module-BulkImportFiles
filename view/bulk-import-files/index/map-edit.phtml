@@ -6,11 +6,15 @@
 
 $translate = $this->plugin('translate');
 $escapeHtml = $this->plugin('escapeHtml');
-$this->headLink()->appendStylesheet($this->assetUrl('css/bulk-import-files.css', 'BulkImportFiles'));
+
+$this->headLink()
+    ->appendStylesheet($this->assetUrl('css/bulk-import-files.css', 'BulkImportFiles'));
 $script = 'var basePath = ' . json_encode($this->basePath(), 320);
 $this->headScript()
     ->appendScript($script)
     ->appendFile($this->assetUrl('js/bulk-import-files.js', 'BulkImportFiles'));
+
+$this->htmlElement('body')->appendAttribute('class', 'bulk-import-files map-edit');
 
 $form->prepare();
 ?>
@@ -19,7 +23,7 @@ $form->prepare();
 
 <?php echo $this->form()->openTag($form); ?>
 <fieldset id='page-actions'>
-    <button type="submit" style="display: none"><?php echo $translate('Next'); ?></button>
+    <button type="submit" style="display: none;"><?php echo $translate('Next'); ?></button>
 </fieldset>
 <?php echo $this->formCollection($form, false); ?>
 
@@ -28,7 +32,6 @@ $form->prepare();
 
 <div class="selected-files-source">
 </div>
-
 <?php echo $this->form()->closeTag($form); ?>
 
 <div class="files-map-block">
@@ -43,9 +46,15 @@ $form->prepare();
         <p>
             <?= $translate('You may need to create an item template first, with the media type as title.') ?>
         </p>
+        <p>
+            <?= $translate('You can select folder with you files with any type (images, etc.) and configure it.') ?>
+        </p>
         <h4><?= $translate('Select folder') ?></h4>
         <div><?= $translate('You can select folder with your files with any type (images, etc.) and configure it.') ?></div>
-        <input type="file" id="multiFiles" name="files[]" multiple="multiple" webkitdirectory mozdirectory msdirectory odirectory directory />
-        <button id="upload"><?= $translate('Upload') ?></button>
+        <div class="inputs">
+            <input type="file" name="files[]" id="multiFiles" class="fileinput button" multiple="multiple" webkitdirectory="webkitdirectory" mozdirectory="mozdirectory" msdirectory="msdirectory" odirectory="odirectory" directory="directory">
+        </div>
+        <?php // This is a hidden button for js. ?>
+        <button type="submit" name="upload" id="upload"><?= $translate('Upload') ?></button>
     </div>
 </div>

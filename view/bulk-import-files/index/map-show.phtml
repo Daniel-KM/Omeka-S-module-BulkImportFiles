@@ -6,7 +6,11 @@
  */
 
 $translate = $this->plugin('translate');
-$this->headLink()->appendStylesheet($this->assetUrl('css/bulk-import-files.css', 'BulkImportFiles'));
+
+$this->headLink()
+    ->appendStylesheet($this->assetUrl('css/bulk-import-files.css', 'BulkImportFiles'));
+
+$this->htmlElement('body')->appendAttribute('class', 'bulk-import-files map-show');
 
 $form->prepare();
 ?>
@@ -22,7 +26,6 @@ $form->prepare();
 <?php if (count($filesMaps) == 0) : ?>
 
     <div><?= $translate('No available maps for import'); ?></div>
-    <div><?= $this->hyperlink($translate('Create'), $this->url('admin/bulk-import-files/default', ['action' => 'map-import'])) ?></div>
 
 <?php else : ?>
 
@@ -31,22 +34,28 @@ $form->prepare();
         <?php foreach ($filesMaps as $item) : ?>
         <table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack" id="table-selected-files">
             <thead>
-                <tr></tr>
+                <tr>
+                    <th></th>
+                </tr>
             </thead>
             <tbody>
                 <?php
                 $mediaType = $item['media_type'];
-                unset($item['media_type']);
-                unset($item['item_id']);
                 ?>
                 <tr>
                     <td class="file_type_property_td">
                         <div class="file_type_property">
                             <h4><?= $translate('Media type') ?></h4>
-                            <?= $mediaType ?>
+                            <a target="_blank" class="underline_link" >
+                                <?= $mediaType ?>
+                            </a>
                         </div>
                     </td>
                 </tr>
+                <?php
+                unset($item['media_type']);
+                unset($item['item_id']);
+                ?>
                 <tr>
                     <td>
                         <table>
@@ -62,11 +71,11 @@ $form->prepare();
                                     <td><?= $metadata ?></td>
                                     <td>
                                         <table>
+                                            <?php foreach ($queries as $query): ?>
                                             <tr>
-                                                <?php foreach ($queries as $query): ?>
                                                 <td><?= $query ?></td>
-                                                <?php endforeach; ?>
                                             </tr>
+                                            <?php endforeach; ?>
                                         </table>
                                     </td>
                                 </tr>
@@ -79,7 +88,6 @@ $form->prepare();
         </table>
         <?php endforeach; ?>
     </div>
-
 <?php endif; ?>
 
 <?php echo $this->form()->closeTag($form); ?>

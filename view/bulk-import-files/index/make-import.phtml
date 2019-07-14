@@ -1,50 +1,91 @@
 <?php
 /**
  * @var \Zend\View\Renderer\PhpRenderer $this
+ *
+ * @todo Use a true form.
  */
 
 $translate = $this->plugin('translate');
 $escapeHtml = $this->plugin('escapeHtml');
-$this->headLink()->appendStylesheet($this->assetUrl('css/bulk-import-files.css', 'BulkImportFiles'));
+
+$this->headLink()
+    ->appendStylesheet($this->assetUrl('css/bulk-import-files.css', 'BulkImportFiles'));
 $script = 'var basePath = ' . json_encode($this->basePath(), 320);
 $this->headScript()
     ->appendScript($script)
     ->appendFile($this->assetUrl('js/bulk-import-files.js', 'BulkImportFiles'));
+
+$this->htmlElement('body')->appendAttribute('class', 'bulk-import-files make-import');
 ?>
 
 <?php echo $this->pageTitle($translate('Make bulk import files'), 1, $translate('Bulk import files')); ?>
 
 <form method="post" class="make_import_form">
-    <div class="field required">
-        <div class="field-meta">
-            <label for="directory"><?= $translate('Source directory') ?></label>
-            <a href="#" class="expand" aria-label="<?= $translate('Expand') ?>"></a>
-            <div class="collapsible">
-                <div class="field-description"><?= $translate('Enter the absolute path to the directory where files to be imported will be added.') ?>
-                    <?= sprintf($translate('The directory can be anywhere on your server. Your root path is: %s'), $_SERVER['DOCUMENT_ROOT']) ?>
+    <fieldset id="fieldset-make_import_form">
+        <legend><?= $translate('Select folder') ?></legend>
+        <p class="explanation">
+            <?= $translate('You can either select a folder on your computer or on the server.') ?>
+            <?= $translate('It is recommended to use the server for big import to allow to continue to use the browser and to avoid the server upload limits for total size and number of files.') ?>
+        </p>
+        <div class="field">
+            <div class="field-meta">
+                <label for="directory"><?= $translate('Source directory on server') ?></label>
+                <a href="#" class="expand" aria-label="<?= $translate('Expand') ?>"></a>
+                <div class="collapsible">
+                    <div class="field-description"><?= $translate('Enter the absolute path to the directory where files to be imported will be added.') ?>
+                        <?= sprintf($translate('The directory can be anywhere on your server. Your root path is: %s'), $_SERVER['DOCUMENT_ROOT']) ?>
+                    </div>
                 </div>
             </div>
+            <div class="inputs">
+                <input type="text" name="directory" id="directory" value="<?= OMEKA_PATH ?>/files/import">
+            </div>
+            <button type="submit" name="add-item-submit" class="check_button"><?= $translate('Check') ?></button>
         </div>
-        <div class="inputs">
-            <input type="text" name="directory" required="required" id="directory" value="<?= OMEKA_PATH ?>/files/import">
-        </div>
-        <button type="submit" name="add-item-submit" class="check_button"><?= $translate('Check') ?></button>
-    </div>
-    <div class="field">
-        <div class="field-meta">
-            <label for="delete_file"><?= $translate('Delete original file from the folder?') ?></label>
-            <a href="#" class="expand" aria-label="<?= $translate('Expand') ?>"></a>
-            <div class="collapsible">
-                <div class="field-description">
-                    <?= $translate('Do you want to delete a file from the source directory after it has been imported? If so, the directory must be server-writable.') ?>
-                </div>
+        <div class="field">
+            <div class="field-meta">
+                <label for="multiFiles"><?= $translate('Select folder on computer') ?></label>
+            </div>
+            <div class="inputs">
+                <input type="file" name="files[]" id="multiFiles" class="fileinput button" multiple="multiple" webkitdirectory="webkitdirectory" mozdirectory="mozdirectory" msdirectory="msdirectory" odirectory="odirectory" directory="directory">
             </div>
         </div>
-        <div class="inputs">
-            <input type="hidden" name="delete_file" value="no">
-            <input type="checkbox" name="delete_file" id="delete_file" value="no">
+        <?php // This is a hidden button for js. ?>
+        <button type="submit" name="upload" id="upload"><?= $translate('Upload') ?></button>
+    </fieldset>
+    <fieldset id="fieldset-make_import_params">
+        <legend><?= $translate('Parameters') ?></legend>
+        <div class="field">
+            <div class="field-meta">
+                <label for="import_unmapped"><?= $translate('Import unmapped files') ?></label>
+                <a href="#" class="expand" aria-label="<?= $translate('Expand') ?>"></a>
+                <div class="collapsible">
+                    <div class="field-description">
+                        <?= $translate('Allow to import all files of a folder. Unmapped files will be imported without metadata, except the file name as title.') ?>
+                    </div>
+                </div>
+            </div>
+            <div class="inputs">
+                <input type="hidden" name="import_unmapped" value="0">
+                <input type="checkbox" name="import_unmapped" id="import_unmapped" value="0">
+            </div>
         </div>
-    </div>
+        <div class="field">
+            <div class="field-meta">
+                <label for="delete_file"><?= $translate('Delete original file from the folder on the server') ?></label>
+                <a href="#" class="expand" aria-label="<?= $translate('Expand') ?>"></a>
+                <div class="collapsible">
+                    <div class="field-description">
+                        <?= $translate('Do you want to delete a file from the source directory after it has been imported? If so, the directory must be server-writable.') ?>
+                    </div>
+                </div>
+            </div>
+            <div class="inputs">
+                <input type="hidden" name="delete_file" value="0">
+                <input type="checkbox" name="delete_file" id="delete_file" value="0">
+            </div>
+        </div>
+    </fieldset>
 </form>
 
 <div class="response"></div>
