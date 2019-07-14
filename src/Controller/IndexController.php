@@ -338,7 +338,7 @@ class IndexController extends AbstractActionController
 
         if (isset($params['data_for_recognize_single'])) {
             $full_file_path = $params['directory'] . '/' . $params['data_for_recognize_single'];
-            $delete_file_action = $params['delete-file'];
+            $delete_file_action = $params['delete_file'] === 'true';
 
             // TODO Use api standard method, not direct creation.
             // Create new media via temporary factory.
@@ -449,7 +449,7 @@ class IndexController extends AbstractActionController
                 ->setAttribute('id', 'add-item');
             $form->setData($data);
             $hasNewItem = $this->api($form)->create('items', $data);
-            if ($hasNewItem && $delete_file_action === 'yes') {
+            if ($hasNewItem && $delete_file_action) {
                 $tempFile->delete();
             }
         }

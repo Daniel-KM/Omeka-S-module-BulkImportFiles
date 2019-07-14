@@ -376,7 +376,7 @@ $(document).ready(function () {
                 data_for_recognize_single = {
                     'data_for_recognize_single' : data_for_recognize['filenames'][file_position_upload],
                     'directory': directory,
-                    'delete-file': $('#delete-file').val(),
+                    'delete_file': $('#delete_file').is(':checked'),
                     'data_for_recognize_row_id' : rowId,
                 };
 
@@ -445,15 +445,5 @@ $(document).ready(function () {
             create_action = setTimeout(make_single_file_upload(file_position_upload), 1000);
         });
     }
-
-    $('#delete-file').click(function () {
-        if_checked = $(this).val();
-
-        if (if_checked == 'no') {
-            $(this).val('yes');
-        } else {
-            $(this).val('no')
-        }
-    })
 
 });
