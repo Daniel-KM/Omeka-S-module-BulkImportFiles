@@ -61,16 +61,21 @@ $this->headScript()
                         <a data-sidebar-content-url="" class="o-icon-more sidebar-content"
                            href="#"
                            title="<?= $translate('Show all data') ?>"
-                           aria-label="<?= $translate('Show all data') ?>" style="font-size: 30px; line-height: 15px;">...</a>
+                           aria-label="<?= $translate('Show all data') ?>" style="font-size: 30px; line-height: 15px;">&nbsp;</a>
                     </div>
 
                     <div class="full_info">
                         <table>
                             <tr>
-                                <td><?php echo count($files_data['source_data']) ? sprintf($translate('%d available fields'), count($files_data['source_data'])) : $translate('No available fields'); ?>
+                                <td>
+                                    <?php if (count($files_data['source_data'])): ?>
+                                    <?= sprintf($translate('%d available fields'), count($files_data['source_data'])) ?>
                                     <div class="js-save-button">
                                         <button type="submit" name="add-item-submit"><?= $translate('Save') ?></button>
                                     </div>
+                                    <?php else: ?>
+                                    <?= $translate('No available fields') ?>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                             <tr>
