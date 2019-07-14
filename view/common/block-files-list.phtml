@@ -38,17 +38,17 @@ $this->headScript()
                     <?= $files_data['file']['name']; ?>
                 </span>
                 <span>
-                    <span><?php $translate('Media type') ?></span>
+                    <span><?= $translate('Media type') ?></span>
                     <?php if (isset($files_data['file']['item_id'])): ?>
-                        <a target="_blank" class="underline_link" title="<?= $translate('Click for edit') ?>" href="<?= $this->url('admin/id', ['controller' => 'item', 'action' => 'edit', 'id' => $files_data['file']['item_id']]) ?>">
+                        <a target="_blank" class="underline_link" title="<?= $translate('Click for edit') ?>" href="<?php echo $this->url('admin/bulk-import-files') . '/map-edit?arg_file=' . $files_data['file']['item_id']; ?>">
                             <?php echo $files_data['file']['type']; ?>
                         </a>
-                        <input type="hidden" value="<?= $files_data['file']['item_id']; ?>" class="omeka_item_id">
+                        <input type="hidden" value="<?= $files_data['file']['item_id']; ?>" class="omeka_file_id">
                         <input type="hidden" value="<?= $files_data['file']['type']; ?>" class="media_type">
                     <?php else: ?>
                         <?php echo $files_data['file']['type']; ?>
                         <span class="errors"><?= $translate('[Type is not defined]') ?></span>
-                        <a href="<?= $this->basePath() ?>/admin/item/add" target="_blank" class="add_item_button">Add</a>
+                        <button target="_blank" class="add_file_button" onClick="add_file_action('<?php echo $files_data['file']['type']; ?>')"><?= $translate('Add') ?></button>
                     <?php endif; ?>
                 </span>
                 <span>
@@ -199,7 +199,7 @@ $this->headScript()
     <div class="listterms_with_action">
         <select class="listterms_select">
             <?php foreach ($listTerms as $val): ?>
-                <option value="<?= $val ?>"><?= $val; ?></option>
+                <option value="<?= $val ?>"><?= $val ?></option>
             <?php endforeach; ?>
         </select>
         <div class="js-action-property-button">
