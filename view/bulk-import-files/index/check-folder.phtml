@@ -9,8 +9,9 @@
  */
 
 $translate = $this->plugin('translate');
-
 ?>
+
+<?php // echo $this->messages(); ?>
 
 <?php if ($this->error): ?>
 
@@ -18,7 +19,7 @@ $translate = $this->plugin('translate');
 
 <?php else: ?>
 
-    <?php if (count($files_data)): ?>
+    <?php if (!empty($files_data)): ?>
         <div class="total_info">
             <div class="total_info_row"><h4><?= $translate('Total files'); ?></h4><?= $this->total_files ?></div>
             <div class="total_info_row"><h4><?= $translate('Importable files') ?></h4><?= $this->total_files_can_recognized ?></div>
