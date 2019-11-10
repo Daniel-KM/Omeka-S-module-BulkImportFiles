@@ -774,7 +774,7 @@ class IndexController extends AbstractActionController
         foreach ($data as $key => $value) {
             if (is_array($value)) {
                 $this->_flatArray($value, $ignoredKeys, $keys . '.' . $key);
-            } elseif (!in_array($key, $ignoredKeys)) {
+            } elseif (!in_array($key, $ignoredKeys, true)) {
                 $this->flatArray[] = [
                     'key' => trim($keys . '.' . $key, '.'),
                     'value' => $value,
