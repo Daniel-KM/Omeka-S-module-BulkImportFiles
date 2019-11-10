@@ -405,11 +405,11 @@ class IndexController extends AbstractActionController
             $file_source = $getId3
                 ->analyze($full_file_path);
 
+            $file_extension = pathinfo($full_file_path, PATHINFO_EXTENSION);
+            $file_extension = strtolower($file_extension);
+
             $media_type = isset($file_source['mime_type']) ? $file_source['mime_type'] : 'undefined';
             if ($media_type == 'undefined') {
-                $file_extension = pathinfo($full_file_path, PATHINFO_EXTENSION);
-                $file_extension = strtolower($file_extension);
-
                 // TODO Why pdf is an exception ?
                 if ($file_extension == 'pdf') {
                     $media_type = 'application/pdf';
@@ -476,7 +476,9 @@ class IndexController extends AbstractActionController
             if (!file_exists($tmpDir)) {
                 mkdir($tmpDir, 0775, true);
             }
-            $tmpPath = tempnam($tmpDir, 'omk_bif_');
+            // The file extension is required, else the server can get one that
+            // is not allowed by Omeka.
+            $tmpPath = tempnam($tmpDir, 'omk_bif_') . '.' . $file_extension;
             copy($full_file_path, $tmpPath);
             @chmod($tmpPath, 0775);
 
