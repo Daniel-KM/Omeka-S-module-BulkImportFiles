@@ -20,8 +20,8 @@ $(document).ready(function () {
                 $('.response').html(response);
                 action_for_map_files();
             },
-            error: function (response) {
-                $('.response').html(response.responseText);
+            error: function (xhr) {
+                $('.response').html(xhr.responseText);
             },
             complete: function () {
                 $('.modal-loader').hide();
@@ -60,8 +60,8 @@ $(document).ready(function () {
                 $('.response').html(response);
                 action_for_map_files();
             },
-            error: function (response) {
-                $('.response').html(response);
+            error: function (xhr) {
+                $('.response').html(xhr.responseText);
             },
             complete: function () {
                 $('.modal-loader').hide();
@@ -292,8 +292,8 @@ $(document).ready(function () {
             success: function (response) {
                 $('.response').html(response);
             },
-            error: function (response) {
-                $('.response').html(response.responseText);
+            error: function (xhr) {
+                $('.response').html(xhr.responseText);
             },
             complete: function () {
                 $('.modal-loader').hide();
@@ -365,8 +365,11 @@ $(document).ready(function () {
                             row.find('.status').html('OK');
                         }
                     },
-                    error: function (response) {
-                        $('.response').html(response);
+                    error: function (xhr) {
+                        row.addClass('error');
+                        row.find('.status').html('Error');
+                        row.after('<tr class="message row_id_' + rowId + '"><td class="error" colspan="6"></td></tr>');
+                        row.next().find('td').html('An internal error occured. Check file size and source.');
                     },
                     complete: function (response) {
                         make_action = true;
