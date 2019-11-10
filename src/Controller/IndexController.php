@@ -10,9 +10,11 @@ if (!class_exists(\JamesHeinrich\GetID3\GetId3::class)) {
 use BulkImportFiles\Form\ImportForm;
 use BulkImportFiles\Form\SettingsForm;
 use JamesHeinrich\GetID3\GetId3;
+use Omeka\File\TempFileFactory;
+use Omeka\File\Uploader;
 use Omeka\Mvc\Exception\NotFoundException;
+use Zend\Form\FormElementManager\FormElementManagerV3Polyfill as FormElementManager;
 use Zend\Mvc\Controller\AbstractActionController;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Model\JsonModel;
 use Zend\View\Model\ViewModel;
 
@@ -43,8 +45,6 @@ class IndexController extends AbstractActionController
 
     protected $filesData;
 
-    protected $basePath;
-
     protected $directory;
 
     protected $ignoredKeys = [
@@ -61,19 +61,34 @@ class IndexController extends AbstractActionController
         'md5_data',
     ];
 
+    /**
+     * @var TempFileFactory
+     */
     protected $tempFileFactory;
 
     /**
-     * @var ServiceLocatorInterface
+     * @var Uploader
      */
-    protected $services;
+    protected $uploader;
 
     /**
-     * @param ServiceLocatorInterface $serviceLocator
+     * @var FormElementManager
      */
-    public function __construct(ServiceLocatorInterface $serviceLocator)
-    {
-        $this->services = $serviceLocator;
+    protected $formElementManager;
+
+    /**
+     * @param TempFileFactory $tempFileFactory
+     * @param Uploader $uploader,
+     * @param FormElementManager $formElementManager
+     */
+    public function __construct(
+        TempFileFactory $tempFileFactory,
+        Uploader $uploader,
+        FormElementManager $formElementManager
+    ) {
+        $this->tempFileFactory = $tempFileFactory;
+        $this->uploader = $uploader;
+        $this->formElementManager = $formElementManager;
     }
 
     public function indexAction()
@@ -108,63 +123,75 @@ class IndexController extends AbstractActionController
 
         $filesDataForView = [];
 
-        foreach ($files['files'] as $file) {
-            $mediaType = $file['type'];
-            $data = [];
-            $this->parsedData = [];
-            $errors = '';
+        if (!empty($files['files'])) {
+            foreach ($files['files'] as $file) {
+                // TODO Manage the error store.
+                $errorStore = null;
+                $tempFile = $this->uploader->upload($file, $errorStore);
+                $file['tmp_name'] = $tempFile->getTempPath();
+                $file['type'] = $tempFile->getMediaType();
 
-            if (isset($this->filesMapsArray[$mediaType])) {
-                $filesMapsArray = $this->filesMapsArray[$mediaType];
-                $file['item_id'] = $filesMapsArray['item_id'];
-                unset($filesMapsArray['media_type']);
-                unset($filesMapsArray['item_id']);
+                $mediaType = $file['type'];
+                $data = [];
+                $this->parsedData = [];
+                $errors = '';
 
-                switch ($mediaType) {
-                    case 'application/pdf':
-                        $data = $this->extractDataFromPdf($file['tmp_name']);
-                        $this->parsedData = $this->flatArray($data);
-                        $data = $this->mapData()->array($data, $filesMapsArray, true);
-                        break;
+                if (isset($this->filesMapsArray[$mediaType])) {
+                    $filesMapsArray = $this->filesMapsArray[$mediaType];
+                    $file['item_id'] = $filesMapsArray['item_id'];
+                    unset($filesMapsArray['media_type']);
+                    unset($filesMapsArray['item_id']);
 
-                    default:
-                        $getId3 = new GetId3();
-                        $fileSource = $getId3
-                            ->analyze($file['tmp_name']);
-                        $this->parsedData = $this->flatArray($fileSource, $this->ignoredKeys);
-                        $data = $this->mapData()->array($fileSource, $filesMapsArray, true);
-                        break;
+                    switch ($mediaType) {
+                        case 'application/pdf':
+                            $data = $this->extractDataFromPdf($tempFile->getTempPath());
+                            $this->parsedData = $this->flatArray($data);
+                            $data = $this->mapData()->array($data, $filesMapsArray, true);
+                            break;
+
+                        default:
+                            $getId3 = new GetId3();
+                            $fileSource = $getId3
+                                ->analyze($tempFile->getTempPath());
+                            $this->parsedData = $this->flatArray($fileSource, $this->ignoredKeys);
+                            $data = $this->mapData()->array($fileSource, $filesMapsArray, true);
+                            break;
+                    }
                 }
-            }
 
-            /*
-             * selected files for uploads
-             * $file array
-             *      'name' => string
-             *      'type' => string
-             *      'tmp_name' => string
-             *      'error' => int
-             *      'size' => int
-             *      'item_id' => string (map file)
-             *
-             * $source_data = $this->parsedData
-             * all available meta data for current file with value
-             * example:
-             *      'key' => string '/video/dataformat'
-             *      'value' => string 'jpg'
-             *
-             * config saved by user for current file type
-             * $recognized_data
-             * example:
-             * 'dcterms:created' => array
-             *        'field' => string 'jpg/exif/IFD0/DateTime'
-             *        'value' => string '2014:03:12 15:03:25'
-             */
+                /*
+                 * selected files for uploads
+                 * $file array
+                 *      'name' => string
+                 *      'type' => string
+                 *      'tmp_name' => string
+                 *      'error' => int
+                 *      'size' => int
+                 *      'item_id' => string (map file)
+                 *
+                 * $source_data = $this->parsedData
+                 * all available meta data for current file with value
+                 * example:
+                 *      'key' => string '/video/dataformat'
+                 *      'value' => string 'jpg'
+                 *
+                 * config saved by user for current file type
+                 * $recognized_data
+                 * example:
+                 * 'dcterms:created' => array
+                 *        'field' => string 'jpg/exif/IFD0/DateTime'
+                 *        'value' => string '2014:03:12 15:03:25'
+                 */
+                $filesDataForView[] = [
+                    'file' => $file,
+                    'source_data' => $this->parsedData,
+                    'recognized_data' => $data,
+                    'errors' => $errors,
+                ];
+            }
+        } else {
             $filesDataForView[] = [
-                'file' => $file,
-                'source_data' => $this->parsedData,
-                'recognized_data' => $data,
-                'errors' => $errors,
+                'errors' => [$this->translate('Can’t check empty folder.')], // @translate,
             ];
         }
 
@@ -195,19 +222,19 @@ class IndexController extends AbstractActionController
                 });
                 $filePath = $params['folder'] . '/';
                 foreach ($files as $file) {
-                    $getId3 = new GetId3();
-                    $fileSource = $getId3
-                        ->analyze($filePath . $file);
-                    $mediaType = 'undefined';
-                    if (isset($fileSource['mime_type'])) {
-                        $mediaType = $fileSource['mime_type'];
-                    }
+                    $fullFilePath = $filePath . $file;
+                    // TODO Manage the error store.
+                    $tempFile = $this->tempFileFactory->build();
+                    $tempFile->setTempPath($fullFilePath);
+
+                    $mediaType = $tempFile->getMediaType();
+
                     $file = [];
-                    $file['name'] = $fileSource['filename'];
+                    $file['name'] = basename($fullFilePath);
                     $file['type'] = $mediaType;
-                    $file['tmp_name'] = null;
-                    $file['error'] = isset($fileSource['error']) ? reset($fileSource['error']) : 0;
-                    $file['size'] = $fileSource['filesize'];
+                    $file['tmp_name'] = $fullFilePath;
+                    $file['error'] = 0;
+                    $file['size'] = filesize($fullFilePath);
 
                     $data = [];
                     $this->parsedData = [];
@@ -221,12 +248,15 @@ class IndexController extends AbstractActionController
 
                         switch ($mediaType) {
                             case 'application/pdf':
-                                $data = $this->extractDataFromPdf($filePath);
+                                $data = $this->extractDataFromPdf($tempFile->getTempPath());
                                 $this->parsedData = $this->flatArray($data);
                                 $data = $this->mapData()->array($data, $filesMapsArray, true);
                                 break;
 
                             default:
+                                $getId3 = new GetId3();
+                                $fileSource = $getId3
+                                    ->analyze($tempFile->getTempPath());
                                 $this->parsedData = $this->flatArray($fileSource, $this->ignoredKeys);
                                 $data = $this->mapData()->array($fileSource, $filesMapsArray, true);
                                 break;
@@ -279,6 +309,12 @@ class IndexController extends AbstractActionController
 
         if (!empty($files['files'])) {
             foreach ($files['files'] as $file) {
+                // TODO Manage the error store.
+                $errorStore = null;
+                $tempFile = $this->uploader->upload($file, $errorStore);
+                $file['tmp_name'] = $tempFile->getTempPath();
+                $file['type'] = $tempFile->getMediaType();
+
                 // Check name for security.
                 if (basename($file['name']) !== $file['name']) {
                     $error = $this->translate('All files must have a regular name. Check ended.'); // @translate
@@ -286,58 +322,33 @@ class IndexController extends AbstractActionController
                 }
 
                 if ($file['error'] === UPLOAD_ERR_OK) {
-                    $getId3 = new GetId3();
-                    $fileSource = $getId3
-                        ->analyze($file['tmp_name']);
-
                     ++$totalFiles;
-
-                    $mediaType = 'undefined';
-                    $fileIssetMaps = 'no';
-
-                    if (isset($fileSource['mime_type'])) {
-                        $mediaType = $fileSource['mime_type'];
-                        if (isset($this->filesMapsArray[$mediaType])) {
-                            $fileIssetMaps = 'yes';
-                            ++$totalFilesCanRecognized;
-                        }
-                    }
-
-                    $filesData[] = [
-                        'source' => $file['name'],
-                        'filename' => basename($file['tmp_name']),
-                        'file_size' => $fileSource['filesize'],
-                        'file_type' => $mediaType,
-                        'file_isset_maps' => $fileIssetMaps,
-                        'has_error' => $file['error'],
-                    ];
-
                     $fullFilePath = $dest . basename($file['tmp_name']);
                     move_uploaded_file($file['tmp_name'], $fullFilePath);
-                } else {
-                    if (isset($this->filesMapsArray[$file['type']])) {
-                        $fileIssetMaps = 'yes';
-                        ++$totalFilesCanRecognized;
-                    } else {
-                        $fileIssetMaps = 'no';
-                    }
-
-                    $filesData[] = [
-                        'source' => $file['name'],
-                        'filename' => basename($file['tmp_name']),
-                        'file_size' => $file['size'],
-                        'file_type' => $file['type'],
-                        'file_isset_maps' => $fileIssetMaps,
-                        'has_error' => $file['error'],
-                    ];
                 }
+
+                if ($file['type'] && isset($this->filesMapsArray[$file['type']])) {
+                    $fileIssetMaps = 'yes';
+                    ++$totalFilesCanRecognized;
+                } else {
+                    $fileIssetMaps = 'no';
+                }
+
+                $filesData[] = [
+                    'source' => $file['name'],
+                    'filename' => basename($file['tmp_name']),
+                    'file_size' => $file['size'],
+                    'file_type' => $file['type'],
+                    'file_isset_maps' => $fileIssetMaps,
+                    'has_error' => $file['error'],
+                ];
             }
 
             if (!$error && count($filesData) == 0) {
-                $error = $this->translate('Folder is empty'); // @translate
+                $error = $this->translate('The folder is empty or files have error.'); // @translate;
             }
         } else {
-            $error = $this->translate('Can’t check empty folder'); // @translate
+            $error = $this->translate('Can’t check empty folder.'); // @translate
         }
 
         // This is not a full view, only a partial html.
@@ -372,41 +383,40 @@ class IndexController extends AbstractActionController
                     return strpos($v, '.') !== 0;
                 });
                 $filePath = $params['folder'] . '/';
+
                 foreach ($files as $file) {
-                    $getId3 = new GetId3();
-                    $fileSource = $getId3
-                        ->analyze($filePath . $file);
+                    $fullFilePath = $filePath . $file;
+                    // TODO Manage the error store.
+                    $tempFile = $this->tempFileFactory->build();
+                    $tempFile->setTempPath($fullFilePath);
 
                     ++$totalFiles;
 
-                    $mediaType = 'undefined';
-                    $fileIssetMaps = 'no';
-
-                    if (isset($fileSource['mime_type'])) {
-                        $mediaType = $fileSource['mime_type'];
-                        if (isset($this->filesMapsArray[$mediaType])) {
-                            $fileIssetMaps = 'yes';
-                            ++$totalFilesCanRecognized;
-                        }
+                    $mediaType = $tempFile->getMediaType();
+                    if ($mediaType && isset($this->filesMapsArray[$mediaType])) {
+                        $fileIssetMaps = 'yes';
+                        ++$totalFilesCanRecognized;
+                    } else {
+                        $fileIssetMaps = 'no';
                     }
 
                     $filesData[] = [
                         'source' => $file,
-                        'filename' => $fileSource['filename'],
-                        'file_size' => $fileSource['filesize'],
+                        'filename' => basename($file),
+                        'file_size' => filesize($fullFilePath),
                         'file_type' => $mediaType,
                         'file_isset_maps' => $fileIssetMaps,
                     ];
                 }
 
                 if (count($filesData) == 0) {
-                    $error = $this->translate('Folder is empty'); // @translate;
+                    $error = $this->translate('The folder is empty or files have error.'); // @translate;
                 }
             } else {
-                $error = $this->translate('Folder not exist'); // @translate;
+                $error = $this->translate('The folder does not exist.'); // @translate;
             }
         } else {
-            $error = $this->translate('Can’t check empty folder'); // @translate;
+            $error = $this->translate('Can’t check empty folder.'); // @translate;
         }
 
         $this->layout()
@@ -430,16 +440,6 @@ class IndexController extends AbstractActionController
         // with a local folder inside "files/bulkimportfiles_temp", that is
         // available via https.
 
-        $config = $this->services->get('Config');
-        $basePath = $config['file_store']['local']['base_path'] ?: OMEKA_PATH . '/files';
-        $baseUri = $config['file_store']['local']['base_uri'];
-        if (!$baseUri) {
-            $helpers = $this->services->get('ViewHelperManager');
-            $serverUrlHelper = $helpers->get('ServerUrl');
-            $basePathHelper = $helpers->get('BasePath');
-            $baseUri = $serverUrlHelper($basePathHelper('files'));
-        }
-
         $params = $this->params()->fromPost();
         $params['import_unmapped'] = $params['import_unmapped'] === 'true';
         $isServer = $params['is_server'] === 'true';
@@ -451,31 +451,20 @@ class IndexController extends AbstractActionController
         $error = null;
 
         if (isset($params['filename'])) {
+            // The file is already checked.
+            $tempFile = $this->tempFileFactory->build();
             if ($isServer) {
                 $fullFilePath = $params['directory'] . '/' . $params['filename'];
             } else {
-                $fullFilePath = sys_get_temp_dir() . '/bulkimportfiles_upload/' . $params['filename'];
+                // Temp dir is available in config, it's get quickly here.
+                $tmpPath = pathinfo($tempFile->getTempPath(), PATHINFO_DIRNAME);
+                $fullFilePath = $tmpPath . DIRECTORY_SEPARATOR . $params['filename'];
             }
+            $tempFile->setTempPath($fullFilePath);
+            $tempFile->setSourceName($params['source']);
 
             $deleteFileAction = $params['delete_file'];
-
-            // TODO Use api standard method, not direct creation.
-            // Create new media via temporary factory.
-
-            $getId3 = new GetId3();
-            $fileSource = $getId3
-                ->analyze($fullFilePath);
-
-            $fileExtension = pathinfo($fullFilePath, PATHINFO_EXTENSION);
-            $fileExtension = strtolower($fileExtension);
-
-            $mediaType = isset($fileSource['mime_type']) ? $fileSource['mime_type'] : 'undefined';
-            if ($mediaType == 'undefined') {
-                // TODO Why pdf is an exception ?
-                if ($fileExtension == 'pdf') {
-                    $mediaType = 'application/pdf';
-                }
-            }
+            $mediaType = $tempFile->getMediaType();
 
             $isMapped = isset($this->filesMapsArray[$mediaType]);
             if (!$isMapped) {
@@ -506,6 +495,9 @@ class IndexController extends AbstractActionController
                             $data = $this->mapData()->pdf($fullFilePath, $filesMapsArray);
                             break;
                         default:
+                            $getId3 = new GetId3();
+                            $fileSource = $getId3
+                                ->analyze($fullFilePath);
                             $data = $this->mapData()->array($fileSource, $filesMapsArray);
                             break;
                     }
@@ -531,20 +523,6 @@ class IndexController extends AbstractActionController
             }
 
             // Create the item with the data and the file.
-
-            // Save the file if not to be deleted.
-            $tmpDir = $basePath . '/bulkimportfiles_temp';
-            if (!file_exists($tmpDir)) {
-                mkdir($tmpDir, 0775, true);
-            }
-            // The file extension is required, else the server can get one that
-            // is not allowed by Omeka.
-            $tmpPath = tempnam($tmpDir, 'omk_bif_') . '.' . $fileExtension;
-            copy($fullFilePath, $tmpPath);
-            @chmod($tmpPath, 0775);
-
-            $url = $baseUri . '/bulkimportfiles_temp/' . basename($tmpPath);
-
             // Append default metadata and media with url.
             $data += [
                 'o:resource_template' => ['o:id' => ''],
@@ -559,22 +537,21 @@ class IndexController extends AbstractActionController
                         '@value' => $isServer ? $params['filename'] : $params['source'],
                         'is_public' => '1',
                     ]],
-                    'o:ingester' => 'url',
-                    'ingest_url' => $url,
+                    'o:ingester' => 'bulk',
+                    'ingest_ingester' => $isServer ? 'sideload' : 'upload',
+                    'ingest_tempfile' => $tempFile,
+                    'ingest_delete_file' => $deleteFileAction,
                     'o:source' => $isServer ? $params['filename'] : $params['source'],
                 ]],
                 'o:is_public' => '1',
             ];
 
-            $newItem = $this->api()->create('items', $data);
+            /** @var \Omeka\Api\Response $response */
+            $response = $this->api()->create('items', $data);
 
             // The temp file is removed in all cases.
-            @unlink($tmpPath);
-            if ($newItem && $deleteFileAction) {
-                $result = @unlink($fullFilePath);
-                if (!$result) {
-                    $warning = error_get_last()['message'];
-                }
+            if (!$response) {
+                $error = 'Unable to process import.'; // @translate
             }
         } else {
             $error = 'No file to process.';
@@ -902,7 +879,7 @@ class IndexController extends AbstractActionController
 
         // The simplest way to get the list of all properties by vocabulary.
         // TODO Use a true form element and use chosen dynamically.
-        $factory = new \Zend\Form\Factory($this->services->get('FormElementManager'));
+        $factory = new \Zend\Form\Factory($this->formElementManager);
         $element = $factory->createElement([
             'type' => \Omeka\Form\Element\PropertySelect::class,
         ]);
