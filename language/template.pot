@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-11-04 00:00+0100\n"
+"POT-Creation-Date: 2019-11-11 00:00+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,87 +17,139 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/Controller/IndexController.php:223
+#: Module.php:51
+msgid "The libraries of the module should be installed first."
+msgstr ""
+
+#: Module.php:52
+msgid "See module’s installation documentation."
+msgstr ""
+
+#: src/Controller/IndexController.php:132
+#: src/Controller/IndexController.php:312
+msgid "Upload issue. Check file size and source."
+msgstr ""
+
+#: src/Controller/IndexController.php:136
+msgid "Unable to upload the file. Check file size and source."
+msgstr ""
+
+#: src/Controller/IndexController.php:147
+#: src/Controller/IndexController.php:359
+msgid "Can’t check empty folder. Check file size and source."
+msgstr ""
+
+#: src/Controller/IndexController.php:198
+#: src/Controller/IndexController.php:425
+msgid "The folder is not inside the configured Bulk Import directory."
+msgstr ""
+
+#: src/Controller/IndexController.php:201
+#: src/Controller/IndexController.php:428
+msgid "The folder is missing."
+msgstr ""
+
+#: src/Controller/IndexController.php:328
 msgid "All files must have a regular name. Check ended."
 msgstr ""
 
-#: src/Controller/IndexController.php:276
-#: src/Controller/IndexController.php:342
-msgid "Folder is empty"
+#: src/Controller/IndexController.php:356
+#: src/Controller/IndexController.php:422
+msgid "The folder is empty or files have error."
 msgstr ""
 
-#: src/Controller/IndexController.php:279
-#: src/Controller/IndexController.php:348
-#: src/Controller/IndexController.php:666
-#: src/Controller/IndexController.php:824
-msgid "Can’t check empty folder"
-msgstr ""
-
-#: src/Controller/IndexController.php:345
-#: src/Controller/IndexController.php:663
-#: src/Controller/IndexController.php:821
-msgid "Folder not exist"
-msgstr ""
-
-#: src/Controller/IndexController.php:424
+#: src/Controller/IndexController.php:484
 #, php-format
 msgid "The media type \"%s\" is not managed or has no mapping."
 msgstr ""
 
-#: src/Controller/IndexController.php:429
+#: src/Controller/IndexController.php:489
 msgid "No mapping for this file."
 msgstr ""
 
-#: src/Controller/IndexController.php:454
+#: src/Controller/IndexController.php:517
 msgid "No metadata to import. You may see log for more info."
 msgstr ""
 
-#: src/Controller/IndexController.php:456
+#: src/Controller/IndexController.php:519
 msgid "No metadata: mapping is empty."
 msgstr ""
 
-#: src/Controller/IndexController.php:558
-#: src/Controller/IndexController.php:588
-#: src/Controller/IndexController.php:675
+#: src/Controller/IndexController.php:610
+#: src/Controller/IndexController.php:640
 msgid "Request empty."
 msgstr ""
 
-#: src/Controller/IndexController.php:569
+#: src/Controller/IndexController.php:615
+#: src/Controller/IndexController.php:649
+#, php-format
+msgid "Could not save file \"%s\" for writing."
+msgstr ""
+
+#: src/Controller/IndexController.php:621
 msgid "File successfully added!"
 msgstr ""
 
-#: src/Controller/IndexController.php:593
+#: src/Controller/IndexController.php:645
 msgid "Filepath string should be longer that zero character."
 msgstr ""
 
-#: src/Controller/IndexController.php:605
-msgid "File successfully deleted!"
+#: src/Controller/IndexController.php:647
+#, php-format
+msgid "File \"%s\" is not writeable. Check rights."
+msgstr ""
+
+#: src/Controller/IndexController.php:654
+#, php-format
+msgid "Could not delete file \"%s\"."
 msgstr ""
 
 #: src/Controller/IndexController.php:657
+msgid "File successfully deleted!"
+msgstr ""
+
+#: src/Controller/IndexController.php:673
+msgid ""
+"Folder /modules/BulkImportFiles/data/mapping is not available or not "
+"writeable."
+msgstr ""
+
+#: src/Controller/IndexController.php:692
+msgid "Unable to create a new mapping in folder data/mapping."
+msgstr ""
+
+#: src/Controller/IndexController.php:720
 #, php-format
 msgid "Filepath \"%s\" is not writeable."
 msgstr ""
 
-#: src/Controller/IndexController.php:670
+#: src/Controller/IndexController.php:724
 msgid "Mapping of properties successfully updated."
 msgstr ""
 
-#: src/Controller/IndexController.php:672
+#: src/Controller/IndexController.php:726
 msgid "Can’t update mapping."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:498
-#, php-format
-msgid "This module requires the module \"%s\"."
+#: src/Controller/IndexController.php:872
+msgid "Folder not exist"
+msgstr ""
+
+#: src/Controller/IndexController.php:875
+msgid "Can’t check empty folder"
 msgstr ""
 
 #: src/Generic/AbstractModule.php:518
 #, php-format
+msgid "This module requires the module \"%s\"."
+msgstr ""
+
+#: src/Generic/AbstractModule.php:538
+#, php-format
 msgid "This module requires modules \"%s\"."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:586
+#: src/Generic/AbstractModule.php:606
 #, php-format
 msgid ""
 "The module \"%s\" was automatically deactivated because the dependencies are "
@@ -129,12 +181,12 @@ msgid "Make recognize and add"
 msgstr ""
 
 #: view/bulk-import-files/index/check-folder.phtml:33
-#: view/bulk-import-files/index/get-files.phtml:39
+#: view/bulk-import-files/index/get-folder.phtml:46
 msgid "File name"
 msgstr ""
 
 #: view/bulk-import-files/index/check-folder.phtml:35
-#: view/bulk-import-files/index/get-files.phtml:43
+#: view/bulk-import-files/index/get-folder.phtml:50
 #: view/bulk-import-files/index/map-show.phtml:48
 msgid "Media type"
 msgstr ""
@@ -147,41 +199,41 @@ msgstr ""
 msgid "Error during upload."
 msgstr ""
 
-#: view/bulk-import-files/index/get-files.phtml:22
+#: view/bulk-import-files/index/get-folder.phtml:29
 msgid "Selected files"
 msgstr ""
 
-#: view/bulk-import-files/index/get-files.phtml:52
-#: view/bulk-import-files/index/get-files.phtml:72
+#: view/bulk-import-files/index/get-folder.phtml:59
+#: view/bulk-import-files/index/get-folder.phtml:79
 #, php-format
 msgid "%d available fields"
 msgstr ""
 
-#: view/bulk-import-files/index/get-files.phtml:52
-#: view/bulk-import-files/index/get-files.phtml:77
+#: view/bulk-import-files/index/get-folder.phtml:59
+#: view/bulk-import-files/index/get-folder.phtml:84
 msgid "No available fields"
 msgstr ""
 
-#: view/bulk-import-files/index/get-files.phtml:63
-#: view/bulk-import-files/index/get-files.phtml:64
+#: view/bulk-import-files/index/get-folder.phtml:70
+#: view/bulk-import-files/index/get-folder.phtml:71
 msgid "Show all data"
 msgstr ""
 
-#: view/bulk-import-files/index/get-files.phtml:87
-#: view/bulk-import-files/index/get-files.phtml:162
+#: view/bulk-import-files/index/get-folder.phtml:94
+#: view/bulk-import-files/index/get-folder.phtml:169
 msgid "Field"
 msgstr ""
 
-#: view/bulk-import-files/index/get-files.phtml:88
-#: view/bulk-import-files/index/get-files.phtml:163
+#: view/bulk-import-files/index/get-folder.phtml:95
+#: view/bulk-import-files/index/get-folder.phtml:170
 msgid "Value"
 msgstr ""
 
-#: view/bulk-import-files/index/get-files.phtml:154
+#: view/bulk-import-files/index/get-folder.phtml:161
 msgid "Recognized fields"
 msgstr ""
 
-#: view/bulk-import-files/index/get-files.phtml:180
+#: view/bulk-import-files/index/get-folder.phtml:187
 msgid "No recognized fields"
 msgstr ""
 
@@ -196,15 +248,17 @@ msgid "Bulk import files"
 msgstr ""
 
 #: view/bulk-import-files/index/make-import.phtml:24
-#: view/bulk-import-files/index/map-edit.phtml:52
+#: view/bulk-import-files/index/map-edit.phtml:50
 msgid "Select folder"
 msgstr ""
 
 #: view/bulk-import-files/index/make-import.phtml:26
+#: view/bulk-import-files/index/map-edit.phtml:52
 msgid "You can either select a folder on your computer or on the server."
 msgstr ""
 
 #: view/bulk-import-files/index/make-import.phtml:27
+#: view/bulk-import-files/index/map-edit.phtml:53
 msgid ""
 "It is recommended to use the server for big import to allow to continue to "
 "use the browser and to avoid the server upload limits for total size and "
@@ -212,25 +266,30 @@ msgid ""
 msgstr ""
 
 #: view/bulk-import-files/index/make-import.phtml:31
+#: view/bulk-import-files/index/map-edit.phtml:57
 msgid "Source directory on server"
 msgstr ""
 
 #: view/bulk-import-files/index/make-import.phtml:34
+#: view/bulk-import-files/index/map-edit.phtml:60
 msgid ""
 "Enter the absolute path to the directory where files to be imported will be "
 "added."
 msgstr ""
 
 #: view/bulk-import-files/index/make-import.phtml:35
+#: view/bulk-import-files/index/map-edit.phtml:61
 #, php-format
 msgid "The directory can be anywhere on your server. Your root path is: %s"
 msgstr ""
 
 #: view/bulk-import-files/index/make-import.phtml:42
+#: view/bulk-import-files/index/map-edit.phtml:68
 msgid "Check"
 msgstr ""
 
 #: view/bulk-import-files/index/make-import.phtml:46
+#: view/bulk-import-files/index/map-edit.phtml:72
 msgid "Select folder on computer"
 msgstr ""
 
@@ -255,10 +314,11 @@ msgstr ""
 #: view/bulk-import-files/index/make-import.phtml:78
 msgid ""
 "Do you want to delete a file from the source directory after it has been "
-"imported? If so, the directory must be server-writable."
+"imported? If so, the directory must be server-writeable."
 msgstr ""
 
 #: view/bulk-import-files/index/make-import.phtml:93
+#: view/bulk-import-files/index/map-edit.phtml:85
 msgid "Please wait, analysis in progress…"
 msgstr ""
 
@@ -290,18 +350,6 @@ msgid ""
 "You may need to create an item template first, with the media type as title."
 msgstr ""
 
-#: view/bulk-import-files/index/map-edit.phtml:50
-msgid ""
-"You can select folder with you files with any type (images, etc.) and "
-"configure it."
-msgstr ""
-
-#: view/bulk-import-files/index/map-edit.phtml:53
-msgid ""
-"You can select folder with your files with any type (images, etc.) and "
-"configure it."
-msgstr ""
-
 #: view/bulk-import-files/index/map-show.phtml:18
 msgid "View mappings"
 msgstr ""
@@ -318,35 +366,12 @@ msgstr ""
 msgid "Map file data field (xpath or object notation)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:15
-msgid "PdfTk path"
-msgstr ""
-
-#: src/Form/ConfigForm.php:16
-msgid ""
-"Set the path if it is not automatically detected. PdfTk is the library used "
-"to extract metadata from pdf files."
+#: data/scripts/upgrade.php:32 Module.php:42
+msgid "BulkImportFiles requires module BulkImport version 3.0.12 or higher."
 msgstr ""
 
 #: src/Controller/IndexController.php:563
-#: src/Controller/IndexController.php:597
-#, php-format
-msgid "Could not save file \"%s\" for writing."
-msgstr ""
-
-#: src/Controller/IndexController.php:595
-#, php-format
-msgid "File \"%s\" is not writeable. Check rights."
-msgstr ""
-
-#: src/Controller/IndexController.php:602
-#, php-format
-msgid "Could not delete file \"%s\"."
-msgstr ""
-
-#: src/Mvc/Controller/Plugin/ExtractDataFromPdf.php:106
-#, php-format
-msgid "Command pdftk unavailable or failed: %s"
+msgid "Unable to process import."
 msgstr ""
 
 #: src/Mvc/Controller/Plugin/MapData.php:259
@@ -355,10 +380,10 @@ msgid ""
 "is skipped."
 msgstr ""
 
-#: config/module.config.php:79
+#: config/module.config.php:77
 msgid "Make import"
 msgstr ""
 
-#: config/module.config.php:92
+#: config/module.config.php:90
 msgid "Create mappings"
 msgstr ""
