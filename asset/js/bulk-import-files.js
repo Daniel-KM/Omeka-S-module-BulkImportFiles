@@ -1,8 +1,8 @@
 $(document).ready(function () {
 
-    $('#multiFiles').change(function (event) {
-        $('#upload').click();
-    });
+    /**
+     * Mapping.
+     */
 
     $('.map-edit #upload').on('click', function (e) {
         e.preventDefault();
@@ -203,6 +203,10 @@ $(document).ready(function () {
             }
         });
     }
+
+    /**
+     * Import.
+     */
 
     // Import by a directory on the server.
     $('.make_import_form .check_button').on('click', function () {
@@ -431,6 +435,10 @@ $(document).ready(function () {
                 }
             }
         });
+    });
+
+    $('#multiFiles').change(function (event) {
+        $('#upload').click();
     });
 
 });
