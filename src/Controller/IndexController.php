@@ -576,6 +576,8 @@ class IndexController extends AbstractActionController
                     $warning = error_get_last()['message'];
                 }
             }
+        } else {
+            $error = 'No file to process.';
         }
 
         $this->layout()
