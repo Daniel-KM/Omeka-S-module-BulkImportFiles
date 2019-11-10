@@ -8,6 +8,7 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 }
 
 use Generic\AbstractModule;
+use Omeka\Module\Exception\ModuleCannotInstallException;
 use Zend\Mvc\MvcEvent;
 use Zend\ModuleManager\ModuleManager;
 
@@ -26,6 +27,19 @@ class Module extends AbstractModule
     {
         parent::onBootstrap($event);
         $this->addAclRules();
+    }
+
+    protected function preInstall()
+    {
+        $file = __DIR__ . '/vendor/autoload.php';
+        if (!file_exists($file)) {
+            $services = $this->getServiceLocator();
+            $t = $services->get('MvcTranslator');
+            throw new ModuleCannotInstallException(
+                $t->translate('The libraries of the module should be installed first.') // @translate
+                    . ' ' . $t->translate('See module’s installation documentation.') // @translate
+            );
+        }
     }
 
     /**
