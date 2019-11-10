@@ -39,7 +39,7 @@ class IndexController extends AbstractActionController
 
     private $flatArray;
 
-    protected $parsed_data;
+    protected $parsedData;
 
     protected $filesData;
 
@@ -106,33 +106,33 @@ class IndexController extends AbstractActionController
             return strpos($v['name'], '.') !== 0;
         });
 
-        $files_data_for_view = [];
+        $filesDataForView = [];
 
         foreach ($files['files'] as $file) {
-            $media_type = $file['type'];
+            $mediaType = $file['type'];
             $data = [];
-            $this->parsed_data = [];
+            $this->parsedData = [];
             $errors = '';
 
-            if (isset($this->filesMapsArray[$media_type])) {
-                $filesMapsArray = $this->filesMapsArray[$media_type];
+            if (isset($this->filesMapsArray[$mediaType])) {
+                $filesMapsArray = $this->filesMapsArray[$mediaType];
                 $file['item_id'] = $filesMapsArray['item_id'];
                 unset($filesMapsArray['media_type']);
                 unset($filesMapsArray['item_id']);
 
-                switch ($media_type) {
+                switch ($mediaType) {
                     case 'application/pdf':
                         $data = $this->extractDataFromPdf($file['tmp_name']);
-                        $this->parsed_data = $this->flatArray($data);
+                        $this->parsedData = $this->flatArray($data);
                         $data = $this->mapData()->array($data, $filesMapsArray, true);
                         break;
 
                     default:
                         $getId3 = new GetId3();
-                        $file_source = $getId3
+                        $fileSource = $getId3
                             ->analyze($file['tmp_name']);
-                        $this->parsed_data = $this->flatArray($file_source, $this->ignoredKeys);
-                        $data = $this->mapData()->array($file_source, $filesMapsArray, true);
+                        $this->parsedData = $this->flatArray($fileSource, $this->ignoredKeys);
+                        $data = $this->mapData()->array($fileSource, $filesMapsArray, true);
                         break;
                 }
             }
@@ -147,7 +147,7 @@ class IndexController extends AbstractActionController
              *      'size' => int
              *      'item_id' => string (map file)
              *
-             * $source_data = $this->parsed_data
+             * $source_data = $this->parsedData
              * all available meta data for current file with value
              * example:
              *      'key' => string '/video/dataformat'
@@ -160,9 +160,9 @@ class IndexController extends AbstractActionController
              *        'field' => string 'jpg/exif/IFD0/DateTime'
              *        'value' => string '2014:03:12 15:03:25'
              */
-            $files_data_for_view[] = [
+            $filesDataForView[] = [
                 'file' => $file,
-                'source_data' => $this->parsed_data,
+                'source_data' => $this->parsedData,
                 'recognized_data' => $data,
                 'errors' => $errors,
             ];
@@ -170,7 +170,7 @@ class IndexController extends AbstractActionController
 
         $this->layout()
             ->setTemplate('bulk-import-files/index/get-files')
-            ->setVariable('files_data_for_view', $files_data_for_view)
+            ->setVariable('files_data_for_view', $filesDataForView)
             ->setVariable('listTerms', $this->listTerms())
             ->setVariable('filesMaps', $this->filesMaps);
     }
@@ -183,7 +183,7 @@ class IndexController extends AbstractActionController
 
         $this->prepareFilesMaps();
 
-        $files_data_for_view = [];
+        $filesDataForView = [];
 
         $params = $this->params()->fromPost();
         if (!empty($params['folder'])) {
@@ -193,50 +193,50 @@ class IndexController extends AbstractActionController
                 $files = array_filter($files, function($v) {
                     return strpos($v, '.') !== 0;
                 });
-                $file_path = $params['folder'] . '/';
+                $filePath = $params['folder'] . '/';
                 foreach ($files as $file) {
                     $getId3 = new GetId3();
-                    $file_source = $getId3
-                        ->analyze($file_path . $file);
-                    $media_type = 'undefined';
-                    if (isset($file_source['mime_type'])) {
-                        $media_type = $file_source['mime_type'];
+                    $fileSource = $getId3
+                        ->analyze($filePath . $file);
+                    $mediaType = 'undefined';
+                    if (isset($fileSource['mime_type'])) {
+                        $mediaType = $fileSource['mime_type'];
                     }
                     $file = [];
-                    $file['name'] = $file_source['filename'];
-                    $file['type'] = $media_type;
+                    $file['name'] = $fileSource['filename'];
+                    $file['type'] = $mediaType;
                     $file['tmp_name'] = null;
-                    $file['error'] = isset($file_source['error']) ? reset($file_source['error']) : 0;
-                    $file['size'] = $file_source['filesize'];
+                    $file['error'] = isset($fileSource['error']) ? reset($fileSource['error']) : 0;
+                    $file['size'] = $fileSource['filesize'];
 
                     $data = [];
-                    $this->parsed_data = [];
+                    $this->parsedData = [];
                     $errors = '';
 
-                    if (isset($this->filesMapsArray[$media_type])) {
-                        $filesMapsArray = $this->filesMapsArray[$media_type];
+                    if (isset($this->filesMapsArray[$mediaType])) {
+                        $filesMapsArray = $this->filesMapsArray[$mediaType];
                         $file['item_id'] = $filesMapsArray['item_id'];
                         unset($filesMapsArray['media_type']);
                         unset($filesMapsArray['item_id']);
 
-                        switch ($media_type) {
+                        switch ($mediaType) {
                             case 'application/pdf':
-                                $data = $this->extractDataFromPdf($file_path);
-                                $this->parsed_data = $this->flatArray($data);
+                                $data = $this->extractDataFromPdf($filePath);
+                                $this->parsedData = $this->flatArray($data);
                                 $data = $this->mapData()->array($data, $filesMapsArray, true);
                                 break;
 
                             default:
-                                $this->parsed_data = $this->flatArray($file_source, $this->ignoredKeys);
-                                $data = $this->mapData()->array($file_source, $filesMapsArray, true);
+                                $this->parsedData = $this->flatArray($fileSource, $this->ignoredKeys);
+                                $data = $this->mapData()->array($fileSource, $filesMapsArray, true);
                                 break;
                         }
                     }
 
                     // See getFiles().
-                    $files_data_for_view[] = [
+                    $filesDataForView[] = [
                         'file' => $file,
-                        'source_data' => $this->parsed_data,
+                        'source_data' => $this->parsedData,
                         'recognized_data' => $data,
                         'errors' => $errors,
                     ];
@@ -246,7 +246,7 @@ class IndexController extends AbstractActionController
 
         $this->layout()
             ->setTemplate('bulk-import-files/index/get-folder')
-            ->setVariable('files_data_for_view', $files_data_for_view)
+            ->setVariable('files_data_for_view', $filesDataForView)
             ->setVariable('listTerms', $this->listTerms())
             ->setVariable('filesMaps', $this->filesMaps);
     }
@@ -266,9 +266,9 @@ class IndexController extends AbstractActionController
             return strpos($v['name'], '.') !== 0;
         });
 
-        $files_data = [];
-        $total_files = 0;
-        $total_files_can_recognized = 0;
+        $filesData = [];
+        $totalFiles = 0;
+        $totalFilesCanRecognized = 0;
         $error = '';
 
         // Save the files temporary for the next request.
@@ -287,53 +287,53 @@ class IndexController extends AbstractActionController
 
                 if ($file['error'] === UPLOAD_ERR_OK) {
                     $getId3 = new GetId3();
-                    $file_source = $getId3
+                    $fileSource = $getId3
                         ->analyze($file['tmp_name']);
 
-                    ++$total_files;
+                    ++$totalFiles;
 
-                    $media_type = 'undefined';
-                    $file_isset_maps = 'no';
+                    $mediaType = 'undefined';
+                    $fileIssetMaps = 'no';
 
-                    if (isset($file_source['mime_type'])) {
-                        $media_type = $file_source['mime_type'];
-                        if (isset($this->filesMapsArray[$media_type])) {
-                            $file_isset_maps = 'yes';
-                            ++$total_files_can_recognized;
+                    if (isset($fileSource['mime_type'])) {
+                        $mediaType = $fileSource['mime_type'];
+                        if (isset($this->filesMapsArray[$mediaType])) {
+                            $fileIssetMaps = 'yes';
+                            ++$totalFilesCanRecognized;
                         }
                     }
 
-                    $files_data[] = [
+                    $filesData[] = [
                         'source' => $file['name'],
                         'filename' => basename($file['tmp_name']),
-                        'file_size' => $file_source['filesize'],
-                        'file_type' => $media_type,
-                        'file_isset_maps' => $file_isset_maps,
+                        'file_size' => $fileSource['filesize'],
+                        'file_type' => $mediaType,
+                        'file_isset_maps' => $fileIssetMaps,
                         'has_error' => $file['error'],
                     ];
 
-                    $full_file_path = $dest . basename($file['tmp_name']);
-                    move_uploaded_file($file['tmp_name'], $full_file_path);
+                    $fullFilePath = $dest . basename($file['tmp_name']);
+                    move_uploaded_file($file['tmp_name'], $fullFilePath);
                 } else {
                     if (isset($this->filesMapsArray[$file['type']])) {
-                        $file_isset_maps = 'yes';
-                        ++$total_files_can_recognized;
+                        $fileIssetMaps = 'yes';
+                        ++$totalFilesCanRecognized;
                     } else {
-                        $file_isset_maps = 'no';
+                        $fileIssetMaps = 'no';
                     }
 
-                    $files_data[] = [
+                    $filesData[] = [
                         'source' => $file['name'],
                         'filename' => basename($file['tmp_name']),
                         'file_size' => $file['size'],
                         'file_type' => $file['type'],
-                        'file_isset_maps' => $file_isset_maps,
+                        'file_isset_maps' => $fileIssetMaps,
                         'has_error' => $file['error'],
                     ];
                 }
             }
 
-            if (!$error && count($files_data) == 0) {
+            if (!$error && count($filesData) == 0) {
                 $error = $this->translate('Folder is empty'); // @translate
             }
         } else {
@@ -343,9 +343,9 @@ class IndexController extends AbstractActionController
         // This is not a full view, only a partial html.
         $this->layout()
             ->setTemplate('bulk-import-files/index/check-files')
-            ->setVariable('files_data', $files_data)
-            ->setVariable('total_files', $total_files)
-            ->setVariable('total_files_can_recognized', $total_files_can_recognized)
+            ->setVariable('files_data', $filesData)
+            ->setVariable('total_files', $totalFiles)
+            ->setVariable('total_files_can_recognized', $totalFilesCanRecognized)
             ->setVariable('error', $error)
             ->setVariable('is_server', false);
     }
@@ -358,9 +358,9 @@ class IndexController extends AbstractActionController
 
         $this->prepareFilesMaps();
 
-        $files_data = [];
-        $total_files = 0;
-        $total_files_can_recognized = 0;
+        $filesData = [];
+        $totalFiles = 0;
+        $totalFilesCanRecognized = 0;
         $error = '';
 
         $params = $this->params()->fromPost();
@@ -371,35 +371,35 @@ class IndexController extends AbstractActionController
                 $files = array_filter($files, function($v) {
                     return strpos($v, '.') !== 0;
                 });
-                $file_path = $params['folder'] . '/';
+                $filePath = $params['folder'] . '/';
                 foreach ($files as $file) {
                     $getId3 = new GetId3();
-                    $file_source = $getId3
-                        ->analyze($file_path . $file);
+                    $fileSource = $getId3
+                        ->analyze($filePath . $file);
 
-                    ++$total_files;
+                    ++$totalFiles;
 
-                    $media_type = 'undefined';
-                    $file_isset_maps = 'no';
+                    $mediaType = 'undefined';
+                    $fileIssetMaps = 'no';
 
-                    if (isset($file_source['mime_type'])) {
-                        $media_type = $file_source['mime_type'];
-                        if (isset($this->filesMapsArray[$media_type])) {
-                            $file_isset_maps = 'yes';
-                            ++$total_files_can_recognized;
+                    if (isset($fileSource['mime_type'])) {
+                        $mediaType = $fileSource['mime_type'];
+                        if (isset($this->filesMapsArray[$mediaType])) {
+                            $fileIssetMaps = 'yes';
+                            ++$totalFilesCanRecognized;
                         }
                     }
 
-                    $files_data[] = [
+                    $filesData[] = [
                         'source' => $file,
-                        'filename' => $file_source['filename'],
-                        'file_size' => $file_source['filesize'],
-                        'file_type' => $media_type,
-                        'file_isset_maps' => $file_isset_maps,
+                        'filename' => $fileSource['filename'],
+                        'file_size' => $fileSource['filesize'],
+                        'file_type' => $mediaType,
+                        'file_isset_maps' => $fileIssetMaps,
                     ];
                 }
 
-                if (count($files_data) == 0) {
+                if (count($filesData) == 0) {
                     $error = $this->translate('Folder is empty'); // @translate;
                 }
             } else {
@@ -411,9 +411,9 @@ class IndexController extends AbstractActionController
 
         $this->layout()
             ->setTemplate('bulk-import-files/index/check-folder')
-            ->setVariable('files_data', $files_data)
-            ->setVariable('total_files', $total_files)
-            ->setVariable('total_files_can_recognized', $total_files_can_recognized)
+            ->setVariable('files_data', $filesData)
+            ->setVariable('total_files', $totalFiles)
+            ->setVariable('total_files_can_recognized', $totalFilesCanRecognized)
             ->setVariable('error', $error)
             ->setVariable('is_server', true);
     }
@@ -445,52 +445,52 @@ class IndexController extends AbstractActionController
         $isServer = $params['is_server'] === 'true';
         $params['delete_file'] = !$isServer || $params['delete_file'] === 'true';
 
-        $row_id = $params['row_id'];
+        $rowId = $params['row_id'];
         $notice = null;
         $warning = null;
         $error = null;
 
         if (isset($params['filename'])) {
             if ($isServer) {
-                $full_file_path = $params['directory'] . '/' . $params['filename'];
+                $fullFilePath = $params['directory'] . '/' . $params['filename'];
             } else {
-                $full_file_path = sys_get_temp_dir() . '/bulkimportfiles_upload/' . $params['filename'];
+                $fullFilePath = sys_get_temp_dir() . '/bulkimportfiles_upload/' . $params['filename'];
             }
 
-            $delete_file_action = $params['delete_file'];
+            $deleteFileAction = $params['delete_file'];
 
             // TODO Use api standard method, not direct creation.
             // Create new media via temporary factory.
 
             $getId3 = new GetId3();
-            $file_source = $getId3
-                ->analyze($full_file_path);
+            $fileSource = $getId3
+                ->analyze($fullFilePath);
 
-            $file_extension = pathinfo($full_file_path, PATHINFO_EXTENSION);
-            $file_extension = strtolower($file_extension);
+            $fileExtension = pathinfo($fullFilePath, PATHINFO_EXTENSION);
+            $fileExtension = strtolower($fileExtension);
 
-            $media_type = isset($file_source['mime_type']) ? $file_source['mime_type'] : 'undefined';
-            if ($media_type == 'undefined') {
+            $mediaType = isset($fileSource['mime_type']) ? $fileSource['mime_type'] : 'undefined';
+            if ($mediaType == 'undefined') {
                 // TODO Why pdf is an exception ?
-                if ($file_extension == 'pdf') {
-                    $media_type = 'application/pdf';
+                if ($fileExtension == 'pdf') {
+                    $mediaType = 'application/pdf';
                 }
             }
 
-            $isMapped = isset($this->filesMapsArray[$media_type]);
+            $isMapped = isset($this->filesMapsArray[$mediaType]);
             if (!$isMapped) {
                 if (!$params['import_unmapped']) {
                     $this->layout()
                         ->setTemplate('bulk-import-files/index/process-import')
-                        ->setVariable('row_id', $row_id)
-                        ->setVariable('error', sprintf($this->translate('The media type "%s" is not managed or has no mapping.'), $media_type)); // @translate
+                        ->setVariable('row_id', $rowId)
+                        ->setVariable('error', sprintf($this->translate('The media type "%s" is not managed or has no mapping.'), $mediaType)); // @translate
                     return;
                 }
 
                 $data = [];
                 $notice = $this->translate('No mapping for this file.'); // @translate
             } else {
-                $filesMapsArray = $this->filesMapsArray[$media_type];
+                $filesMapsArray = $this->filesMapsArray[$mediaType];
                 unset($filesMapsArray['media_type']);
                 unset($filesMapsArray['item_id']);
 
@@ -499,14 +499,14 @@ class IndexController extends AbstractActionController
                 $query = $query ? reset($query) : null;
                 $isXpath = $query && strpos($query, '/') !== false;
                 if ($isXpath) {
-                    $data = $this->mapData()->xml($full_file_path, $filesMapsArray);
+                    $data = $this->mapData()->xml($fullFilePath, $filesMapsArray);
                 } else {
-                    switch ($media_type) {
+                    switch ($mediaType) {
                         case 'application/pdf':
-                            $data = $this->mapData()->pdf($full_file_path, $filesMapsArray);
+                            $data = $this->mapData()->pdf($fullFilePath, $filesMapsArray);
                             break;
                         default:
-                            $data = $this->mapData()->array($file_source, $filesMapsArray);
+                            $data = $this->mapData()->array($fileSource, $filesMapsArray);
                             break;
                     }
                 }
@@ -539,8 +539,8 @@ class IndexController extends AbstractActionController
             }
             // The file extension is required, else the server can get one that
             // is not allowed by Omeka.
-            $tmpPath = tempnam($tmpDir, 'omk_bif_') . '.' . $file_extension;
-            copy($full_file_path, $tmpPath);
+            $tmpPath = tempnam($tmpDir, 'omk_bif_') . '.' . $fileExtension;
+            copy($fullFilePath, $tmpPath);
             @chmod($tmpPath, 0775);
 
             $url = $baseUri . '/bulkimportfiles_temp/' . basename($tmpPath);
@@ -570,8 +570,8 @@ class IndexController extends AbstractActionController
 
             // The temp file is removed in all cases.
             @unlink($tmpPath);
-            if ($newItem && $delete_file_action) {
-                $result = @unlink($full_file_path);
+            if ($newItem && $deleteFileAction) {
+                $result = @unlink($fullFilePath);
                 if (!$result) {
                     $warning = error_get_last()['message'];
                 }
@@ -580,7 +580,7 @@ class IndexController extends AbstractActionController
 
         $this->layout()
             ->setTemplate('bulk-import-files/index/process-import')
-            ->setVariable('row_id', $row_id)
+            ->setVariable('row_id', $rowId)
             ->setVariable('notice', $notice)
             ->setVariable('warning', $warning)
             ->setVariable('error', $error);
@@ -690,38 +690,38 @@ class IndexController extends AbstractActionController
 
         if (!empty($params['omeka_file_id'])) {
             $omeka_file_id = $params['omeka_file_id'];
-            $media_type = $params['media_type'];
+            $mediaType = $params['media_type'];
             $listterms_select = $params['listterms_select'];
 
-            $file_content = "$media_type = media_type\n";
+            $fileContent = "$mediaType = media_type\n";
 
             /** @var \BulkImport\Mvc\Controller\Plugin\Bulk $bulk */
             $bulk = $this->bulk();
-            foreach ($listterms_select as $term_item_name) {
-                foreach ($term_item_name['property'] as $term) {
+            foreach ($listterms_select as $termItemName) {
+                foreach ($termItemName['property'] as $term) {
                     if (!$bulk->getPropertyTerm($term)) {
                         continue;
                     }
-                    $file_content .= $term_item_name['field'] . ' = ' . $term . "\n";
+                    $fileContent .= $termItemName['field'] . ' = ' . $term . "\n";
                 }
             }
 
-            $folder_path = dirname(dirname(__DIR__)) . '/data/mapping';
+            $folderPath = dirname(dirname(__DIR__)) . '/data/mapping';
             $response = false;
-            if (!empty($folder_path)) {
-                if (file_exists($folder_path) && is_dir($folder_path)) {
-                    $files = $this->listFilesInDir($folder_path);
-                    $file_path = $folder_path . '/';
+            if (!empty($folderPath)) {
+                if (file_exists($folderPath) && is_dir($folderPath)) {
+                    $files = $this->listFilesInDir($folderPath);
+                    $filePath = $folderPath . '/';
                     foreach ($files as $file) {
                         if ($file != $omeka_file_id) {
                             continue;
                         }
 
-                        if (!is_writeable($file_path . $file)) {
-                            $error = $this->translate('Filepath "%s" is not writeable.', $file_path . $file); // @translate
+                        if (!is_writeable($filePath . $file)) {
+                            $error = $this->translate('Filepath "%s" is not writeable.', $filePath . $file); // @translate
                         }
 
-                        $response = file_put_contents($file_path . $file, $file_content);
+                        $response = file_put_contents($filePath . $file, $fileContent);
                     }
                 } else {
                     $error = $this->translate('Folder not exist'); // @translate;
@@ -818,17 +818,17 @@ class IndexController extends AbstractActionController
     protected function prepareFilesMaps()
     {
         $this->filesMaps = [];
-        $folder_path = dirname(dirname(__DIR__)) . '/data/mapping';
+        $folderPath = dirname(dirname(__DIR__)) . '/data/mapping';
 
-        if (!empty($folder_path)) {
-            if (file_exists($folder_path) && is_dir($folder_path)) {
+        if (!empty($folderPath)) {
+            if (file_exists($folderPath) && is_dir($folderPath)) {
                 /** @var \BulkImport\Mvc\Controller\Plugin\Bulk $bulk */
                 $bulk = $this->bulk();
 
-                $files = $this->listFilesInDir($folder_path);
-                $file_path = $folder_path . '/';
+                $files = $this->listFilesInDir($folderPath);
+                $filePath = $folderPath . '/';
                 foreach ($files as $file) {
-                    $data = file_get_contents($file_path . $file);
+                    $data = file_get_contents($filePath . $file);
                     $data = trim($data);
                     if (empty($data)) {
                         continue;
@@ -837,7 +837,7 @@ class IndexController extends AbstractActionController
                     $data_rows = array_filter(array_map('trim', preg_split('/\n|\r\n?/', $data)));
 
                     $mediaType = null;
-                    $current_maps = [];
+                    $currentMaps = [];
                     foreach ($data_rows as $value) {
                         $value = array_map('trim', explode('=', $value));
                         if (count($value) !== 2) {
@@ -870,16 +870,16 @@ class IndexController extends AbstractActionController
                             continue;
                         }
 
-                        $current_maps[$term][] = $map;
+                        $currentMaps[$term][] = $map;
                     }
 
                     if ($mediaType) {
-                        $current_maps['item_id'] = $file;
-                        $this->filesMapsArray[$mediaType] = $current_maps;
+                        $currentMaps['item_id'] = $file;
+                        $this->filesMapsArray[$mediaType] = $currentMaps;
                     }
 
-                    $current_maps['media_type'] = $mediaType;
-                    $this->filesMaps[$file] = $current_maps;
+                    $currentMaps['media_type'] = $mediaType;
+                    $this->filesMaps[$file] = $currentMaps;
                 }
             } else {
                 $error = $this->translate('Folder not exist'); // @translate;
