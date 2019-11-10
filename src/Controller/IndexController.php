@@ -144,6 +144,7 @@ class IndexController extends AbstractActionController
              *      'tmp_name' => string
              *      'error' => int
              *      'size' => int
+             *      'item_id' => string (map file)
              *
              * $source_data = $this->parsed_data
              * all available meta data for current file with value
@@ -166,27 +167,10 @@ class IndexController extends AbstractActionController
             ];
         }
 
-        // The simplest way to get the list of all properties by vocabulary.
-        // TODO Use a true form element and use chosen dynamically.
-        $factory = new \Zend\Form\Factory($this->services->get('FormElementManager'));
-        $element = $factory->createElement([
-            'type' => \Omeka\Form\Element\PropertySelect::class,
-        ]);
-        $listTerms = $element->getValueOptions();
-        // Convert the list to a list for select whit option group.
-        // TODO Keep the full select array, compatible with js chosen.
-        $result = [];
-        foreach ($listTerms as $vocabulary) {
-            foreach ($vocabulary['options'] as $property) {
-                $result[$vocabulary['label']][$property['attributes']['data-term']] = $property['label'];
-            }
-        }
-        $listTerms = $result;
-
         $this->layout()
             ->setTemplate('bulk-import-files/index/get-files')
             ->setVariable('files_data_for_view', $files_data_for_view)
-            ->setVariable('listTerms', $listTerms)
+            ->setVariable('listTerms', $this->listTerms())
             ->setVariable('filesMaps', $this->filesMaps);
     }
 
@@ -826,5 +810,33 @@ class IndexController extends AbstractActionController
         } else {
             $error = $this->translate('Can’t check empty folder'); // @translate;
         }
+    }
+
+    /**
+     * List all terms of all vocabularies to build a select with option group..
+     *
+     * @return array
+     */
+    protected function listTerms()
+    {
+        $result = [];
+
+        // The simplest way to get the list of all properties by vocabulary.
+        // TODO Use a true form element and use chosen dynamically.
+        $factory = new \Zend\Form\Factory($this->services->get('FormElementManager'));
+        $element = $factory->createElement([
+            'type' => \Omeka\Form\Element\PropertySelect::class,
+        ]);
+        $listTerms = $element->getValueOptions();
+
+        // Convert the list to a list for select with option group.
+        // TODO Keep the full select array, compatible with js chosen.
+        foreach ($listTerms as $vocabulary) {
+            foreach ($vocabulary['options'] as $property) {
+                $result[$vocabulary['label']][$property['attributes']['data-term']] = $property['label'];
+            }
+        }
+
+        return $result;
     }
 }
