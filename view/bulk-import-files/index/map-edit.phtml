@@ -34,7 +34,7 @@ $form->prepare();
 </div>
 <?php echo $this->form()->closeTag($form); ?>
 
-<div class="files-map-block">
+<div class="response files-map-block">
     <div class="property">
         <p>
             <?= sprintf($translate('This helper works only with the formats managed by %sGetId3%s.'), '<a href="https://getid3.org" target="_blank">', '</a>') ?>
@@ -57,4 +57,8 @@ $form->prepare();
         <?php // This is a hidden button for js. ?>
         <button type="submit" name="upload" id="upload"><?= $translate('Upload') ?></button>
     </div>
+</div>
+
+<div class="modal-loader">
+    <div class="modal-loader-info"><?= $translate('Please wait, analysis in progress…') ?></div>
 </div>

@@ -24,18 +24,29 @@ $(document).ready(function () {
             processData: false,
             data: form_data,
             type: 'post',
+            beforeSend: function() {
+                $('.modal-loader').show();
+                $('.response').html('');
+            },
             success: function (response) {
-                $('.files-map-block').html(response);
-                $('#table-selected-files .o-icon-more.sidebar-content').click(function () {
-                    $(this).parent().parent().find('.full_info').toggle();
-                })
-                add_button_action();
+                $('.response').html(response);
+                action_for_map_files();
             },
             error: function (response) {
                 $('.response').html(response);
-            }
+            },
+            complete: function () {
+                $('.modal-loader').hide();
+            },
         });
     });
+
+    function action_for_map_files() {
+        $('#table-selected-files .o-icon-more.sidebar-content').click(function () {
+            $(this).parent().parent().find('.full_info').toggle();
+        })
+        add_button_action();
+    }
 
     function add_button_action() {
         var listterms = $('.listterms').html();
@@ -194,7 +205,7 @@ $(document).ready(function () {
     }
 
     // Import by a directory on the server.
-    $('.make_import_form .check_button').click(function () {
+    $('.make_import_form .check_button').on('click', function () {
         var url = basePath + '/admin/bulk-import-files/check-folder';
         var directory = $('.make_import_form #directory').val();
         var data = {'folder' : directory};
@@ -222,7 +233,7 @@ $(document).ready(function () {
     });
 
     // Import by a directory on the computer.
-    $('.make-import #upload').click(function (e) {
+    $('.make-import #upload').on('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -338,7 +349,7 @@ $(document).ready(function () {
     }
 
     function action_for_recognize_files() {
-        $('.js-recognize_files').click(function () {
+        $('.js-recognize_files').on('click', function () {
             var filenames = [];
             var sources = [];
             var row_id = [];
