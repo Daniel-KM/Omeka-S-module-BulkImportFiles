@@ -32,4 +32,11 @@ if (version_compare($oldVersion, '3.0.6', '<')) {
             'BulkImportFiles requires module BulkImport version 3.0.12 or higher.' // @translate
         );
     }
+
+    $pdftk = $settings->get('bulkimportfiles_pdftk');
+    $pdftkBulk = $settings->get('bulkimport_pdftk');
+    if ($pdftk && !$pdftkBulk) {
+        $settings->set('bulkimport_pdftk', $pdftk);
+    }
+    $settings->delete('bulkimportfiles_pdftk');
 }

@@ -12,7 +12,6 @@ return [
     ],
     'form_elements' => [
         'factories' => [
-            Form\ConfigForm::class => \Omeka\Form\Factory\InvokableFactory::class,
             Form\SettingsForm::class => \Omeka\Form\Factory\InvokableFactory::class,
         ],
     ],
@@ -27,7 +26,6 @@ return [
             'extractStringToFile' => Mvc\Controller\Plugin\ExtractStringToFile::class,
         ],
         'factories' => [
-            'extractDataFromPdf' => Service\ControllerPlugin\ExtractDataFromPdfFactory::class,
             'mapData' => Service\ControllerPlugin\MapDataFactory::class,
         ],
     ],
@@ -110,8 +108,5 @@ return [
         ],
     ],
     'bulkimportfiles' => [
-        'config' => [
-            'bulkimportfiles_pdftk' => '',
-        ],
     ],
 ];
