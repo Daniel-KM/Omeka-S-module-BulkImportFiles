@@ -4,6 +4,7 @@
  * @var array $files_data_for_view
  * @var array $listTerms
  * @var array $filesMaps
+ * @var string $error
  */
 
 $translate = $this->plugin('translate');
@@ -14,6 +15,12 @@ $this->headScript()
     ->appendScript($script)
     ->appendFile($this->assetUrl('js/bulk-import-files.js', 'BulkImportFiles'));
 ?>
+
+<?php if ($error): ?>
+
+    <div class="error"><?= $error ?></div>
+
+<?php else: ?>
 
 <div class="messages">
     <div class="response"></div>
@@ -215,3 +222,5 @@ $this->headScript()
         </div>
     </div>
 </div>
+
+<?php endif; ?>

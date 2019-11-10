@@ -45,8 +45,6 @@ class IndexController extends AbstractActionController
 
     protected $filesData;
 
-    protected $directory;
-
     protected $ignoredKeys = [
         'GETID3_VERSION',
         'filesize',
@@ -122,6 +120,7 @@ class IndexController extends AbstractActionController
         });
 
         $filesDataForView = [];
+        $error = '';
 
         if (!empty($files['files'])) {
             foreach ($files['files'] as $file) {
@@ -190,16 +189,15 @@ class IndexController extends AbstractActionController
                 ];
             }
         } else {
-            $filesDataForView[] = [
-                'errors' => [$this->translate('Can’t check empty folder.')], // @translate,
-            ];
+            $error = $this->translate('Can’t check empty folder.'); // @translate,
         }
 
         $this->layout()
             ->setTemplate('bulk-import-files/index/get-files')
             ->setVariable('files_data_for_view', $filesDataForView)
             ->setVariable('listTerms', $this->listTerms())
-            ->setVariable('filesMaps', $this->filesMaps);
+            ->setVariable('filesMaps', $this->filesMaps)
+            ->setVariable('error', $error);
     }
 
     public function getFolderAction()
@@ -211,16 +209,19 @@ class IndexController extends AbstractActionController
         $this->prepareFilesMaps();
 
         $filesDataForView = [];
+        $error = '';
 
         $params = $this->params()->fromPost();
         if (!empty($params['folder'])) {
-            if (file_exists($params['folder']) && is_dir($params['folder'])) {
-                $files = $this->listFilesInDir($params['folder']);
+            $folder = $this->verifyDirectory($params['folder']);
+            if ($folder) {
+                $params['folder'] = $folder;
+                $files = $this->listFilesInDir($folder);
                 // Skip dot files.
                 $files = array_filter($files, function($v) {
                     return strpos($v, '.') !== 0;
                 });
-                $filePath = $params['folder'] . '/';
+                $filePath = $folder . '/';
                 foreach ($files as $file) {
                     $fullFilePath = $filePath . $file;
                     // TODO Manage the error store.
@@ -271,14 +272,19 @@ class IndexController extends AbstractActionController
                         'errors' => $errors,
                     ];
                 }
+            } else {
+                $error = $this->translate('The folder is not inside the configured Bulk Import directory.'); // @translate,
             }
+        } else {
+            $error = $this->translate('The folder is missing.'); // @translate,
         }
 
         $this->layout()
             ->setTemplate('bulk-import-files/index/get-folder')
             ->setVariable('files_data_for_view', $filesDataForView)
             ->setVariable('listTerms', $this->listTerms())
-            ->setVariable('filesMaps', $this->filesMaps);
+            ->setVariable('filesMaps', $this->filesMaps)
+            ->setVariable('error', $error);
     }
 
     public function checkFilesAction()
@@ -376,7 +382,8 @@ class IndexController extends AbstractActionController
 
         $params = $this->params()->fromPost();
         if (!empty($params['folder'])) {
-            if (file_exists($params['folder']) && is_dir($params['folder'])) {
+            $folder = $this->verifyDirectory($params['folder']);
+            if ($folder) {
                 $files = $this->listFilesInDir($params['folder']);
                 // Skip dot files.
                 $files = array_filter($files, function($v) {
@@ -413,10 +420,10 @@ class IndexController extends AbstractActionController
                     $error = $this->translate('The folder is empty or files have error.'); // @translate;
                 }
             } else {
-                $error = $this->translate('The folder does not exist.'); // @translate;
+                $error = $this->translate('The folder is not inside the configured Bulk Import directory.'); // @translate,
             }
         } else {
-            $error = $this->translate('Can’t check empty folder.'); // @translate;
+            $error = $this->translate('The folder is missing.'); // @translate,
         }
 
         $this->layout()
@@ -894,5 +901,34 @@ class IndexController extends AbstractActionController
         }
 
         return $result;
+    }
+
+    /**
+     * Verify the passed dir.
+     *
+     * @param string $dirpath
+     * @return string|false The real folder path or false if invalid.
+     */
+    protected function verifyDirectory($dirpath)
+    {
+        $directory = $this->settings()->get('bulkimport_local_path');
+        if (empty($directory)) {
+            return false;
+        }
+        $fileinfo = new \SplFileInfo($dirpath);
+        if (!$fileinfo->isDir()) {
+            return false;
+        }
+        $realPath = $fileinfo->getRealPath();
+        if (false === $realPath) {
+            return false;
+        }
+        if (0 !== strpos($realPath, $directory)) {
+            return false;
+        }
+        if (!file_exists($realPath)) {
+            return false;
+        }
+        return $realPath;
     }
 }
