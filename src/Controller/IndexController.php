@@ -237,6 +237,13 @@ class IndexController extends AbstractActionController
                     $data = $this->mapData()->array($fileSource, $filesMapsArray, true);
                     break;
             }
+        } else {
+            $file['item_id'] = null;
+            $getId3 = new GetId3();
+            $fileSource = $getId3
+                ->analyze($tempFile->getTempPath());
+            $parsedData = $this->flatArray($fileSource, $this->ignoredKeys);
+            $data = [];
         }
 
         /*
@@ -661,6 +668,12 @@ class IndexController extends AbstractActionController
             throw new NotFoundException;
         }
 
+        $folderPath = dirname(dirname(__DIR__)) . '/data/mapping';
+        if (empty($folderPath) || !file_exists($folderPath) || !is_dir($folderPath) || !is_writeable($folderPath)) {
+            $result = ['state' => false, 'msg' => $this->translate('Folder /modules/BulkImportFiles/data/mapping is not available or not writeable.')]; // @translate
+            return new JsonModel($result);
+        }
+
         $params = [];
         $params['omeka_file_id'] = $this->params()->fromPost('omeka_file_id');
         $params['media_type'] = $this->params()->fromPost('media_type');
@@ -669,56 +682,48 @@ class IndexController extends AbstractActionController
         $error = '';
         $request = '';
 
-        if (!empty($params['omeka_file_id'])) {
-            $omeka_file_id = $params['omeka_file_id'];
-            $mediaType = $params['media_type'];
-            $listterms_select = $params['listterms_select'];
-
-            $fileContent = "$mediaType = media_type\n";
-
-            /** @var \BulkImport\Mvc\Controller\Plugin\Bulk $bulk */
-            $bulk = $this->bulk();
-            foreach ($listterms_select as $termItemName) {
-                foreach ($termItemName['property'] as $term) {
-                    if (!$bulk->getPropertyTerm($term)) {
-                        continue;
-                    }
-                    $fileContent .= $termItemName['field'] . ' = ' . $term . "\n";
+        // Check for a new mapping.
+        if (empty($params['omeka_file_id'])) {
+            $params['omeka_file_id'] = 'map_' . str_replace('/', '_', $params['media_type']) . '.ini';
+            $fullFilePath = $folderPath . '/' . $params['omeka_file_id'];
+            if (!file_exists($fullFilePath)) {
+                $result = @touch($fullFilePath);
+                if (!$result) {
+                    $result = ['state' => false, 'msg' => $this->translate('Unable to create a new mapping in folder data/mapping.')]; // @translate
+                    return new JsonModel($result);
                 }
             }
+        }
 
-            $folderPath = dirname(dirname(__DIR__)) . '/data/mapping';
-            $response = false;
-            if (!empty($folderPath)) {
-                if (file_exists($folderPath) && is_dir($folderPath)) {
-                    $files = $this->listFilesInDir($folderPath);
-                    $filePath = $folderPath . '/';
-                    foreach ($files as $file) {
-                        if ($file != $omeka_file_id) {
-                            continue;
-                        }
-                        $fullFilePath = $filePath . $file;
+        $omekaFileId = $params['omeka_file_id'];
+        $mediaType = $params['media_type'];
+        $listterms_select = $params['listterms_select'];
 
-                        if (!is_writeable($fullFilePath)) {
-                            $error = sprintf($this->translate('Filepath "%s" is not writeable.'), substr($fullFilePath, strlen(OMEKA_PATH))); // @translate
-                        } else {
-                            $response = file_put_contents($fullFilePath, $fileContent);
-                        }
-                    }
-                } else {
-                    $error = $this->translate('Folder not exist'); // @translate;
+        $fileContent = "$mediaType = media_type\n";
+
+        /** @var \BulkImport\Mvc\Controller\Plugin\Bulk $bulk */
+        $bulk = $this->bulk();
+        foreach ($listterms_select as $termItemName) {
+            foreach ($termItemName['property'] as $term) {
+                if (!$bulk->getPropertyTerm($term)) {
+                    continue;
                 }
-            } else {
-                $error = $this->translate('Can’t check empty folder'); // @translate;
+                $fileContent .= $termItemName['field'] . ' = ' . $term . "\n";
             }
+        }
 
-            if ($response) {
-                $request = $this->translate('Mapping of properties successfully updated.'); // @translate
-            } else {
-                $request = $this->translate('Can’t update mapping.'); // @translate
-            }
+        $fullFilePath = $folderPath . '/' . $omekaFileId;
+        if (is_writeable($fullFilePath)) {
+            $response = file_put_contents($fullFilePath, $fileContent);
         } else {
-            $request = $this->translate('Request empty.'); // @translate
+            $response = false;
+            $error = sprintf($this->translate('Filepath "%s" is not writeable.'), substr($fullFilePath, strlen(OMEKA_PATH))); // @translate
+        }
+
+        if ($response) {
+            $request = $this->translate('Mapping of properties successfully updated.'); // @translate
+        } else {
+            $request = $this->translate('Can’t update mapping.'); // @translate
         }
 
         $result = $error
@@ -801,7 +806,6 @@ class IndexController extends AbstractActionController
     {
         $this->filesMaps = [];
         $folderPath = dirname(dirname(__DIR__)) . '/data/mapping';
-
         if (!empty($folderPath)) {
             if (file_exists($folderPath) && is_dir($folderPath)) {
                 /** @var \BulkImport\Mvc\Controller\Plugin\Bulk $bulk */
@@ -810,7 +814,8 @@ class IndexController extends AbstractActionController
                 $files = $this->listFilesInDir($folderPath);
                 $filePath = $folderPath . '/';
                 foreach ($files as $file) {
-                    $data = file_get_contents($filePath . $file);
+                    $fullFilePath = $filePath . $file;
+                    $data = file_get_contents($fullFilePath);
                     $data = trim($data);
                     if (empty($data)) {
                         continue;
