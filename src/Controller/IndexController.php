@@ -88,6 +88,7 @@ class IndexController extends AbstractActionController
 
     public function makeImportAction()
     {
+        // Simply display the template, that is managed by ajax.
     }
 
     public function getFilesAction()
@@ -169,6 +170,82 @@ class IndexController extends AbstractActionController
 
         $this->layout()
             ->setTemplate('bulk-import-files/index/get-files')
+            ->setVariable('files_data_for_view', $files_data_for_view)
+            ->setVariable('listTerms', $this->listTerms())
+            ->setVariable('filesMaps', $this->filesMaps);
+    }
+
+    public function getFolderAction()
+    {
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            throw new NotFoundException;
+        }
+
+        $this->prepareFilesMaps();
+
+        $files_data_for_view = [];
+
+        $params = $this->params()->fromPost();
+        if (!empty($params['folder'])) {
+            if (file_exists($params['folder']) && is_dir($params['folder'])) {
+                $files = $this->listFilesInDir($params['folder']);
+                // Skip dot files.
+                $files = array_filter($files, function($v) {
+                    return strpos($v, '.') !== 0;
+                });
+                $file_path = $params['folder'] . '/';
+                foreach ($files as $file) {
+                    $getId3 = new GetId3();
+                    $file_source = $getId3
+                        ->analyze($file_path . $file);
+                    $media_type = 'undefined';
+                    if (isset($file_source['mime_type'])) {
+                        $media_type = $file_source['mime_type'];
+                    }
+                    $file = [];
+                    $file['name'] = $file_source['filename'];
+                    $file['type'] = $media_type;
+                    $file['tmp_name'] = null;
+                    $file['error'] = isset($file_source['error']) ? reset($file_source['error']) : 0;
+                    $file['size'] = $file_source['filesize'];
+
+                    $data = [];
+                    $this->parsed_data = [];
+                    $errors = '';
+
+                    if (isset($this->filesMapsArray[$media_type])) {
+                        $filesMapsArray = $this->filesMapsArray[$media_type];
+                        $file['item_id'] = $filesMapsArray['item_id'];
+                        unset($filesMapsArray['media_type']);
+                        unset($filesMapsArray['item_id']);
+
+                        switch ($media_type) {
+                            case 'application/pdf':
+                                $data = $this->extractDataFromPdf($file_path);
+                                $this->parsed_data = $this->flatArray($data);
+                                $data = $this->mapData()->array($data, $filesMapsArray, true);
+                                break;
+
+                            default:
+                                $this->parsed_data = $this->flatArray($file_source, $this->ignoredKeys);
+                                $data = $this->mapData()->array($file_source, $filesMapsArray, true);
+                                break;
+                        }
+                    }
+
+                    // See getFiles().
+                    $files_data_for_view[] = [
+                        'file' => $file,
+                        'source_data' => $this->parsed_data,
+                        'recognized_data' => $data,
+                        'errors' => $errors,
+                    ];
+                }
+            }
+        }
+
+        $this->layout()
+            ->setTemplate('bulk-import-files/index/get-folder')
             ->setVariable('files_data_for_view', $files_data_for_view)
             ->setVariable('listTerms', $this->listTerms())
             ->setVariable('filesMaps', $this->filesMaps);

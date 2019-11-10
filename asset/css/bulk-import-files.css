@@ -18,7 +18,7 @@
 
 }
 
-.make_import_form #upload,
+.bulk-import-files-form #upload,
 .files-map-block #upload {
     display: none;
 }
@@ -172,15 +172,15 @@ div.messages .response.error {
     font-weight: bold;
 }
 
-.make_import_form .field {
+.bulk-import-files-form .field {
     display: flex;
 }
 
-.make_import_form .inputs {
+.bulk-import-files-form .inputs {
     width: 55%;
 }
 
-.make_import_form .check_button {
+.bulk-import-files-form .check_button {
     margin-left: 10px;
     height: 35px;
 }

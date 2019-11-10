@@ -34,7 +34,7 @@ $form->prepare();
 </div>
 <?php echo $this->form()->closeTag($form); ?>
 
-<div class="response files-map-block">
+<div class="response files-map-block bulk-import-files-form">
     <div class="property">
         <p>
             <?= sprintf($translate('This helper works only with the formats managed by %sGetId3%s.'), '<a href="https://getid3.org" target="_blank">', '</a>') ?>
@@ -46,16 +46,38 @@ $form->prepare();
         <p>
             <?= $translate('You may need to create an item template first, with the media type as title.') ?>
         </p>
-        <p>
-            <?= $translate('You can select folder with you files with any type (images, etc.) and configure it.') ?>
-        </p>
-        <h4><?= $translate('Select folder') ?></h4>
-        <div><?= $translate('You can select folder with your files with any type (images, etc.) and configure it.') ?></div>
-        <div class="inputs">
-            <input type="file" name="files[]" id="multiFiles" class="fileinput button" multiple="multiple" webkitdirectory="webkitdirectory" mozdirectory="mozdirectory" msdirectory="msdirectory" odirectory="odirectory" directory="directory">
-        </div>
-        <?php // This is a hidden button for js. ?>
-        <button type="submit" name="upload" id="upload"><?= $translate('Upload') ?></button>
+        <fieldset id="fieldset-map_edit_form">
+            <legend><?= $translate('Select folder') ?></legend>
+            <p class="explanation">
+                <?= $translate('You can either select a folder on your computer or on the server.') ?>
+                <?= $translate('It is recommended to use the server for big import to allow to continue to use the browser and to avoid the server upload limits for total size and number of files.') ?>
+            </p>
+            <div class="field">
+                <div class="field-meta">
+                    <label for="directory"><?= $translate('Source directory on server') ?></label>
+                    <a href="#" class="expand" aria-label="<?= $translate('Expand') ?>"></a>
+                    <div class="collapsible">
+                        <div class="field-description"><?= $translate('Enter the absolute path to the directory where files to be imported will be added.') ?>
+                            <?= sprintf($translate('The directory can be anywhere on your server. Your root path is: %s'), $_SERVER['DOCUMENT_ROOT']) ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="inputs">
+                    <input type="text" name="directory" id="directory" value="<?= OMEKA_PATH ?>/files/import">
+                </div>
+                <button type="submit" name="add-item-submit" class="check_button"><?= $translate('Check') ?></button>
+            </div>
+            <div class="field">
+                <div class="field-meta">
+                    <label for="multiFiles"><?= $translate('Select folder on computer') ?></label>
+                </div>
+                <div class="inputs">
+                    <input type="file" name="files[]" id="multiFiles" class="fileinput button" multiple="multiple" webkitdirectory="webkitdirectory" mozdirectory="mozdirectory" msdirectory="msdirectory" odirectory="odirectory" directory="directory">
+                </div>
+            </div>
+            <?php // This is a hidden button for js. ?>
+            <button type="submit" name="upload" id="upload"><?= $translate('Upload') ?></button>
+        </fieldset>
     </div>
 </div>
 

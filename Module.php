@@ -70,6 +70,7 @@ class Module extends AbstractModule
                     'index',
                     'make-import',
                     'get-files',
+                    'get-folder',
                     'check-files',
                     'check-folder',
                     'process-import',

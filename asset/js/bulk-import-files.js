@@ -4,6 +4,34 @@ $(document).ready(function () {
      * Mapping.
      */
 
+    // Map by a directory on the server.
+    $('#fieldset-map_edit_form .check_button').on('click', function () {
+        var url = basePath + '/admin/bulk-import-files/get-folder';
+        var directory = $('#fieldset-map_edit_form #directory').val();
+        var data = {'folder' : directory};
+        $.ajax({
+            url: url,
+            data: data,
+            type: 'post',
+            beforeSend: function() {
+                $('.modal-loader').show();
+            },
+            success: function (response) {
+                $('.response').html(response);
+                action_for_map_files();
+            },
+            error: function (response) {
+                $('.response').html(response.responseText);
+            },
+            complete: function () {
+                $('.modal-loader').hide();
+            }
+        });
+
+        return false;
+    });
+
+    // Map by a directory on the computer.
     $('.map-edit #upload').on('click', function (e) {
         e.preventDefault();
         e.stopPropagation();

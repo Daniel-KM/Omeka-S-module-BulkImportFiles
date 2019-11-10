@@ -19,7 +19,7 @@ $this->htmlElement('body')->appendAttribute('class', 'bulk-import-files make-imp
 
 <?php echo $this->pageTitle($translate('Make bulk import files'), 1, $translate('Bulk import files')); ?>
 
-<form method="post" class="make_import_form">
+<form method="post" class="make_import_form bulk-import-files-form">
     <fieldset id="fieldset-make_import_form">
         <legend><?= $translate('Select folder') ?></legend>
         <p class="explanation">
@@ -75,7 +75,7 @@ $this->htmlElement('body')->appendAttribute('class', 'bulk-import-files make-imp
                 <a href="#" class="expand" aria-label="<?= $translate('Expand') ?>"></a>
                 <div class="collapsible">
                     <div class="field-description">
-                        <?= $translate('Do you want to delete a file from the source directory after it has been imported? If so, the directory must be server-writable.') ?>
+                        <?= $translate('Do you want to delete a file from the source directory after it has been imported? If so, the directory must be server-writeable.') ?>
                     </div>
                 </div>
             </div>
