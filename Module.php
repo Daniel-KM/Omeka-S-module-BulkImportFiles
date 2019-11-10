@@ -31,6 +31,18 @@ class Module extends AbstractModule
 
     protected function preInstall()
     {
+        $this->checkDependency();
+
+        /** @var \Omeka\Module\Manager $moduleManager */
+        $moduleManager = $this->getServiceLocator()->get('Omeka\ModuleManager');
+        $module = $moduleManager->getModule('BulkImport');
+        $version = $module->getDb('version');
+        if (version_compare($version, '3.0.12', '<')) {
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException(
+                'BulkImportFiles requires module BulkImport version 3.0.12 or higher.' // @translate
+            );
+        }
+
         $file = __DIR__ . '/vendor/autoload.php';
         if (!file_exists($file)) {
             $services = $this->getServiceLocator();
