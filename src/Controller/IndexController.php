@@ -380,8 +380,9 @@ class IndexController extends AbstractActionController
         }
 
         $params = $this->params()->fromPost();
+        $params['import_unmapped'] = $params['import_unmapped'] === 'true';
         $isServer = $params['is_server'] === 'true';
-        $params['delete_file'] = !$isServer || $params['delete_file'];
+        $params['delete_file'] = !$isServer || $params['delete_file'] === 'true';
 
         $row_id = $params['row_id'];
         $notice = null;
