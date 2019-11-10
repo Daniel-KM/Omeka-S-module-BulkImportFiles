@@ -610,7 +610,7 @@ class IndexController extends AbstractActionController
             $filename = 'map_' . explode('/', $mediaType)[0] . '_' . explode('/', $mediaType)[1] . '.ini';
             $filepath = dirname(dirname(__DIR__)) . '/data/mapping/' . $filename;
             if (($handle = fopen($filepath, 'w')) === false) {
-                $request['msg'] = $this->translate(sprintf('Could not save file "%s" for writing.', $filepath)); // @translate
+                $request['msg'] = sprintf($this->translate('Could not save file "%s" for writing.'), substr($filepath, strlen(OMEKA_PATH))); // @translate
             } else {
                 $content = "$mediaType = media_type\n";
                 fwrite($handle, $content);
@@ -642,14 +642,14 @@ class IndexController extends AbstractActionController
             if (!strlen($filepath)) {
                 $request['msg'] = $this->translate('Filepath string should be longer that zero character.'); // @translate
             } elseif (!is_writeable($filepath)) {
-                $request['msg'] = $this->translate(sprintf('File "%s" is not writeable. Check rights.', $filepath)); // @translate
+                $request['msg'] = sprintf($this->translate('File "%s" is not writeable. Check rights.'), substr($filepath, strlen(OMEKA_PATH))); // @translate
             } elseif (($handle = fopen($filepath, 'w')) === false) {
-                $request['msg'] = $this->translate(sprintf('Could not save file "%s" for writing.', $filepath)); // @translate
+                $request['msg'] = sprintf($this->translate('Could not save file "%s" for writing.'), substr($filepath, strlen(OMEKA_PATH))); // @translate
             } else {
                 fclose($handle);
                 $result = unlink($filepath);
                 if (!$result) {
-                    $request['msg'] = $this->translate(sprintf('Could not delete file "%s".', $filepath)); // @translate
+                    $request['msg'] = sprintf($this->translate('Could not delete file "%s".'), substr($filepath, strlen(OMEKA_PATH))); // @translate
                 } else {
                     $request['state'] = true;
                     $request['msg'] = $this->translate('File successfully deleted!'); // @translate
@@ -702,12 +702,13 @@ class IndexController extends AbstractActionController
                         if ($file != $omeka_file_id) {
                             continue;
                         }
+                        $fullFilePath = $filePath . $file;
 
-                        if (!is_writeable($filePath . $file)) {
-                            $error = $this->translate('Filepath "%s" is not writeable.', $filePath . $file); // @translate
+                        if (!is_writeable($fullFilePath)) {
+                            $error = sprintf($this->translate('Filepath "%s" is not writeable.'), substr($fullFilePath, strlen(OMEKA_PATH))); // @translate
+                        } else {
+                            $response = file_put_contents($fullFilePath, $fileContent);
                         }
-
-                        $response = file_put_contents($filePath . $file, $fileContent);
                     }
                 } else {
                     $error = $this->translate('Folder not exist'); // @translate;
