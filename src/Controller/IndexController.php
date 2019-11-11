@@ -221,29 +221,29 @@ class IndexController extends AbstractActionController
             $file['item_id'] = $filesMapsArray['item_id'];
             unset($filesMapsArray['media_type']);
             unset($filesMapsArray['item_id']);
-
-            switch ($mediaType) {
-                case 'application/pdf':
-                    $data = $this->extractDataFromPdf($tempFile->getTempPath());
-                    $parsedData = $this->flatArray($data);
-                    $data = $this->mapData()->array($data, $filesMapsArray, true);
-                    break;
-
-                default:
-                    $getId3 = new GetId3();
-                    $fileSource = $getId3
-                        ->analyze($tempFile->getTempPath());
-                    $parsedData = $this->flatArray($fileSource, $this->ignoredKeys);
-                    $data = $this->mapData()->array($fileSource, $filesMapsArray, true);
-                    break;
-            }
         } else {
+            $filesMapsArray = null;
             $file['item_id'] = null;
-            $getId3 = new GetId3();
-            $fileSource = $getId3
-                ->analyze($tempFile->getTempPath());
-            $parsedData = $this->flatArray($fileSource, $this->ignoredKeys);
-            $data = [];
+        }
+
+        switch ($mediaType) {
+            case 'application/pdf':
+                $data = $this->extractDataFromPdf($tempFile->getTempPath());
+                $parsedData = $this->flatArray($data);
+                $data = $filesMapsArray
+                    ? $this->mapData()->array($data, $filesMapsArray, true)
+                    : [];
+                break;
+
+            default:
+                $getId3 = new GetId3();
+                $fileSource = $getId3
+                    ->analyze($tempFile->getTempPath());
+                $parsedData = $this->flatArray($fileSource, $this->ignoredKeys);
+                $data = $filesMapsArray
+                    ? $this->mapData()->array($fileSource, $filesMapsArray, true)
+                    : [];
+                break;
         }
 
         /*
