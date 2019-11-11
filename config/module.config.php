@@ -72,6 +72,7 @@ return [
                 'route' => 'admin/bulk-import-files',
                 'resource' => 'BulkImportFiles\Controller\Index',
                 'privilege' => 'make-import',
+                'class' => 'o-icon-install',
                 'pages' => [
                     [
                         'label' => 'Make import', // @translate
