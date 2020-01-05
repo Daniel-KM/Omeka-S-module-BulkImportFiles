@@ -96,11 +96,6 @@ but all the maps should be in the same order.
 
 Note that metadata can be slighly different between standards.
 
-These items should be kept private, else they will be displayed in public.
-
-Once saved, all the specific items can be checked in the main menu `Bulk import files`
-on the main sidebar.
-
 ### Assistant to create or update a mapping
 
 An assistant is available to create or update a mapping via the second
