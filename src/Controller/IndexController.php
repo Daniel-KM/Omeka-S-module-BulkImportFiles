@@ -116,7 +116,7 @@ class IndexController extends AbstractActionController
         $request = $this->getRequest();
         $files = $request->getFiles()->toArray();
         // Skip dot files.
-        $files['files'] = array_filter($files['files'], function($v) {
+        $files['files'] = array_filter($files['files'], function ($v) {
             return strpos($v['name'], '.') !== 0;
         });
 
@@ -173,7 +173,7 @@ class IndexController extends AbstractActionController
                 $params['folder'] = $folder;
                 $files = $this->listFilesInDir($folder);
                 // Skip dot files.
-                $files = array_filter($files, function($v) {
+                $files = array_filter($files, function ($v) {
                     return strpos($v, '.') !== 0;
                 });
                 $filePath = $folder . '/';
@@ -288,7 +288,7 @@ class IndexController extends AbstractActionController
         $request = $this->getRequest();
         $files = $request->getFiles()->toArray();
         // Skip dot files.
-        $files['files'] = array_filter($files['files'], function($v) {
+        $files['files'] = array_filter($files['files'], function ($v) {
             return strpos($v['name'], '.') !== 0;
         });
 
@@ -388,7 +388,7 @@ class IndexController extends AbstractActionController
             if ($folder) {
                 $files = $this->listFilesInDir($params['folder']);
                 // Skip dot files.
-                $files = array_filter($files, function($v) {
+                $files = array_filter($files, function ($v) {
                     return strpos($v, '.') !== 0;
                 });
                 $filePath = $params['folder'] . '/';
@@ -526,7 +526,7 @@ class IndexController extends AbstractActionController
                     'property_id' => 1,
                     'type' => 'literal',
                     '@language' => null,
-                    '@value' =>  $isServer ? $params['filename'] : $params['source'],
+                    '@value' => $isServer ? $params['filename'] : $params['source'],
                     'is_public' => '1',
                 ];
             }

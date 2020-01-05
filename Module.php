@@ -99,6 +99,5 @@ class Module extends AbstractModule
                     'save-options',
                 ]
             );
-
     }
 }
