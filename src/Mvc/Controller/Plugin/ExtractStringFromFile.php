@@ -55,6 +55,7 @@ class ExtractStringFromFile extends AbstractPlugin
             throw new RuntimeException('Filepath, start string and end string should be longer that zero character.');
         }
 
+        // TODO Convert this code to unicode (mb_strpos mb_strlen, mb_substr for fread).
         $chunkSize = (int) $chunkSize;
         if ($chunkSize <= strlen($startString) || $chunkSize <= strlen($endString)) {
             throw new RuntimeException('Chunk size should be longer than start and end strings.');
