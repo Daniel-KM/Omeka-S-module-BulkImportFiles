@@ -12,7 +12,7 @@ $this->headLink()
 $script = 'var basePath = ' . json_encode($this->basePath(), 320);
 $this->headScript()
     ->appendScript($script)
-    ->appendFile($this->assetUrl('js/bulk-import-files.js', 'BulkImportFiles'));
+    ->appendFile($this->assetUrl('js/bulk-import-files.js', 'BulkImportFiles'), 'text/javascript', ['defer' => 'defer']);
 
 $this->htmlElement('body')->appendAttribute('class', 'bulk-import-files make-import');
 ?>
