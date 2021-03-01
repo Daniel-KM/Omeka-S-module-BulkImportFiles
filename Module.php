@@ -37,9 +37,9 @@ class Module extends AbstractModule
         $moduleManager = $this->getServiceLocator()->get('Omeka\ModuleManager');
         $module = $moduleManager->getModule('BulkImport');
         $version = $module->getDb('version');
-        if (version_compare($version, '3.0.12', '<')) {
+        if (version_compare($version, '3.3.21', '<')) {
             throw new \Omeka\Module\Exception\ModuleCannotInstallException(
-                'BulkImportFiles requires module BulkImport version 3.0.12 or higher.' // @translate
+                'BulkImportFiles requires module BulkImport version 3.3.21 or higher.' // @translate
             );
         }
 

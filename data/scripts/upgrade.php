@@ -40,3 +40,17 @@ if (version_compare($oldVersion, '3.0.6', '<')) {
     }
     $settings->delete('bulkimportfiles_pdftk');
 }
+
+if (version_compare($oldVersion, '3.3.6.2', '<')) {
+    $this->checkDependency();
+
+    /** @var \Omeka\Module\Manager $moduleManager */
+    $moduleManager = $services->get('Omeka\ModuleManager');
+    $module = $moduleManager->getModule('BulkImport');
+    $version = $module->getDb('version');
+    if (version_compare($version, '3.3.21', '<')) {
+        throw new \Omeka\Module\Exception\ModuleCannotInstallException(
+            'BulkImportFiles requires module BulkImport version 3.3.21 or higher.' // @translate
+        );
+    }
+}
