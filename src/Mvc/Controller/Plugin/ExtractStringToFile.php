@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright 2019 Daniel Berthereau
@@ -29,8 +29,8 @@
 
 namespace BulkImportFiles\Mvc\Controller\Plugin;
 
-use Omeka\File\Exception\RuntimeException;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
+use Omeka\File\Exception\RuntimeException;
 
 /**
  * Extract a string from a file of any size.
@@ -38,9 +38,9 @@ use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 class ExtractStringToFile extends AbstractPlugin
 {
     /**
-     * Extract a string from a file of any size from a start and a end strings.
+     * Extract a string to a file of any size from a start and a end strings.
      *
-     * @url https://stackoverflow.com/questions/1578169/how-can-i-read-xmp-data-from-a-jpg-with-php#2837300
+     * @link https://stackoverflow.com/questions/1578169/how-can-i-read-xmp-data-from-a-jpg-with-php#2837300
      *
      * @param string $filepath
      * @param string $startString

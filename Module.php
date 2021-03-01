@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace BulkImportFiles;
 
 if (!class_exists(\Generic\AbstractModule::class)) {
@@ -8,9 +8,9 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 }
 
 use Generic\AbstractModule;
-use Omeka\Module\Exception\ModuleCannotInstallException;
-use Laminas\Mvc\MvcEvent;
 use Laminas\ModuleManager\ModuleManager;
+use Laminas\Mvc\MvcEvent;
+use Omeka\Module\Exception\ModuleCannotInstallException;
 
 class Module extends AbstractModule
 {
@@ -18,18 +18,18 @@ class Module extends AbstractModule
 
     protected $dependency = 'BulkImport';
 
-    public function init(ModuleManager $moduleManager)
+    public function init(ModuleManager $moduleManager): void
     {
         require_once __DIR__ . '/vendor/autoload.php';
     }
 
-    public function onBootstrap(MvcEvent $event)
+    public function onBootstrap(MvcEvent $event): void
     {
         parent::onBootstrap($event);
         $this->addAclRules();
     }
 
-    protected function preInstall()
+    protected function preInstall(): void
     {
         $this->checkDependency();
 
@@ -57,7 +57,7 @@ class Module extends AbstractModule
     /**
      * Add ACL rules for this module.
      */
-    protected function addAclRules()
+    protected function addAclRules(): void
     {
         /** @var \Omeka\Permissions\Acl $acl */
         $acl = $this->getServiceLocator()->get('Omeka\Acl');

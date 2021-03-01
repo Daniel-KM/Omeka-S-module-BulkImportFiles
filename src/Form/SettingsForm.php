@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace BulkImportFiles\Form;
 
 use Laminas\Form\Element;
@@ -8,7 +8,7 @@ class SettingsForm extends Form
 {
     protected $modules = [];
 
-    public function init()
+    public function init(): void
     {
         $this->add([
             'type' => Element\Hidden::class,

@@ -1,23 +1,23 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace BulkImportFiles\Controller;
 
 // The autoload doesn’t work with GetId3.
 if (!class_exists(\JamesHeinrich\GetID3\GetId3::class)) {
-    require dirname(dirname(__DIR__)) . '/vendor/james-heinrich/getid3/src/GetID3.php';
+    require dirname(__DIR__, 2) . '/vendor/james-heinrich/getid3/src/GetID3.php';
 }
 
 use BulkImportFiles\Form\ImportForm;
 use BulkImportFiles\Form\SettingsForm;
 use JamesHeinrich\GetID3\GetId3;
-use Omeka\File\TempFile;
-use Omeka\File\TempFileFactory;
-use Omeka\File\Uploader;
-use Omeka\Mvc\Exception\NotFoundException;
 use Laminas\Form\FormElementManager\FormElementManagerV3Polyfill as FormElementManager;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
+use Omeka\File\TempFile;
+use Omeka\File\TempFileFactory;
+use Omeka\File\Uploader;
+use Omeka\Mvc\Exception\NotFoundException;
 
 class IndexController extends AbstractActionController
 {
@@ -100,12 +100,12 @@ class IndexController extends AbstractActionController
         ]);
     }
 
-    public function makeImportAction()
+    public function makeImportAction(): void
     {
         // Simply display the template, that is managed by ajax.
     }
 
-    public function getFilesAction()
+    public function getFilesAction(): void
     {
         if (!$this->getRequest()->isXmlHttpRequest()) {
             throw new NotFoundException;
@@ -155,7 +155,7 @@ class IndexController extends AbstractActionController
             ->setVariable('error', $error);
     }
 
-    public function getFolderAction()
+    public function getFolderAction(): void
     {
         if (!$this->getRequest()->isXmlHttpRequest()) {
             throw new NotFoundException;
@@ -277,7 +277,7 @@ class IndexController extends AbstractActionController
         ];
     }
 
-    public function checkFilesAction()
+    public function checkFilesAction(): void
     {
         if (!$this->getRequest()->isXmlHttpRequest()) {
             throw new NotFoundException;
@@ -369,7 +369,7 @@ class IndexController extends AbstractActionController
             ->setVariable('is_server', false);
     }
 
-    public function checkFolderAction()
+    public function checkFolderAction(): void
     {
         if (!$this->getRequest()->isXmlHttpRequest()) {
             throw new NotFoundException;
@@ -437,7 +437,7 @@ class IndexController extends AbstractActionController
             ->setVariable('is_server', true);
     }
 
-    public function processImportAction()
+    public function processImportAction(): void
     {
         if (!$this->getRequest()->isXmlHttpRequest()) {
             throw new NotFoundException;
@@ -610,7 +610,7 @@ class IndexController extends AbstractActionController
             $request['msg'] = $this->translate('Request empty.'); // @translate
         } else {
             $filename = 'map_' . explode('/', $mediaType)[0] . '_' . explode('/', $mediaType)[1] . '.ini';
-            $filepath = dirname(dirname(__DIR__)) . '/data/mapping/' . $filename;
+            $filepath = dirname(__DIR__, 2) . '/data/mapping/' . $filename;
             if (($handle = fopen($filepath, 'w')) === false) {
                 $request['msg'] = sprintf($this->translate('Could not save file "%s" for writing.'), mb_substr($filepath, mb_strlen(OMEKA_PATH))); // @translate
             } else {
@@ -640,7 +640,7 @@ class IndexController extends AbstractActionController
             $request['msg'] = $this->translate('Request empty.'); // @translate
         } else {
             $filename = 'map_' . explode('/', $mediaType)[0] . '_' . explode('/', $mediaType)[1] . '.ini';
-            $filepath = dirname(dirname(__DIR__)) . '/data/mapping/' . $filename;
+            $filepath = dirname(__DIR__, 2) . '/data/mapping/' . $filename;
             if (!strlen($filepath)) {
                 $request['msg'] = $this->translate('Filepath string should be longer that zero character.'); // @translate
             } elseif (!is_writeable($filepath)) {
@@ -668,7 +668,7 @@ class IndexController extends AbstractActionController
             throw new NotFoundException;
         }
 
-        $folderPath = dirname(dirname(__DIR__)) . '/data/mapping';
+        $folderPath = dirname(__DIR__, 2) . '/data/mapping';
         if (empty($folderPath) || !file_exists($folderPath) || !is_dir($folderPath) || !is_writeable($folderPath)) {
             $result = ['state' => false, 'msg' => $this->translate('Folder /modules/BulkImportFiles/data/mapping is not available or not writeable.')]; // @translate
             return new JsonModel($result);
@@ -769,7 +769,7 @@ class IndexController extends AbstractActionController
      * @param array $ignoredKeys
      * @param string $keys
      */
-    private function _flatArray(array $data, array $ignoredKeys = [], $keys = null)
+    private function _flatArray(array $data, array $ignoredKeys = [], $keys = null): void
     {
         foreach ($data as $key => $value) {
             if (is_array($value)) {
@@ -802,10 +802,10 @@ class IndexController extends AbstractActionController
         return $result;
     }
 
-    protected function prepareFilesMaps()
+    protected function prepareFilesMaps(): void
     {
         $this->filesMaps = [];
-        $folderPath = dirname(dirname(__DIR__)) . '/data/mapping';
+        $folderPath = dirname(__DIR__, 2) . '/data/mapping';
         if (!empty($folderPath)) {
             if (file_exists($folderPath) && is_dir($folderPath)) {
                 /** @var \BulkImport\Mvc\Controller\Plugin\Bulk $bulk */

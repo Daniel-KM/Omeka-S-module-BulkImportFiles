@@ -1,22 +1,22 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace BulkImportFiles\Form;
 
-use Laminas\View\Helper\Url;
 use Laminas\Form\Form;
+use Laminas\View\Helper\Url;
 
 class ImportForm extends Form
 {
     protected $urlHelper;
 
-    public function init()
+    public function init(): void
     {
     }
 
     /**
      * @param Url $urlHelper
      */
-    public function setUrlHelper(Url $urlHelper)
+    public function setUrlHelper(Url $urlHelper): void
     {
         $this->urlHelper = $urlHelper;
     }

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace BulkImportFiles\Mvc\Controller\Plugin;
 
 use ArrayObject;
@@ -177,7 +177,7 @@ class MapData extends AbstractPlugin
         return $this->array($input, $mapping, $simpleExtract);
     }
 
-    protected function simpleExtract(ArrayObject $result, $value, $target, $source)
+    protected function simpleExtract(ArrayObject $result, $value, $target, $source): void
     {
         $result[] = [
             'field' => $source,
@@ -186,7 +186,7 @@ class MapData extends AbstractPlugin
         ];
     }
 
-    protected function appendValueToTarget(ArrayObject $result, $value, $target)
+    protected function appendValueToTarget(ArrayObject $result, $value, $target): void
     {
         static $targets = [];
 
@@ -478,7 +478,7 @@ class MapData extends AbstractPlugin
      * @param array $ignoredKeys
      * @param string $keys
      */
-    private function _flatArray(array $data, array $ignoredKeys = [], $keys = null)
+    private function _flatArray(array $data, array $ignoredKeys = [], $keys = null): void
     {
         foreach ($data as $key => $value) {
             if (is_array($value)) {

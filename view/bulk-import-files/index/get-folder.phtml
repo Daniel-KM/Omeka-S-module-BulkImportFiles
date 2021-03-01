@@ -38,7 +38,7 @@ $this->headScript()
     <?php foreach ($this->files_data_for_view as $files_data): ?>
         <?php
         $set_active = isset($files_data['file']['item_id']) ? ' set_active' : '';
-        $itemId = isset($files_data['file']['item_id']) ? $files_data['file']['item_id'] : '';
+        $itemId = $files_data['file']['item_id'] ?? '';
         ?>
         <tr class="separator selected-files-row<?= $set_active ?>" data-file-type="<?= $files_data['file']['type'] ?>" data-file-item-id="<?= $itemId ?>">
             <td colspan="1">

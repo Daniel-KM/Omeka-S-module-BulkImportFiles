@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace BulkImportFiles\Service\ControllerPlugin;
 
 use BulkImportFiles\Mvc\Controller\Plugin\MapData;
