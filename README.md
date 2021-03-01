@@ -35,7 +35,7 @@ If the module was installed from the source, rename the name of the folder of
 the module to `BulkImportFiles`, go to the root of the module, and run:
 
 ```
-    composer install
+composer install --no-dev
 ```
 
 The next times:
@@ -128,7 +128,7 @@ your archives regularly so you can roll back if needed.
 Troubleshooting
 ---------------
 
-See online issues on the [module issues] page on GitHub.
+See online issues on the [module issues] page on GitLab.
 
 
 License
@@ -173,20 +173,20 @@ Copyright
 * Copyright Daniel Berthereau, 2019
 
 
-[Bulk Import Files]: https://github.com/Daniel-KM/Omeka-S-module-BulkImportFiles
+[Bulk Import Files]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImportFiles
 [Omeka S]: https://omeka.org/s
 [Omeka Classic]: https://omeka.org/classic
-[plugin]: https://github.com/Daniel-KM/Omeka-plugin-BulkImportFiles
+[plugin]: https://gitlab.com/Daniel-KM/Omeka-plugin-BulkImportFiles
 [`getid3`]: https://getid3.org
 [`php-pdftk`]: https://github.com/mikehaertl/php-pdftk
 [`pdftk`]: https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit
-[`BulkImportFiles.zip`]: https://github.com/Daniel-KM/Omeka-S-module-BulkImportFiles/releases
-[Bulk Import]: https://github.com/Daniel-KM/Omeka-S-module-BulkImport
+[`BulkImportFiles.zip`]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImportFiles/-/releases
+[Bulk Import]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImport
 [installing a module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
-[module issues]: https://github.com/Daniel-KM/Omeka-S-module-BulkImportFiles/issues
+[module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImportFiles/-/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org
 [OSI]: http://opensource.org
 [GitLab]: https://gitlab.com/Daniel-KM
-[Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"
+[Daniel-KM]: https://gitlab.com/Daniel-KM "Daniel Berthereau"
