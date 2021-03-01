@@ -14,10 +14,10 @@ use Omeka\File\TempFile;
 use Omeka\File\TempFileFactory;
 use Omeka\File\Uploader;
 use Omeka\Mvc\Exception\NotFoundException;
-use Zend\Form\FormElementManager\FormElementManagerV3Polyfill as FormElementManager;
-use Zend\Mvc\Controller\AbstractActionController;
-use Zend\View\Model\JsonModel;
-use Zend\View\Model\ViewModel;
+use Laminas\Form\FormElementManager\FormElementManagerV3Polyfill as FormElementManager;
+use Laminas\Mvc\Controller\AbstractActionController;
+use Laminas\View\Model\JsonModel;
+use Laminas\View\Model\ViewModel;
 
 class IndexController extends AbstractActionController
 {
@@ -887,7 +887,7 @@ class IndexController extends AbstractActionController
 
         // The simplest way to get the list of all properties by vocabulary.
         // TODO Use a true form element and use chosen dynamically.
-        $factory = new \Zend\Form\Factory($this->formElementManager);
+        $factory = new \Laminas\Form\Factory($this->formElementManager);
         $element = $factory->createElement([
             'type' => \Omeka\Form\Element\PropertySelect::class,
         ]);

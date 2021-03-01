@@ -2,7 +2,7 @@
 
 namespace BulkImportFiles\Form;
 
-use Zend\Form\Form;
+use Laminas\Form\Form;
 
 class MakeImportForm extends Form
 {

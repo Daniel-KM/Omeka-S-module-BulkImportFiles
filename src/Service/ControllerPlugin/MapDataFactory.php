@@ -3,7 +3,7 @@ namespace BulkImportFiles\Service\ControllerPlugin;
 
 use BulkImportFiles\Mvc\Controller\Plugin\MapData;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class MapDataFactory implements FactoryInterface
 {

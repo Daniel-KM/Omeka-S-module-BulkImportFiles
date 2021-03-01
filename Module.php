@@ -9,8 +9,8 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 
 use Generic\AbstractModule;
 use Omeka\Module\Exception\ModuleCannotInstallException;
-use Zend\Mvc\MvcEvent;
-use Zend\ModuleManager\ModuleManager;
+use Laminas\Mvc\MvcEvent;
+use Laminas\ModuleManager\ModuleManager;
 
 class Module extends AbstractModule
 {

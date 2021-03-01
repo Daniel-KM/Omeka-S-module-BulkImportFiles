@@ -4,8 +4,8 @@ namespace BulkImportFiles\Mvc\Controller\Plugin;
 use ArrayObject;
 use DOMDocument;
 use DOMXPath;
-use Zend\Mvc\Controller\Plugin\AbstractPlugin;
-use Zend\Mvc\Controller\PluginManager;
+use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
+use Laminas\Mvc\Controller\PluginManager;
 
 /**
  * Extract data from a string with a mapping.
