@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-01 00:00+0000\n"
+"POT-Creation-Date: 2021-11-22 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -150,10 +150,10 @@ msgid "This module requires modules \"%s\"."
 msgstr ""
 
 #: src/Generic/AbstractModule.php:80
-msgid "This module has resources that connot be installed."
+msgid "This module has resources that cannot be installed."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:707
+#: src/Generic/AbstractModule.php:725
 #, php-format
 msgid ""
 "The module \"%s\" was automatically deactivated because the dependencies are "
@@ -187,12 +187,6 @@ msgstr ""
 #: view/bulk-import-files/index/check-folder.phtml:33
 #: view/bulk-import-files/index/get-folder.phtml:46
 msgid "File name"
-msgstr ""
-
-#: view/bulk-import-files/index/check-folder.phtml:35
-#: view/bulk-import-files/index/get-folder.phtml:50
-#: view/bulk-import-files/index/map-show.phtml:48
-msgid "Media type"
 msgstr ""
 
 #: view/bulk-import-files/index/check-folder.phtml:36
@@ -388,10 +382,10 @@ msgid ""
 "is skipped."
 msgstr ""
 
-#: config/module.config.php:78
+#: config/module.config.php:79
 msgid "Make import"
 msgstr ""
 
-#: config/module.config.php:91
+#: config/module.config.php:92
 msgid "Create mappings"
 msgstr ""

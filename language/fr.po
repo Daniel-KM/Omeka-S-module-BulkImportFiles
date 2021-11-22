@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-11-11 00:00+0100\n"
-"PO-Revision-Date: 2021-03-01 00:00+0000\n"
+"POT-Creation-Date: 2021-11-22 00:00+0000\n"
+"PO-Revision-Date: 2021-11-22 00:00+0000\n"
+"Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
+"Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
-"Language-Team: \n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 3.0\n"
 
 #: Module.php:51
 msgid "The libraries of the module should be installed first."
@@ -151,17 +151,21 @@ msgstr "Dossier inexistant"
 msgid "Can’t check empty folder"
 msgstr "Impossible de vérifier un dossier vide"
 
-#: src/Generic/AbstractModule.php:518
+#: src/Generic/AbstractModule.php:66
 #, php-format
 msgid "This module requires the module \"%s\"."
 msgstr "Ce module requiert le module \"%s\"."
 
-#: src/Generic/AbstractModule.php:538
+#: src/Generic/AbstractModule.php:73
 #, php-format
 msgid "This module requires modules \"%s\"."
 msgstr "Ce module requiert les modules \"%s\"."
 
-#: src/Generic/AbstractModule.php:606
+#: src/Generic/AbstractModule.php:80
+msgid "This module has resources that cannot be installed."
+msgstr "Ce module a des ressources qui ne peuvent pas être installées."
+
+#: src/Generic/AbstractModule.php:725
 #, php-format
 msgid ""
 "The module \"%s\" was automatically deactivated because the dependencies are "
@@ -198,12 +202,6 @@ msgstr "Reconnaître et ajouter"
 #: view/bulk-import-files/index/get-folder.phtml:46
 msgid "File name"
 msgstr "Nom de fichier"
-
-#: view/bulk-import-files/index/check-folder.phtml:35
-#: view/bulk-import-files/index/get-folder.phtml:50
-#: view/bulk-import-files/index/map-show.phtml:48
-msgid "Media type"
-msgstr "Type de média"
 
 #: view/bulk-import-files/index/check-folder.phtml:36
 msgid "Has mapping"
@@ -315,7 +313,7 @@ msgstr "Vérification"
 #: view/bulk-import-files/index/make-import.phtml:46
 #: view/bulk-import-files/index/map-edit.phtml:72
 msgid "Select folder on computer"
-msgstr "Choisir un dossier dans l’ordnateur"
+msgstr "Choisir un dossier dans l’ordinateur"
 
 #: view/bulk-import-files/index/make-import.phtml:56
 msgid "Parameters"
@@ -403,10 +401,16 @@ msgstr "Alignements disponibles pour l’import"
 msgid "Map file data field (xpath or object notation)"
 msgstr "Aligner les champs depuis le fichier (xpath ou notation objet)"
 
-#: data/scripts/upgrade.php:32 Module.php:42
+#: data/scripts/upgrade.php:32
 msgid "BulkImportFiles requires module BulkImport version 3.0.12 or higher."
 msgstr ""
 "Le module Bulk Import Files requiert le module Bulk Import version 3.0.12 ou "
+"supérieur."
+
+#: data/scripts/upgrade.php:53 Module.php:42
+msgid "BulkImportFiles requires module BulkImport version 3.3.21 or higher."
+msgstr ""
+"Le module Bulk Import Files requiert le module Bulk Import version 3.3.21 ou "
 "supérieur."
 
 #: src/Controller/IndexController.php:563
@@ -421,10 +425,13 @@ msgstr ""
 "Index #{index}: impossible de trouver la ressource pour la valeur "
 "\"{value}\" : l’entrée est ignorée."
 
-#: config/module.config.php:77
+#: config/module.config.php:79
 msgid "Make import"
 msgstr "Importer"
 
-#: config/module.config.php:90
+#: config/module.config.php:92
 msgid "Create mappings"
 msgstr "Création des alignements"
+
+#~ msgid "Media type"
+#~ msgstr "Type de média"
