@@ -193,7 +193,7 @@ class MapData extends AbstractPlugin
         // First prepare the target keys.
         // TODO This normalization of the mapping can be done one time outside.
 
-        // @see BulkImport\View\Helper\AutomapFields
+        // @see \BulkImport\Mvc\Controller\Plugin\AutomapFields
         // The pattern checks a term or keyword, then an optional @language, then
         // an optional ^^ data type.
         $pattern = '~'
