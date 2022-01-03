@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace BulkImportFiles;
 
 if (!class_exists(\Generic\AbstractModule::class)) {
@@ -36,10 +37,10 @@ class Module extends AbstractModule
         /** @var \Omeka\Module\Manager $moduleManager */
         $moduleManager = $this->getServiceLocator()->get('Omeka\ModuleManager');
         $module = $moduleManager->getModule('BulkImport');
-        $version = $module->getDb('version');
-        if (version_compare($version, '3.3.21', '<')) {
+        $version = (string) $module->getDb('version');
+        if (version_compare($version, '3.3.28', '<')) {
             throw new \Omeka\Module\Exception\ModuleCannotInstallException(
-                'BulkImportFiles requires module BulkImport version 3.3.21 or higher.' // @translate
+                'BulkImportFiles requires module BulkImport version 3.3.28 or higher.' // @translate
             );
         }
 
