@@ -182,7 +182,7 @@ Copyright
 [`pdftk`]: https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit
 [`BulkImportFiles.zip`]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImportFiles/-/releases
 [Bulk Import]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImport
-[installing a module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
+[Installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
 [module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImportFiles/-/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
