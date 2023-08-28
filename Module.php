@@ -17,7 +17,9 @@ class Module extends AbstractModule
 {
     const NAMESPACE = __NAMESPACE__;
 
-    protected $dependency = 'BulkImport';
+    protected $dependencies = [
+        'BulkImport',
+    ];
 
     public function init(ModuleManager $moduleManager): void
     {
@@ -32,7 +34,7 @@ class Module extends AbstractModule
 
     protected function preInstall(): void
     {
-        $this->checkDependency();
+        $this->checkDependencies();
 
         /** @var \Omeka\Module\Manager $moduleManager */
         $moduleManager = $this->getServiceLocator()->get('Omeka\ModuleManager');

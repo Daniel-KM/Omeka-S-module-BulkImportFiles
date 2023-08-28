@@ -10,7 +10,7 @@ if (!class_exists(\JamesHeinrich\GetID3\GetId3::class)) {
 use BulkImportFiles\Form\ImportForm;
 use BulkImportFiles\Form\SettingsForm;
 use JamesHeinrich\GetID3\GetId3;
-use Laminas\Form\FormElementManager\FormElementManagerV3Polyfill as FormElementManager;
+use Laminas\Form\FormElementManager;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
