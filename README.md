@@ -15,36 +15,40 @@ This module is backported as a [plugin] for [Omeka Classic]
 Installation
 ------------
 
-This module is dependant from the module [Bulk Import], that should be
-installed first.
-
-The module uses external libraries, [`getid3`] and [`php-pdftk`], so use the
-release zip to install it, or use and init the source.
-
 See general end user documentation for [installing a module].
+
+The module [Common] must be installed first.
+
+You may use the release zip to install it or clone the source via git.
 
 * From the zip
 
-Download the last release [`BulkImportFiles.zip`] from the list of releases (the
+Download the last release [BulkImportFiles.zip] from the list of releases (the
 master does not contain the dependency), and uncompress it in the `modules`
 directory.
 
 * From the source and for development
 
 If the module was installed from the source, rename the name of the folder of
-the module to `BulkImportFiles`, go to the root of the module, and run:
+the module to `BulkImportFiles`.
 
-```
+```sh
+cd modules
+git clone https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImportFiles BulkImportFiles
+cd BulkImportFiles
 composer install --no-dev
 ```
 
+Then install it like any other Omeka module and follow the config instructions.
+
+The module uses external libraries, [`getid3`] and [`php-pdftk`], so use the
+release zip to install it, or use and init the source.
+
 The next times:
 
+```sh
+composer update
 ```
-    composer update
-```
-
-Then install it like any other Omeka module.
 
 * Install pdftk
 
@@ -170,7 +174,7 @@ See licences of dependencies.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2019
+* Copyright Daniel Berthereau, 2019-2024
 
 
 [Bulk Import Files]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImportFiles
@@ -180,9 +184,10 @@ Copyright
 [`getid3`]: https://getid3.org
 [`php-pdftk`]: https://github.com/mikehaertl/php-pdftk
 [`pdftk`]: https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit
-[`BulkImportFiles.zip`]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImportFiles/-/releases
+[Common]: https://gitlab.com/Daniel-KM/Omeka-S-module-Common
+[BulkImportFiles.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImportFiles/-/releases
 [Bulk Import]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImport
-[Installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
+[installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
 [module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImportFiles/-/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
