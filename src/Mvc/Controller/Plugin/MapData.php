@@ -3,11 +3,10 @@
 namespace BulkImportFiles\Mvc\Controller\Plugin;
 
 use ArrayObject;
+use Common\Stdlib\EasyMeta;
 use DOMDocument;
 use DOMXPath;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
-use Laminas\Mvc\Controller\PluginManager;
-use Common\Stdlib\EasyMeta;
 
 /**
  * Extract data from a string with a mapping.

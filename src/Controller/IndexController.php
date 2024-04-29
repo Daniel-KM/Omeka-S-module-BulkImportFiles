@@ -116,9 +116,7 @@ class IndexController extends AbstractActionController
         $request = $this->getRequest();
         $files = $request->getFiles()->toArray();
         // Skip dot files.
-        $files['files'] = array_filter($files['files'], function ($v) {
-            return strpos($v['name'], '.') !== 0;
-        });
+        $files['files'] = array_filter($files['files'], fn ($v) => strpos($v['name'], '.') !== 0);
 
         $filesDataForView = [];
         $error = '';
@@ -173,9 +171,7 @@ class IndexController extends AbstractActionController
                 $params['folder'] = $folder;
                 $files = $this->listFilesInDir($folder);
                 // Skip dot files.
-                $files = array_filter($files, function ($v) {
-                    return strpos($v, '.') !== 0;
-                });
+                $files = array_filter($files, fn ($v) => strpos($v, '.') !== 0);
                 $filePath = $folder . '/';
                 foreach ($files as $file) {
                     $fullFilePath = $filePath . $file;
@@ -288,9 +284,7 @@ class IndexController extends AbstractActionController
         $request = $this->getRequest();
         $files = $request->getFiles()->toArray();
         // Skip dot files.
-        $files['files'] = array_filter($files['files'], function ($v) {
-            return strpos($v['name'], '.') !== 0;
-        });
+        $files['files'] = array_filter($files['files'], fn ($v) => strpos($v['name'], '.') !== 0);
 
         $filesData = [];
         $totalFiles = 0;
@@ -388,9 +382,7 @@ class IndexController extends AbstractActionController
             if ($folder) {
                 $files = $this->listFilesInDir($params['folder']);
                 // Skip dot files.
-                $files = array_filter($files, function ($v) {
-                    return strpos($v, '.') !== 0;
-                });
+                $files = array_filter($files, fn ($v) => strpos($v, '.') !== 0);
                 $filePath = $params['folder'] . '/';
 
                 foreach ($files as $file) {
@@ -799,9 +791,7 @@ class IndexController extends AbstractActionController
         if (empty($dir) || !file_exists($dir) || !is_dir($dir) || !is_readable($dir)) {
             return [];
         }
-        $result = array_values(array_filter(scandir($dir), function ($file) use ($dir) {
-            return is_file($dir . DIRECTORY_SEPARATOR . $file);
-        }));
+        $result = array_values(array_filter(scandir($dir), fn ($file) => is_file($dir . DIRECTORY_SEPARATOR . $file)));
         natcasesort($result);
         return $result;
     }

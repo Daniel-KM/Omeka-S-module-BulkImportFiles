@@ -51,7 +51,7 @@ class ExtractStringToFile extends AbstractPlugin
      */
     public function __invoke($filepath, $content)
     {
-        $chunkSize = 131072;
+        // $chunkSize = 131072;
         if (!strlen($filepath)) {
             throw new RuntimeException('Filepath string should be longer that zero character.');
         }
@@ -60,8 +60,8 @@ class ExtractStringToFile extends AbstractPlugin
             throw new RuntimeException(sprintf('Could not save file "%s" for reading/'), $filepath);
         }
 
-        $buffer = '';
-        $hasString = false;
+        // $buffer = '';
+        // $hasString = false;
 
         fwrite($handle, $content);
         fclose($handle);
