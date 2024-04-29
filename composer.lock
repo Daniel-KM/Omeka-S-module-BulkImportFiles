@@ -8,24 +8,24 @@
     "packages": [
         {
             "name": "james-heinrich/getid3",
-            "version": "v2.0.0-beta3",
+            "version": "v2.0.0-beta6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/JamesHeinrich/getID3.git",
-                "reference": "5515a2d24667c3c0ff49fdcbdadc405c0880c7a2"
+                "reference": "8bf46222ae008d870e6676b4bf455ed664d90d05"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/JamesHeinrich/getID3/zipball/5515a2d24667c3c0ff49fdcbdadc405c0880c7a2",
-                "reference": "5515a2d24667c3c0ff49fdcbdadc405c0880c7a2",
+                "url": "https://api.github.com/repos/JamesHeinrich/getID3/zipball/8bf46222ae008d870e6676b4bf455ed664d90d05",
+                "reference": "8bf46222ae008d870e6676b4bf455ed664d90d05",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4.0"
             },
             "require-dev": {
-                "jakub-onderka/php-parallel-lint": "^0.9 || ^1.0",
-                "phpunit/phpunit": "^4.8|^5.0"
+                "php-parallel-lint/php-parallel-lint": "^1.0",
+                "phpunit/phpunit": "^4.8 || ^5.0 || ^6.1 || ^7.5 || ^8.5"
             },
             "suggest": {
                 "ext-SimpleXML": "SimpleXML extension is required to analyze RIFF/WAV/BWF audio files (also requires `ext-libxml`).",
@@ -87,9 +87,9 @@
             ],
             "support": {
                 "issues": "https://github.com/JamesHeinrich/getID3/issues",
-                "source": "https://github.com/JamesHeinrich/getID3/tree/2.0"
+                "source": "https://github.com/JamesHeinrich/getID3/tree/v2.0.0-beta6"
             },
-            "time": "2020-07-21T08:15:44+00:00"
+            "time": "2023-11-02T19:40:57+00:00"
         }
     ],
     "packages-dev": [],
@@ -100,5 +100,5 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.2.0"
 }
