@@ -12,8 +12,8 @@ return [
         ],
     ],
     'form_elements' => [
-        'factories' => [
-            Form\SettingsForm::class => \Omeka\Form\Factory\InvokableFactory::class,
+        'invokables' => [
+            Form\ConfigForm::class => Form\ConfigForm::class,
         ],
     ],
     'controllers' => [
@@ -110,5 +110,9 @@ return [
         ],
     ],
     'bulkimportfiles' => [
+        'config' => [
+            'bulkimportfiles_pdftk' => '',
+            'bulkimportfiles_local_path' => '',
+        ],
     ],
 ];

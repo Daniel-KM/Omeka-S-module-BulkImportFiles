@@ -228,7 +228,7 @@ class IndexController extends AbstractActionController
 
         switch ($mediaType) {
             case 'application/pdf':
-                $data = $this->extractDataFromPdf($tempFile->getTempPath());
+                $data = $this->extractDataFromPdf->__invoke($tempFile->getTempPath());
                 $parsedData = $this->flatArray($data);
                 $data = $filesMapsArray
                     ? $this->mapData()->array($data, $filesMapsArray, true)
@@ -701,11 +701,15 @@ class IndexController extends AbstractActionController
 
         $fileContent = "$mediaType = media_type\n";
 
-        /** @var \BulkImport\Mvc\Controller\Plugin\Bulk $bulk */
-        $bulk = $this->bulk();
+        /** @var \Common\Mvc\Controller\Plugin\EasyMeta $easyMeta */
+        $easyMeta = $this->easyMeta();
         foreach ($listterms_select as $termItemName) {
             foreach ($termItemName['property'] as $term) {
+<<<<<<< HEAD
                 if (!$bulk->getPropertyTerm($term)) {
+=======
+                if (!$easyMeta->propertyTerm($term)) {
+>>>>>>> 2c04571 (Replaced dependency from module Generic to module Common.)
                     continue;
                 }
                 $fileContent .= $termItemName['field'] . ' = ' . $term . "\n";
@@ -808,8 +812,8 @@ class IndexController extends AbstractActionController
         $folderPath = dirname(__DIR__, 2) . '/data/mapping';
         if (!empty($folderPath)) {
             if (file_exists($folderPath) && is_dir($folderPath)) {
-                /** @var \BulkImport\Mvc\Controller\Plugin\Bulk $bulk */
-                $bulk = $this->bulk();
+                /** @var \Common\Mvc\Controller\Plugin\EasyMeta $easyMeta */
+                $easyMeta = $this->easyMeta();
 
                 $files = $this->listFilesInDir($folderPath);
                 $filePath = $folderPath . '/';
@@ -852,7 +856,11 @@ class IndexController extends AbstractActionController
                         if (strpos($term, ':') === false || count(explode(':', $term)) !== 2) {
                             continue;
                         }
+<<<<<<< HEAD
                         $term = $bulk->getPropertyTerm($term);
+=======
+                        $term = $easyMeta->propertyTerm($term);
+>>>>>>> 2c04571 (Replaced dependency from module Generic to module Common.)
                         if (!$term) {
                             continue;
                         }
@@ -877,7 +885,7 @@ class IndexController extends AbstractActionController
     }
 
     /**
-     * List all terms of all vocabularies to build a select with option group..
+     * List all terms of all vocabularies to build a select with option group.
      *
      * @return array
      */
@@ -912,7 +920,7 @@ class IndexController extends AbstractActionController
      */
     protected function verifyDirectory($dirpath)
     {
-        $directory = $this->settings()->get('bulkimport_local_path');
+        $directory = $this->settings()->get('bulkimportfiles_local_path');
         if (empty($directory)) {
             return false;
         }

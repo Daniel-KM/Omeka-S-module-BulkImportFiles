@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace BulkImportFiles\Mvc\Controller\Plugin;
 
 use ArrayObject;
@@ -6,6 +7,7 @@ use DOMDocument;
 use DOMXPath;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 use Laminas\Mvc\Controller\PluginManager;
+use Common\Stdlib\EasyMeta;
 
 /**
  * Extract data from a string with a mapping.
@@ -13,14 +15,19 @@ use Laminas\Mvc\Controller\PluginManager;
 class MapData extends AbstractPlugin
 {
     /**
-     * @var PluginManager
+     * @var \Common\Stdlib\EasyMeta
      */
-    protected $plugins;
+    protected $easyMeta;
 
     /**
-     * @var \BulkImport\Mvc\Controller\Plugin\Bulk
+     * @var unknown
      */
-    protected $bulk;
+    protected $extractDataFromPdf;
+
+    /**
+     * @var \BulkImportFiles\Mvc\Controller\Plugin\ExtractStringFromFile
+     */
+    protected $extractStringFromFile;
 
     /**
      * Temporary flat array.
@@ -48,19 +55,17 @@ class MapData extends AbstractPlugin
         'md5_data',
     ];
 
-    /**
-     * @param PluginManager $plugins
-     */
-    public function __construct(PluginManager $plugins)
-    {
-        $this->plugins = $plugins;
-        $this->bulk = $plugins->get('bulk');
+    public function __construct(
+        EasyMeta $easyMeta,
+        ExtractDataFromPdf $extractDataFromPdf,
+        ExtractStringFromFile $extractFileFromFile
+    ) {
+        $this->easyMeta = $easyMeta;
+        $this->extractDataFromPdf = $extractDataFromPdf;
+        $this->extractStringFromFile = $extractStringFromFile;
     }
 
-    /**
-     * @return \BulkImportFiles\Mvc\Controller\Plugin\MapData
-     */
-    public function __invoke()
+    public function __invoke(): self
     {
         return $this;
     }
@@ -74,7 +79,7 @@ class MapData extends AbstractPlugin
      * @return array A resource array by property, suitable for api creation
      * or update.
      */
-    public function array(array $input, array $mapping, $simpleExtract = false)
+    public function array(array $input, array $mapping, $simpleExtract = false): array
     {
         $mapping = $this->normalizeMapping($mapping);
         if (empty($input) || empty($mapping)) {
@@ -121,8 +126,7 @@ class MapData extends AbstractPlugin
             return [];
         }
 
-        $extractStringFromFile = $this->plugins()->get('extractStringFromFile');
-        $xml = $extractStringFromFile($filepath, '<x:xmpmeta', '</x:xmpmeta>');
+        $xml = $this->extractStringFromFile->__invoke($filepath, '<x:xmpmeta', '</x:xmpmeta>');
         if (empty($xml)) {
             return [];
         }
@@ -172,8 +176,7 @@ class MapData extends AbstractPlugin
             return [];
         }
 
-        $extractDataFromPdf = $this->plugins()->get('extractDataFromPdf');
-        $input = $extractDataFromPdf($filepath);
+        $input = $this->extractDataFromPdf->__invoke($filepath);
         return $this->array($input, $mapping, $simpleExtract);
     }
 
@@ -222,7 +225,7 @@ class MapData extends AbstractPlugin
             $targets[$target]['type'] = empty($matches[3]) ? null : trim($matches[3]);
             $targets[$target]['is'] = $this->isField($targets[$target]['field']);
             if ($targets[$target]['is'] === 'property') {
-                $targets[$target]['property_id'] = $this->bulk->getPropertyId($targets[$target]['field']);
+                $targets[$target]['property_id'] = $this->easyMeta->propertyId($targets[$target]['field']);
             }
         }
 
@@ -337,7 +340,7 @@ class MapData extends AbstractPlugin
         if (in_array($field, $singleData)) {
             return 'single';
         }
-        return $this->bulk->isPropertyTerm($field)
+        return $this->easyMeta->propertyId($field)
             ? 'property'
             : 'custom';
     }
@@ -490,10 +493,5 @@ class MapData extends AbstractPlugin
                 ];
             }
         }
-    }
-
-    protected function plugins()
-    {
-        return $this->plugins;
     }
 }

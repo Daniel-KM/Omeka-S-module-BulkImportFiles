@@ -2,66 +2,61 @@
 
 namespace BulkImportFiles;
 
-if (!class_exists(\Generic\AbstractModule::class)) {
-    require file_exists(dirname(__DIR__) . '/Generic/AbstractModule.php')
-        ? dirname(__DIR__) . '/Generic/AbstractModule.php'
-        : __DIR__ . '/src/Generic/AbstractModule.php';
+if (!class_exists(\Common\TraitModule::class)) {
+    require_once dirname(__DIR__) . '/Common/TraitModule.php';
 }
 
-use Generic\AbstractModule;
+use Common\Stdlib\PsrMessage;
+use Common\TraitModule;
+use Laminas\EventManager\Event;
+use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\ModuleManager\ModuleManager;
 use Laminas\Mvc\MvcEvent;
+use Omeka\Module\AbstractModule;
 use Omeka\Module\Exception\ModuleCannotInstallException;
 
+/**
+ * Bulk import files.
+ *
+ * @copyright Daniel Berthereau, 2018-2024
+ * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
+ */
 class Module extends AbstractModule
 {
-    const NAMESPACE = __NAMESPACE__;
+    use TraitModule;
 
-    protected $dependencies = [
-        'BulkImport',
-    ];
+    const NAMESPACE = __NAMESPACE__;
 
     public function init(ModuleManager $moduleManager): void
     {
         require_once __DIR__ . '/vendor/autoload.php';
     }
 
-    public function onBootstrap(MvcEvent $event): void
-    {
-        parent::onBootstrap($event);
-        $this->addAclRules();
-    }
-
     protected function preInstall(): void
     {
-        $this->checkDependencies();
+        $services = $this->getServiceLocator();
+        $translate = $services->get('ControllerPluginManager')->get('translate');
 
-        /** @var \Omeka\Module\Manager $moduleManager */
-        $moduleManager = $this->getServiceLocator()->get('Omeka\ModuleManager');
-        $module = $moduleManager->getModule('BulkImport');
-        $version = (string) $module->getDb('version');
-        if (version_compare($version, '3.3.28', '<')) {
-            throw new \Omeka\Module\Exception\ModuleCannotInstallException(
-                'BulkImportFiles requires module BulkImport version 3.3.28 or higher.' // @translate
+        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.57')) {
+            $message = new \Omeka\Stdlib\Message(
+                $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
+                'Common', '3.4.57'
             );
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
 
         $file = __DIR__ . '/vendor/autoload.php';
         if (!file_exists($file)) {
-            $services = $this->getServiceLocator();
-            $t = $services->get('MvcTranslator');
             throw new ModuleCannotInstallException(
-                $t->translate('The libraries of the module should be installed first.') // @translate
-                    . ' ' . $t->translate('See module’s installation documentation.') // @translate
+                $translate('The libraries of the module should be installed first. See module’s installation documentation.') // @translate
             );
         }
     }
 
-    /**
-     * Add ACL rules for this module.
-     */
-    protected function addAclRules(): void
+    public function onBootstrap(MvcEvent $event): void
     {
+        parent::onBootstrap($event);
+
         /** @var \Omeka\Permissions\Acl $acl */
         $acl = $this->getServiceLocator()->get('Omeka\Acl');
 
