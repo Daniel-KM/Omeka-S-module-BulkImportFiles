@@ -2,8 +2,6 @@
 
 namespace BulkImportFiles;
 
-use Omeka\Stdlib\Message;
-
 /**
  * @var Module $this
  * @var \Laminas\ServiceManager\ServiceLocatorInterface $services
@@ -18,42 +16,29 @@ use Omeka\Stdlib\Message;
  */
 $plugins = $services->get('ControllerPluginManager');
 $api = $plugins->get('api');
+$config = $services->get('Config');
 $settings = $services->get('Omeka\Settings');
 $connection = $services->get('Omeka\Connection');
 $messenger = $plugins->get('messenger');
 $entityManager = $services->get('Omeka\EntityManager');
 
-if (version_compare($oldVersion, '3.0.6', '<')) {
-    $this->checkDependencies();
-
-    /** @var \Omeka\Module\Manager $moduleManager */
-    $moduleManager = $services->get('Omeka\ModuleManager');
-    $module = $moduleManager->getModule('BulkImport');
-    $version = $module->getDb('version');
-    if (version_compare($version, '3.0.12', '<')) {
-        throw new \Omeka\Module\Exception\ModuleCannotInstallException(
-            'BulkImportFiles requires module BulkImport version 3.0.12 or higher.' // @translate
-        );
-    }
-
-    $pdftk = $settings->get('bulkimportfiles_pdftk');
-    $pdftkBulk = $settings->get('bulkimport_pdftk');
-    if ($pdftk && !$pdftkBulk) {
-        $settings->set('bulkimport_pdftk', $pdftk);
-    }
-    $settings->delete('bulkimportfiles_pdftk');
+if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.57')) {
+    $message = new \Omeka\Stdlib\Message(
+        'The module %1$s should be upgraded to version %2$s or later.', // @translate
+        'Common', '3.4.57'
+    );
+    throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
 }
 
-if (version_compare($oldVersion, '3.3.6.2', '<')) {
-    $this->checkDependencies();
+if (version_compare($oldVersion, '3.4.8', '<')) {
+    $pdftk = $settings->get('bulkimportfiles_pdftk') ?: null;
+    $pdftkBulk = $settings->get('bulkimport_pdftk') ?: null;
+    $settings->set('bulkimportfiles_pdftk', $pdftk ?? $pdftkBulk ?? '/usr/bin/pdftk');
 
-    /** @var \Omeka\Module\Manager $moduleManager */
-    $moduleManager = $services->get('Omeka\ModuleManager');
-    $module = $moduleManager->getModule('BulkImport');
-    $version = $module->getDb('version');
-    if (version_compare($version, '3.3.21', '<')) {
-        throw new \Omeka\Module\Exception\ModuleCannotInstallException(
-            'BulkImportFiles requires module BulkImport version 3.3.21 or higher.' // @translate
-        );
-    }
+    $config = $services->get('Config');
+    $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+
+    $pdftk = $settings->get('bulkimportfiles_local_path') ?: null;
+    $pdftkBulk = $settings->get('bulkimport_local_path') ?: null;
+    $settings->set('bulkimportfiles_local_path', $pdftk ?? $pdftkBulk ?? ($basePath . '/_import'));
 }
