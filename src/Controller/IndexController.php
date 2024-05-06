@@ -697,11 +697,7 @@ class IndexController extends AbstractActionController
         $easyMeta = $this->easyMeta();
         foreach ($listterms_select as $termItemName) {
             foreach ($termItemName['property'] as $term) {
-<<<<<<< HEAD
-                if (!$bulk->getPropertyTerm($term)) {
-=======
                 if (!$easyMeta->propertyTerm($term)) {
->>>>>>> 2c04571 (Replaced dependency from module Generic to module Common.)
                     continue;
                 }
                 $fileContent .= $termItemName['field'] . ' = ' . $term . "\n";
@@ -846,11 +842,7 @@ class IndexController extends AbstractActionController
                         if (strpos($term, ':') === false || count(explode(':', $term)) !== 2) {
                             continue;
                         }
-<<<<<<< HEAD
-                        $term = $bulk->getPropertyTerm($term);
-=======
                         $term = $easyMeta->propertyTerm($term);
->>>>>>> 2c04571 (Replaced dependency from module Generic to module Common.)
                         if (!$term) {
                             continue;
                         }
