@@ -2,6 +2,8 @@
 
 namespace BulkImportFiles;
 
+use Laminas\ServiceManager\Factory\InvokableFactory;
+
 return [
     'view_manager' => [
         'template_path_stack' => [
@@ -11,25 +13,47 @@ return [
             'ViewJsonStrategy',
         ],
     ],
+
+    // FORM ELEMENTS (solo factories; se usi getForm(FQCN) non servono alias)
     'form_elements' => [
-        'invokables' => [
-            Form\ConfigForm::class => Form\ConfigForm::class,
+        'factories' => [
+            \BulkImportFiles\Form\ImportForm::class   => InvokableFactory::class,
+            \BulkImportFiles\Form\SettingsForm::class => InvokableFactory::class,
         ],
+        // Nessun 'aliases' per evitare cicli.
     ],
+
+    // CONTROLLERS
     'controllers' => [
         'factories' => [
-            'BulkImportFiles\Controller\Index' => Service\Controller\IndexControllerFactory::class,
+            \BulkImportFiles\Controller\Index::class => \BulkImportFiles\Service\Controller\IndexControllerFactory::class,
         ],
     ],
+
+    // CONTROLLER PLUGINS
     'controller_plugins' => [
-        'invokables' => [
-            'extractStringFromFile' => Mvc\Controller\Plugin\ExtractStringFromFile::class,
-            'extractStringToFile' => Mvc\Controller\Plugin\ExtractStringToFile::class,
+        'aliases' => [
+            'mapData'               => \BulkImportFiles\Mvc\Controller\Plugin\MapData::class,
+            'extractDataFromPdf'    => \BulkImportFiles\Mvc\Controller\Plugin\ExtractDataFromPdf::class,
+            'extractStringFromFile' => \BulkImportFiles\Mvc\Controller\Plugin\ExtractStringFromFile::class,
+            'extractStringToFile'   => \BulkImportFiles\Mvc\Controller\Plugin\ExtractStringToFile::class,
         ],
         'factories' => [
-            'mapData' => Service\ControllerPlugin\MapDataFactory::class,
+            'mapData'             => Service\ControllerPlugin\MapDataFactory::class,
+            'extractDataFromPdf'  => Service\ControllerPlugin\ExtractDataFromPdfFactory::class,
+            \BulkImportFiles\Mvc\Controller\Plugin\MapData::class
+                => \BulkImportFiles\Service\ControllerPlugin\MapDataFactory::class,
+            \BulkImportFiles\Mvc\Controller\Plugin\ExtractDataFromPdf::class
+                => \BulkImportFiles\Service\ControllerPlugin\ExtractDataFromPdfFactory::class,
+            \BulkImportFiles\Mvc\Controller\Plugin\ExtractStringFromFile::class
+                => InvokableFactory::class,
+            \BulkImportFiles\Mvc\Controller\Plugin\ExtractStringToFile::class
+                => InvokableFactory::class,
         ],
+        
     ],
+
+    // ROUTER
     'router' => [
         'routes' => [
             'admin' => [
@@ -40,7 +64,7 @@ return [
                             'route' => '/bulk-import-files',
                             'defaults' => [
                                 '__NAMESPACE__' => 'BulkImportFiles\Controller',
-                                'controller' => 'Index',
+                                'controller' => \BulkImportFiles\Controller\Index::class,
                                 'action' => 'index',
                             ],
                         ],
@@ -55,7 +79,7 @@ return [
                                     ],
                                     'defaults' => [
                                         '__NAMESPACE__' => 'BulkImportFiles\Controller',
-                                        'controller' => 'Index',
+                                        'controller' => \BulkImportFiles\Controller\Index::class,
                                         'action' => 'index',
                                     ],
                                 ],
@@ -66,39 +90,43 @@ return [
             ],
         ],
     ],
+
+    // NAVIGATION
     'navigation' => [
         'AdminModule' => [
             [
                 'label' => 'Bulk import files', // @translate
                 'route' => 'admin/bulk-import-files',
-                'resource' => 'BulkImportFiles\Controller\Index',
+                'resource' => \BulkImportFiles\Controller\Index::class,
                 'privilege' => 'make-import',
                 'class' => 'o-icon-install',
                 'pages' => [
                     [
                         'label' => 'Make import', // @translate
                         'route' => 'admin/bulk-import-files',
-                        'resource' => 'BulkImportFiles\Controller\Index',
+                        'resource' => \BulkImportFiles\Controller\Index::class,
                         'privilege' => 'make-import',
                     ],
                     [
                         'label' => 'View mappings', // @translate
                         'route' => 'admin/bulk-import-files/default',
                         'action' => 'map-show',
-                        'resource' => 'BulkImportFiles\Controller\Index',
+                        'resource' => \BulkImportFiles\Controller\Index::class,
                         'privilege' => 'map-show',
                     ],
                     [
                         'label' => 'Create mappings', // @translate
                         'route' => 'admin/bulk-import-files/default',
                         'action' => 'map-edit',
-                        'resource' => 'BulkImportFiles\Controller\Index',
+                        'resource' => \BulkImportFiles\Controller\Index::class,
                         'privilege' => 'map-edit',
                     ],
                 ],
             ],
         ],
     ],
+
+    // TRANSLATOR
     'translator' => [
         'translation_file_patterns' => [
             [
@@ -109,10 +137,11 @@ return [
             ],
         ],
     ],
+
     'bulkimportfiles' => [
         'config' => [
-            'bulkimportfiles_pdftk' => '',
-            'bulkimportfiles_local_path' => '',
+            'bulkimportfiles_pdftk'     => '',
+            'bulkimportfiles_local_path'=> '',
         ],
     ],
 ];

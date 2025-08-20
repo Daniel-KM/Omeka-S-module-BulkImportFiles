@@ -2,6 +2,8 @@
 
 namespace BulkImportFiles\Mvc\Controller\Plugin;
 
+use BulkImportFiles\Mvc\Controller\Plugin\ExtractDataFromPdf as ExtractDataFromPdfFiles;
+use BulkImport\Mvc\Controller\Plugin\ExtractDataFromPdf as ExtractDataFromPdfCore;
 use ArrayObject;
 use Common\Stdlib\EasyMeta;
 use DOMDocument;
@@ -13,31 +15,24 @@ use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
  */
 class MapData extends AbstractPlugin
 {
-    /**
-     * @var \Common\Stdlib\EasyMeta
-     */
+    /** @var EasyMeta */
     protected $easyMeta;
 
-    /**
-     * @var unknown
-     */
+    // Dopo:
+    /** @var ExtractDataFromPdfFiles|ExtractDataFromPdfCore */
     protected $extractDataFromPdf;
 
-    /**
-     * @var \BulkImportFiles\Mvc\Controller\Plugin\ExtractStringFromFile
-     */
+    /** @var ExtractStringFromFile */
     protected $extractStringFromFile;
 
     /**
      * Temporary flat array.
-     *
      * @var array
      */
     private $flatArray;
 
     /**
      * Keys to ignore for getid3.
-     *
      * @var array
      */
     protected $getId3IgnoredKeys = [
@@ -54,15 +49,15 @@ class MapData extends AbstractPlugin
         'md5_data',
     ];
 
-    public function __construct(
-        EasyMeta $easyMeta,
-        ExtractDataFromPdf $extractDataFromPdf,
-        ExtractStringFromFile $extractFileFromFile
-    ) {
-        $this->easyMeta = $easyMeta;
-        $this->extractDataFromPdf = $extractDataFromPdf;
-        $this->extractStringFromFile = $extractStringFromFile;
-    }
+       public function __construct(
+           EasyMeta $easyMeta,
+           ExtractDataFromPdfFiles|ExtractDataFromPdfCore $extractDataFromPdf,
+           ExtractStringFromFile $extractStringFromFile
+       ) {
+           $this->easyMeta = $easyMeta;
+           $this->extractDataFromPdf = $extractDataFromPdf;
+           $this->extractStringFromFile = $extractStringFromFile;
+       }
 
     public function __invoke(): self
     {
@@ -72,11 +67,10 @@ class MapData extends AbstractPlugin
     /**
      * Extract data from an array with a mapping.
      *
-     * @param array $input Array of metadata..
+     * @param array $input Array of metadata.
      * @param array $mapping The mapping adapted to the input.
      * @param bool $simpleExtract Only extract metadata, don't map them.
-     * @return array A resource array by property, suitable for api creation
-     * or update.
+     * @return array A resource array by property, suitable for api creation or update.
      */
     public function array(array $input, array $mapping, $simpleExtract = false): array
     {
@@ -89,7 +83,7 @@ class MapData extends AbstractPlugin
 
         foreach ($mapping as $map) {
             $target = reset($map);
-            $query = key($map);
+            $query  = key($map);
 
             $queryMapping = explode('.', $query);
             $input_fields = $input;
@@ -113,10 +107,9 @@ class MapData extends AbstractPlugin
      * Extract data from a xml file with a mapping.
      *
      * @param string $filepath
-     * @param array $mapping The mapping adapted to the input.
-     * @param bool $simpleExtract Only extract metadata, don't map them.
-     * @return array A resource array by property, suitable for api creation
-     * or update.
+     * @param array  $mapping
+     * @param bool   $simpleExtract
+     * @return array
      */
     public function xml($filepath, array $mapping, $simpleExtract = false)
     {
@@ -130,7 +123,7 @@ class MapData extends AbstractPlugin
             return [];
         }
 
-        // Check if the xml is fully formed.
+        // Ensure XML header.
         $xml = trim($xml);
         if (strpos($xml, '<?xml ') !== 0) {
             $xml = '<?xml version="1.1" encoding="utf-8"?>' . $xml;
@@ -150,14 +143,13 @@ class MapData extends AbstractPlugin
         }
 
         foreach ($mapping as $map) {
-            $target = reset($map);
-            $query = key($map);
+            $target   = reset($map);
+            $query    = key($map);
             $nodeList = $xpath->query($query);
             if (!$nodeList || !$nodeList->length) {
                 continue;
             }
 
-            // The answer has many nodes.
             foreach ($nodeList as $node) {
                 $simpleExtract
                     ? $this->simpleExtract($result, $node->nodeValue, $target, $query)
@@ -182,28 +174,47 @@ class MapData extends AbstractPlugin
     protected function simpleExtract(ArrayObject $result, $value, $target, $source): void
     {
         $result[] = [
-            'field' => $source,
+            'field'  => $source,
             'target' => $target,
-            'value' => $value,
+            'value'  => $value,
         ];
+    }
+
+    private function resolvePropertyTermCompat($maybeTerm): ?string
+    {
+        if (is_string($maybeTerm) && strpos($maybeTerm, ':') !== false) {
+            return $maybeTerm;
+        }
+        $prop = $this->getController()->api()->searchOne('properties', ['term' => $maybeTerm])->getContent();
+        if ($prop) {
+            return $prop->term();
+        }
+        $prop = $this->getController()->api()->searchOne('properties', ['label' => $maybeTerm])->getContent();
+        return $prop ? $prop->term() : null;
+    }
+
+    private function resolvePropertyIdCompat($termOrLabel): ?int
+    {
+        if (is_string($termOrLabel) && strpos($termOrLabel, ':') !== false) {
+            $prop = $this->getController()->api()->searchOne('properties', ['term' => $termOrLabel])->getContent();
+            return $prop ? (int) $prop->id() : null;
+        }
+        $prop = $this->getController()->api()->searchOne('properties', ['term' => $termOrLabel])->getContent();
+        if ($prop) {
+            return (int) $prop->id();
+        }
+        $prop = $this->getController()->api()->searchOne('properties', ['label' => $termOrLabel])->getContent();
+        return $prop ? (int) $prop->id() : null;
     }
 
     protected function appendValueToTarget(ArrayObject $result, $value, $target): void
     {
         static $targets = [];
 
-        // First prepare the target keys.
-        // TODO This normalization of the mapping can be done one time outside.
-
-        // @see \BulkImport\Mvc\Controller\Plugin\AutomapFields
-        // The pattern checks a term or keyword, then an optional @language, then
-        // an optional ^^ data type.
+        // Pattern: term/keyword, optional @language, optional ^^datatype.
         $pattern = '~'
-            // Check a term/keyword.
             . '^([a-zA-Z][^@^]*)'
-            // Check a language + country.
             . '\s*(?:@\s*([a-zA-Z]+-[a-zA-Z]+|[a-zA-Z]+|))?'
-            // Check a data type.
             . '\s*(?:\^\^\s*([a-zA-Z][a-zA-Z0-9]*:[a-zA-Z][\w-]*|[a-zA-Z][\w-]*|))?$'
             . '~';
         $matches = [];
@@ -219,33 +230,36 @@ class MapData extends AbstractPlugin
                 return;
             }
             $targets[$target] = [];
-            $targets[$target]['field'] = trim($matches[1]);
-            $targets[$target]['@language'] = empty($matches[2]) ? null : trim($matches[2]);
-            $targets[$target]['type'] = empty($matches[3]) ? null : trim($matches[3]);
-            $targets[$target]['is'] = $this->isField($targets[$target]['field']);
+            $targets[$target]['field']      = trim($matches[1]);
+            $targets[$target]['@language']  = empty($matches[2]) ? null : trim($matches[2]);
+            $targets[$target]['type']       = empty($matches[3]) ? null : trim($matches[3]);
+            $targets[$target]['is']         = $this->isField($targets[$target]['field']);
             if ($targets[$target]['is'] === 'property') {
-                $targets[$target]['property_id'] = $this->easyMeta->propertyId($targets[$target]['field']);
+                // id via EasyMeta, fallback via API se serve
+                $targets[$target]['property_id'] = $this->easyMeta->propertyId($targets[$target]['field'])
+                    ?: $this->resolvePropertyIdCompat($targets[$target]['field']);
             }
         }
 
-        // Second, fill the result with the value.
         switch ($targets[$target]['is']) {
             case 'property':
+                if (empty($targets[$target]['property_id'])) {
+                    return;
+                }
                 $v = [];
                 $v['property_id'] = $targets[$target]['property_id'];
-                $v['type'] = $targets[$target]['type'] ?: 'literal';
+                $v['type']        = $targets[$target]['type'] ?: 'literal';
                 switch ($v['type']) {
                     case 'literal':
-                    // case strpos($resourceValue['type'], 'customvocab:') === 0:
                     default:
-                        $v['@value'] = $value;
+                        $v['@value']    = $value;
                         $v['@language'] = $targets[$target]['@language'];
                         break;
                     case 'uri':
-                    case strpos($targets[$target]['type'], 'valuesuggest:') === 0:
-                        $v['o:label'] = null;
+                    case (strpos((string) $targets[$target]['type'], 'valuesuggest:') === 0):
+                        $v['o:label']   = null;
                         $v['@language'] = $targets[$target]['@language'];
-                        $v['@id'] = $value;
+                        $v['@id']       = $value;
                         break;
                     case 'resource':
                     case 'resource:item':
@@ -257,10 +271,12 @@ class MapData extends AbstractPlugin
                             $v['@language'] = null;
                         } else {
                             $v['has_error'] = true;
-                            $this->logger->err(
-                                'Index #{index}: Resource id for value "{value}" cannot be found: the entry is skipped.', // @translate
-                                ['index' => $this->indexResource, 'value' => $value]
-                            );
+                            if (property_exists($this, 'logger') && property_exists($this, 'indexResource')) {
+                                $this->logger->err(
+                                    'Index #{index}: Resource id for value "{value}" cannot be found: the entry is skipped.',
+                                    ['index' => $this->indexResource, 'value' => $value]
+                                );
+                            }
                         }
                         break;
                 }
@@ -268,25 +284,28 @@ class MapData extends AbstractPlugin
                     $result[$targets[$target]['field']][] = $v;
                 }
                 break;
-            // Item is used only for media, that has only one item.
+
             case $targets[$target]['field'] === 'o:item':
             case 'id':
                 $result[$targets[$target]['field']] = ['o:id' => $value];
                 break;
+
             case 'resource':
                 $result[$targets[$target]['field']][] = ['o:id' => $value];
                 break;
+
             case 'boolean':
                 $result[$targets[$target]['field']] = in_array($value, ['false', false, 0, '0', 'off', 'close'], true)
                     ? false
                     : (bool) $value;
                 break;
+
             case 'single':
-                // TODO Check email and owner.
                 $v = [];
                 $v['value'] = $value;
                 $result[$targets[$target]['field']] = $v;
                 break;
+
             case 'custom':
             default:
                 $v = [];
@@ -294,9 +313,7 @@ class MapData extends AbstractPlugin
                 if (isset($targets[$target]['@language'])) {
                     $v['@language'] = $targets[$target]['@language'];
                 }
-                $v['type'] = empty($targets[$target]['type'])
-                    ? 'literal'
-                    : $targets[$target]['type'];
+                $v['type'] = empty($targets[$target]['type']) ? 'literal' : $targets[$target]['type'];
                 $result[$targets[$target]['field']][] = $v;
                 break;
         }
@@ -310,57 +327,27 @@ class MapData extends AbstractPlugin
      */
     protected function isField($field)
     {
-        $resources = [
-            'o:item',
-            'o:item_set',
-            'o:media',
-        ];
-        if (in_array($field, $resources)) {
+        $resources = ['o:item', 'o:item_set', 'o:media'];
+        if (in_array($field, $resources, true)) {
             return 'resource';
         }
-        $ids = [
-            'o:resource_template',
-            'o:resource_class',
-            'o:owner',
-        ];
-        if (in_array($field, $ids)) {
+        $ids = ['o:resource_template', 'o:resource_class', 'o:owner'];
+        if (in_array($field, $ids, true)) {
             return 'id';
         }
-        $booleans = [
-            'o:is_open',
-            'o:is_public',
-        ];
-        if (in_array($field, $booleans)) {
+        $booleans = ['o:is_open', 'o:is_public'];
+        if (in_array($field, $booleans, true)) {
             return 'boolean';
         }
-        $singleData = [
-            'o:email',
-        ];
-        if (in_array($field, $singleData)) {
+        $singleData = ['o:email'];
+        if (in_array($field, $singleData, true)) {
             return 'single';
         }
-        return $this->easyMeta->propertyId($field)
-            ? 'property'
-            : 'custom';
+        return $this->easyMeta->propertyId($field) ? 'property' : 'custom';
     }
 
     /**
      * Normalize a mapping.
-     *
-     * Mapping is either a single or a multiple list, either a target
-     * key or value, and either a xpath or a array:
-     * [dcterms:title => /xpath/to/data]
-     * [dcterms:title => object.to.data]
-     * [/xpath/to/data => dcterms:title]
-     * [object.to.data => dcterms:title]
-     * [[dcterms:title => /xpath/to/data]]
-     * [[dcterms:title => object.to.data]]
-     * [[/xpath/to/data => dcterms:title]]
-     * [[object.to.data => dcterms:title]]
-     *
-     * And the same mappings with a value as an array, for example:.
-     * [[object.to.data => [dcterms:title]]]
-     * The format is normalized into [[path/object => dcterms:title]].
      *
      * @param array $mapping
      * @return array
@@ -371,22 +358,21 @@ class MapData extends AbstractPlugin
             return $mapping;
         }
 
-        // Normalize the mapping to multiple data with source to target.
         $keyValue = reset($mapping);
         $isMultipleMapping = is_numeric(key($mapping));
         if (!$isMultipleMapping) {
-            $mapping = $this->multipleFromSingle($mapping);
+            $mapping  = $this->multipleFromSingle($mapping);
             $keyValue = reset($mapping);
         }
 
         $value = reset($keyValue);
         if (is_array($value)) {
-            $mapping = $this->multipleFromMultiple($mapping);
+            $mapping  = $this->multipleFromMultiple($mapping);
             $keyValue = reset($mapping);
         }
 
         $key = key($keyValue);
-        $isTargetKey = strpos($key, ':') && strpos($key, '::') === false;
+        $isTargetKey = strpos((string) $key, ':') && strpos((string) $key, '::') === false;
         if ($isTargetKey) {
             $mapping = $this->flipTargetToValues($mapping);
         }
@@ -394,12 +380,6 @@ class MapData extends AbstractPlugin
         return $mapping;
     }
 
-    /**
-     * Convert a single mapping to a multiple mapping.
-     *
-     * @param array $mapping
-     * @return array
-     */
     protected function multipleFromSingle(array $mapping)
     {
         $result = [];
@@ -409,12 +389,6 @@ class MapData extends AbstractPlugin
         return $result;
     }
 
-    /**
-     * Convert a multiple level mapping to a multiple mapping.
-     *
-     * @param array $mapping
-     * @return array
-     */
     protected function multipleFromMultiple(array $mapping)
     {
         $result = [];
@@ -428,12 +402,6 @@ class MapData extends AbstractPlugin
         return $result;
     }
 
-    /**
-     * Flip keys and values of a full mapping.
-     *
-     * @param array $mapping
-     * @return array
-     */
     protected function flipTargetToValues(array $mapping)
     {
         $result = [];
@@ -445,20 +413,6 @@ class MapData extends AbstractPlugin
 
     /**
      * Create a flat array from a recursive array.
-     *
-     * @example
-     * ```
-     * // The following recursive array:
-     * 'video' => [
-     *      'dataformat' => 'jpg',
-     *      'bits_per_sample' => 24;
-     * ]
-     * // is converted into:
-     * [
-     *     'video.dataformat' => 'jpg',
-     *     'video.bits_per_sample' => 24,
-     * ]
-     * ```
      *
      * @param array $data
      * @param array $ignoredKeys
@@ -476,8 +430,8 @@ class MapData extends AbstractPlugin
     /**
      * Recursive helper to flat an array with separator ".".
      *
-     * @param array $data
-     * @param array $ignoredKeys
+     * @param array  $data
+     * @param array  $ignoredKeys
      * @param string $keys
      */
     private function _flatArray(array $data, array $ignoredKeys = [], $keys = null): void
@@ -485,9 +439,9 @@ class MapData extends AbstractPlugin
         foreach ($data as $key => $value) {
             if (is_array($value)) {
                 $this->_flatArray($value, $ignoredKeys, $keys . '.' . $key);
-            } elseif (!in_array($key, $ignoredKeys)) {
+            } elseif (!in_array($key, $ignoredKeys, true)) {
                 $this->flatArray[] = [
-                    'key' => trim($keys . '.' . $key, '.'),
+                    'key'   => trim((string) ($keys . '.' . $key), '.'),
                     'value' => $value,
                 ];
             }
