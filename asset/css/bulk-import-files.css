@@ -1,6 +1,6 @@
 /* Import: styles */
 
-@media screen {
+@media all {
     .bulk-import-files .subhead::before,
     .bulk-import-files {
         content:"";
