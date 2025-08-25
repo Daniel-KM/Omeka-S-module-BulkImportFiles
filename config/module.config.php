@@ -17,7 +17,7 @@ return [
     // FORM ELEMENTS (solo factories; se usi getForm(FQCN) non servono alias)
     'form_elements' => [
         'factories' => [
-            \BulkImportFiles\Form\ImportForm::class   => InvokableFactory::class,
+            \BulkImportFiles\Form\ImportForm::class => InvokableFactory::class,
             \BulkImportFiles\Form\SettingsForm::class => InvokableFactory::class,
         ],
         // Nessun 'aliases' per evitare cicli.
@@ -33,14 +33,14 @@ return [
     // CONTROLLER PLUGINS
     'controller_plugins' => [
         'aliases' => [
-            'mapData'               => \BulkImportFiles\Mvc\Controller\Plugin\MapData::class,
-            'extractDataFromPdf'    => \BulkImportFiles\Mvc\Controller\Plugin\ExtractDataFromPdf::class,
+            'mapData' => \BulkImportFiles\Mvc\Controller\Plugin\MapData::class,
+            'extractDataFromPdf' => \BulkImportFiles\Mvc\Controller\Plugin\ExtractDataFromPdf::class,
             'extractStringFromFile' => \BulkImportFiles\Mvc\Controller\Plugin\ExtractStringFromFile::class,
-            'extractStringToFile'   => \BulkImportFiles\Mvc\Controller\Plugin\ExtractStringToFile::class,
+            'extractStringToFile' => \BulkImportFiles\Mvc\Controller\Plugin\ExtractStringToFile::class,
         ],
         'factories' => [
-            'mapData'             => Service\ControllerPlugin\MapDataFactory::class,
-            'extractDataFromPdf'  => Service\ControllerPlugin\ExtractDataFromPdfFactory::class,
+            'mapData' => Service\ControllerPlugin\MapDataFactory::class,
+            'extractDataFromPdf' => Service\ControllerPlugin\ExtractDataFromPdfFactory::class,
             \BulkImportFiles\Mvc\Controller\Plugin\MapData::class
                 => \BulkImportFiles\Service\ControllerPlugin\MapDataFactory::class,
             \BulkImportFiles\Mvc\Controller\Plugin\ExtractDataFromPdf::class
@@ -50,7 +50,7 @@ return [
             \BulkImportFiles\Mvc\Controller\Plugin\ExtractStringToFile::class
                 => InvokableFactory::class,
         ],
-        
+
     ],
 
     // ROUTER
@@ -140,8 +140,8 @@ return [
 
     'bulkimportfiles' => [
         'config' => [
-            'bulkimportfiles_pdftk'     => '',
-            'bulkimportfiles_local_path'=> '',
+            'bulkimportfiles_pdftk' => '',
+            'bulkimportfiles_local_path' => '',
         ],
     ],
 ];

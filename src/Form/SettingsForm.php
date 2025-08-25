@@ -2,8 +2,8 @@
 
 namespace BulkImportFiles\Form;
 
-use Laminas\Form\Form;
 use Laminas\Form\Element;
+use Laminas\Form\Form;
 
 class SettingsForm extends Form
 {

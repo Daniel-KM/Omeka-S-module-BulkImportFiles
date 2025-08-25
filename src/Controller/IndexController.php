@@ -60,8 +60,8 @@ class IndexController extends AbstractActionController
         Uploader $uploader,
         FormElementManager $formElementManager
     ) {
-        $this->tempFileFactory   = $tempFileFactory;
-        $this->uploader          = $uploader;
+        $this->tempFileFactory = $tempFileFactory;
+        $this->uploader = $uploader;
         $this->formElementManager = $formElementManager;
     }
 
@@ -110,7 +110,7 @@ class IndexController extends AbstractActionController
                     continue;
                 }
                 $file['tmp_name'] = $tempFile->getTempPath();
-                $file['type']     = $tempFile->getMediaType();
+                $file['type'] = $tempFile->getMediaType();
 
                 $filesDataForView[] = $this->getDataForFile($file, $tempFile);
             }
@@ -152,11 +152,11 @@ class IndexController extends AbstractActionController
                     $mediaType = $tempFile->getMediaType();
 
                     $file = [
-                        'name'     => basename($fullFilePath),
-                        'type'     => $mediaType,
+                        'name' => basename($fullFilePath),
+                        'type' => $mediaType,
                         'tmp_name' => $fullFilePath,
-                        'error'    => 0,
-                        'size'     => filesize($fullFilePath),
+                        'error' => 0,
+                        'size' => filesize($fullFilePath),
                     ];
 
                     $filesDataForView[] = $this->getDataForFile($file, $tempFile);
@@ -178,14 +178,14 @@ class IndexController extends AbstractActionController
 
     protected function getDataForFile(array $file, TempFile $tempFile)
     {
-        $mediaType  = $tempFile->getMediaType();
-        $data       = [];
+        $mediaType = $tempFile->getMediaType();
+        $data = [];
         $parsedData = [];
-        $errors     = '';
+        $errors = '';
 
         if (isset($this->filesMapsArray[$mediaType])) {
-            $filesMapsArray    = $this->filesMapsArray[$mediaType];
-            $file['item_id']   = $filesMapsArray['item_id'];
+            $filesMapsArray = $this->filesMapsArray[$mediaType];
+            $file['item_id'] = $filesMapsArray['item_id'];
             unset($filesMapsArray['media_type'], $filesMapsArray['item_id']);
         } else {
             $filesMapsArray = null;
@@ -195,7 +195,7 @@ class IndexController extends AbstractActionController
         switch ($mediaType) {
             case 'application/pdf':
                 // >>> usa il controller plugin, NON una proprietà
-                $pdfData    = $this->plugin('extractDataFromPdf')->__invoke($tempFile->getTempPath());
+                $pdfData = $this->plugin('extractDataFromPdf')->__invoke($tempFile->getTempPath());
                 $parsedData = $this->flatArray($pdfData);
                 $data = $filesMapsArray
                     ? $this->mapData()->array($pdfData, $filesMapsArray, true)
@@ -213,10 +213,10 @@ class IndexController extends AbstractActionController
         }
 
         return [
-            'file'            => $file,
-            'source_data'     => $parsedData,
+            'file' => $file,
+            'source_data' => $parsedData,
             'recognized_data' => $data,
-            'errors'          => $errors,
+            'errors' => $errors,
         ];
     }
 
@@ -259,7 +259,7 @@ class IndexController extends AbstractActionController
                     continue;
                 }
                 $file['tmp_name'] = $tempFile->getTempPath();
-                $file['type']     = $tempFile->getMediaType();
+                $file['type'] = $tempFile->getMediaType();
 
                 // Check name for security.
                 if (basename($file['name']) !== $file['name']) {
@@ -458,8 +458,8 @@ class IndexController extends AbstractActionController
 
             $data += [
                 'o:resource_template' => ['o:id' => ''],
-                'o:resource_class'    => ['o:id' => ''],
-                'o:thumbnail'         => ['o:id' => ''],
+                'o:resource_class' => ['o:id' => ''],
+                'o:thumbnail' => ['o:id' => ''],
                 'o:media' => [[
                     'o:is_public' => '1',
                     'dcterms:title' => [[
@@ -469,11 +469,11 @@ class IndexController extends AbstractActionController
                         '@value' => $isServer ? $params['filename'] : $params['source'],
                         'is_public' => '1',
                     ]],
-                    'o:ingester'          => 'bulk',
-                    'ingest_ingester'     => $isServer ? 'sideload' : 'upload',
-                    'ingest_tempfile'     => $tempFile,
-                    'ingest_delete_file'  => $deleteFileAction,
-                    'o:source'            => $isServer ? $params['filename'] : $params['source'],
+                    'o:ingester' => 'bulk',
+                    'ingest_ingester' => $isServer ? 'sideload' : 'upload',
+                    'ingest_tempfile' => $tempFile,
+                    'ingest_delete_file' => $deleteFileAction,
+                    'o:source' => $isServer ? $params['filename'] : $params['source'],
                 ]],
                 'o:is_public' => '1',
             ];
@@ -590,9 +590,9 @@ class IndexController extends AbstractActionController
         }
 
         $params = [];
-        $params['omeka_file_id']   = $this->params()->fromPost('omeka_file_id');
-        $params['media_type']      = $this->params()->fromPost('media_type');
-        $params['listterms_select']= $this->params()->fromPost('listterms_select');
+        $params['omeka_file_id'] = $this->params()->fromPost('omeka_file_id');
+        $params['media_type'] = $this->params()->fromPost('media_type');
+        $params['listterms_select'] = $this->params()->fromPost('listterms_select');
 
         $error = '';
         $request = '';
@@ -608,9 +608,9 @@ class IndexController extends AbstractActionController
             }
         }
 
-        $omekaFileId     = $params['omeka_file_id'];
-        $mediaType       = $params['media_type'];
-        $listterms_select= $params['listterms_select'];
+        $omekaFileId = $params['omeka_file_id'];
+        $mediaType = $params['media_type'];
+        $listterms_select = $params['listterms_select'];
 
         $fileContent = "$mediaType = media_type\n";
 
@@ -656,7 +656,7 @@ class IndexController extends AbstractActionController
                 $this->_flatArray($value, $ignoredKeys, $keys . '.' . $key);
             } elseif (!in_array($key, $ignoredKeys, true)) {
                 $this->flatArray[] = [
-                    'key'   => trim($keys . '.' . $key, '.'),
+                    'key' => trim($keys . '.' . $key, '.'),
                     'value' => $value,
                 ];
             }
@@ -716,10 +716,10 @@ class IndexController extends AbstractActionController
                             && strpos($value[0], ':') !== false
                         ) {
                             $term = $value[0];
-                            $map  = $value[1];
+                            $map = $value[1];
                         } else {
                             $term = $value[1];
-                            $map  = $value[0];
+                            $map = $value[0];
                         }
 
                         if (strpos($term, ':') === false || count(explode(':', $term)) !== 2) {
