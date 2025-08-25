@@ -174,7 +174,7 @@ See licences of dependencies.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2019-2024
+* Copyright Daniel Berthereau, 2019-2025
 
 
 [Bulk Import Files]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImportFiles
