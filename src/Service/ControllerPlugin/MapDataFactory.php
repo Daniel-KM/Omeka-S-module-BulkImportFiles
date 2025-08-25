@@ -11,9 +11,11 @@ class MapDataFactory implements FactoryInterface
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
         $plugins = $services->get('ControllerPluginManager');
+
         return new MapData(
             $services->get('EasyMeta'),
-            $plugins->get('extractStringFromFile')
+            $plugins->get('extractDataFromPdf'),     // 2: PDF
+            $plugins->get('extractStringFromFile')   // 3: string/file
         );
     }
 }
