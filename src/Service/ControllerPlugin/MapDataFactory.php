@@ -13,7 +13,7 @@ class MapDataFactory implements FactoryInterface
         $plugins = $services->get('ControllerPluginManager');
 
         return new MapData(
-            $services->get('EasyMeta'),
+            $services->get('Common\EasyMeta'),
             $plugins->get('extractDataFromPdf'),     // 2: PDF
             $plugins->get('extractStringFromFile')   // 3: string/file
         );

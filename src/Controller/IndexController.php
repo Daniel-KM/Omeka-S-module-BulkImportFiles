@@ -3,7 +3,7 @@
 namespace BulkImportFiles\Controller;
 
 // The autoload doesn’t work with GetId3.
-if (!class_exists(\JamesHeinrich\GetID3\GetId3::class)) {
+if (!class_exists('JamesHeinrich\GetID3\GetId3', false)) {
     require dirname(__DIR__, 2) . '/vendor/james-heinrich/getid3/src/GetID3.php';
 }
 
