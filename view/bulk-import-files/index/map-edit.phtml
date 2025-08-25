@@ -23,7 +23,7 @@ $form->prepare();
 
 <?php echo $this->form()->openTag($form); ?>
 <fieldset id='page-actions'>
-    <button type="submit" style="display: none;"><?php echo $translate('Next'); ?></button>
+    <button type="submit" class="button" style="display: none;"><?php echo $translate('Next'); ?></button>
 </fieldset>
 <?php echo $this->formCollection($form, false); ?>
 
@@ -65,7 +65,7 @@ $form->prepare();
                 <div class="inputs">
                     <input type="text" name="directory" id="directory" value="<?= OMEKA_PATH ?>/files/import">
                 </div>
-                <button type="submit" name="add-item-submit" class="check_button"><?= $translate('Check') ?></button>
+                <button type="submit" name="add-item-submit" class="button check_button"><?= $translate('Check') ?></button>
             </div>
             <div class="field">
                 <div class="field-meta">
@@ -76,7 +76,7 @@ $form->prepare();
                 </div>
             </div>
             <?php // This is a hidden button for js. ?>
-            <button type="submit" name="upload" id="upload"><?= $translate('Upload') ?></button>
+            <button type="submit" class="button" name="upload" id="upload"><?= $translate('Upload') ?></button>
         </fieldset>
     </div>
 </div>

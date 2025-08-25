@@ -78,7 +78,7 @@ $this->headScript()
                                     <?php if (count($files_data['source_data'])): ?>
                                     <?= sprintf($translate('%d available fields'), count($files_data['source_data'])) ?>
                                     <div class="js-save-button">
-                                        <button type="submit" name="add-item-submit"><?= $translate('Save') ?></button>
+                                        <button type="submit" class="button" name="add-item-submit"><?= $translate('Save') ?></button>
                                     </div>
                                     <?php else: ?>
                                     <?= $translate('No available fields') ?>

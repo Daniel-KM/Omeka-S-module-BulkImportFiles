@@ -24,7 +24,7 @@ $translate = $this->plugin('translate');
             <div class="total_info_row"><h4><?= $translate('Total files'); ?></h4><?= $this->total_files ?></div>
             <div class="total_info_row"><h4><?= $translate('Importable files') ?></h4><?= $this->total_files_can_recognized ?></div>
             <div class="origin" data-origin="<?= $is_server ? 'server' : 'upload' ?>"><h4><?= $translate('Origin'); ?></h4><?= $is_server ? $translate('Directory on server') : $translate('Uploaded files') ?></div>
-            <button type="button" class="js-recognize_files"><?= $translate('Make recognize and add') ?></button>
+            <button type="button" class="button js-recognize_files"><?= $translate('Make recognize and add') ?></button>
         </div>
         <table>
             <thead>

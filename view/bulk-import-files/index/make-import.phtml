@@ -39,7 +39,7 @@ $this->htmlElement('body')->appendAttribute('class', 'bulk-import-files make-imp
             <div class="inputs">
                 <input type="text" name="directory" id="directory" value="<?= OMEKA_PATH ?>/files/import">
             </div>
-            <button type="submit" name="add-item-submit" class="check_button"><?= $translate('Check') ?></button>
+            <button type="submit" class="button" name="add-item-submit" class="check_button"><?= $translate('Check') ?></button>
         </div>
         <div class="field">
             <div class="field-meta">
@@ -50,7 +50,7 @@ $this->htmlElement('body')->appendAttribute('class', 'bulk-import-files make-imp
             </div>
         </div>
         <?php // This is a hidden button for js. ?>
-        <button type="submit" name="upload" id="upload"><?= $translate('Upload') ?></button>
+        <button type="submit" class="button" name="upload" id="upload"><?= $translate('Upload') ?></button>
     </fieldset>
     <fieldset id="fieldset-make_import_params">
         <legend><?= $translate('Parameters') ?></legend>
