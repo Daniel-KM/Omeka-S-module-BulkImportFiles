@@ -13,7 +13,7 @@ $translate = $this->plugin('translate');
 
 <?php // echo $this->messages(); ?>
 
-<?php if ($error): ?>
+<?php if (!empty($error)): ?>
 
     <div class="error"><?= $error ?></div>
 
